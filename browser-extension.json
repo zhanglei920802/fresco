@@ -1,0 +1,8 @@
+{
+  "__comment": "Configuration for an internal browser extension that does small UI changes",
+  "allowDirectMerges": false,
+  "allowBotCommands": false,
+  "internalRepository": "fbsource",
+  "cannedReplies": {
+  }
+}
