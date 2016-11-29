@@ -98,9 +98,9 @@ public class GenericDraweeHierarchy implements SettableDraweeHierarchy {
   private final Resources mResources;
   private @Nullable RoundingParams mRoundingParams;
 
-  private final RootDrawable mTopLevelDrawable;
-  private final FadeDrawable mFadeDrawable;
-  private final ForwardingDrawable mActualImageWrapper;
+  private final RootDrawable mTopLevelDrawable;//Imageview最终绘制需要的Drawable
+  private final FadeDrawable mFadeDrawable;//所有数据整合后存放的ArrayDrawable
+  private final ForwardingDrawable mActualImageWrapper;//加载成功展示的图片
 
   GenericDraweeHierarchy(GenericDraweeHierarchyBuilder builder) {
     mResources = builder.getResources();

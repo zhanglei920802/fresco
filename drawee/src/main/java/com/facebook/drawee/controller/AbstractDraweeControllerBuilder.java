@@ -283,7 +283,7 @@ public abstract class AbstractDraweeControllerBuilder <
   /** Builds the specified controller. */
   @Override
   public AbstractDraweeController build() {
-    validate();
+    validate();//校验
 
     // if only a low-res request is specified, treat it as a final request.
     if (mImageRequest == null && mMultiImageRequests == null && mLowResImageRequest != null) {
