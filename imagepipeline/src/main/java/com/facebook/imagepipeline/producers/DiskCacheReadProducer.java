@@ -9,15 +9,15 @@
 
 package com.facebook.imagepipeline.producers;
 
-import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.facebook.common.internal.ImmutableMap;
 import com.facebook.common.internal.VisibleForTesting;
 import com.facebook.imagepipeline.cache.DiskCachePolicy;
 import com.facebook.imagepipeline.image.EncodedImage;
 import com.facebook.imagepipeline.request.ImageRequest;
+
+import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -62,6 +62,7 @@ public class DiskCacheReadProducer implements Producer<EncodedImage> {
     final AtomicBoolean isCancelled = new AtomicBoolean(false);
     Task<EncodedImage> diskLookupTask = mDiskCachePolicy
         .createAndStartCacheReadTask(imageRequest, producerContext.getCallerContext(), isCancelled);
+
     Continuation<EncodedImage, Void> continuation = onFinishDiskReads(consumer, producerContext);
     diskLookupTask.continueWith(continuation);
     subscribeTaskForRequestCancellation(isCancelled, producerContext);

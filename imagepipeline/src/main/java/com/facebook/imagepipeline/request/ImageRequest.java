@@ -245,6 +245,12 @@ public class ImageRequest {
       return mValue;
     }
 
+    /**
+     * 获取较大的请求级别
+     * @param requestLevel1
+     * @param requestLevel2
+       * @return
+       */
     public static RequestLevel getMax(RequestLevel requestLevel1, RequestLevel requestLevel2) {
       return requestLevel1.getValue() > requestLevel2.getValue() ? requestLevel1 : requestLevel2;
     }

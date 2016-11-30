@@ -547,13 +547,15 @@ public class ImagePipeline {
       ImageRequest imageRequest,
       ImageRequest.RequestLevel lowestPermittedRequestLevelOnSubmit,
       Object callerContext) {
-    final RequestListener requestListener = getRequestListenerForRequest(imageRequest);
+    final RequestListener requestListener = getRequestListenerForRequest(imageRequest);//监听器
 
     try {
+      //构造请求的级别
       ImageRequest.RequestLevel lowestPermittedRequestLevel =
           ImageRequest.RequestLevel.getMax(
               imageRequest.getLowestPermittedRequestLevel(),
               lowestPermittedRequestLevelOnSubmit);
+
       SettableProducerContext settableProducerContext = new SettableProducerContext(
           imageRequest,
           generateUniqueFutureId(),
@@ -565,6 +567,7 @@ public class ImagePipeline {
               imageRequest.getMediaVariations() != null ||
               !UriUtil.isNetworkUri(imageRequest.getSourceUri()),
           imageRequest.getPriority());
+
       return CloseableProducerToDataSourceAdapter.create(
           producerSequence,
           settableProducerContext,

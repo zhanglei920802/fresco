@@ -92,7 +92,7 @@ public class EncodedMemoryCacheProducer implements Producer<EncodedImage> {
           listener.requiresExtraMap(requestId)
               ? ImmutableMap.of(EXTRA_CACHED_VALUE_FOUND, "false")
               : null);
-      mInputProducer.produceResults(consumerOfInputProducer, producerContext);
+      mInputProducer.produceResults(consumerOfInputProducer, producerContext);//磁盘缓存
     } finally {
       CloseableReference.closeSafely(cachedReference);
     }
