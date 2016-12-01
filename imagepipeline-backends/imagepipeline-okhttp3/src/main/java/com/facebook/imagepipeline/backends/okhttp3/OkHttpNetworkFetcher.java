@@ -37,9 +37,9 @@ public class OkHttpNetworkFetcher extends
     BaseNetworkFetcher<OkHttpNetworkFetcher.OkHttpNetworkFetchState> {
 
   public static class OkHttpNetworkFetchState extends FetchState {
-    public long submitTime;
-    public long responseTime;
-    public long fetchCompleteTime;
+    public long submitTime;//提交时间
+    public long responseTime;//响应时间
+    public long fetchCompleteTime;//解析完成时间
 
     public OkHttpNetworkFetchState(
         Consumer<EncodedImage> consumer,
@@ -49,13 +49,16 @@ public class OkHttpNetworkFetcher extends
   }
 
   private static final String TAG = "OkHttpNetworkFetchProducer";
-  private static final String QUEUE_TIME = "queue_time";
-  private static final String FETCH_TIME = "fetch_time";
-  private static final String TOTAL_TIME = "total_time";
-  private static final String IMAGE_SIZE = "image_size";
+  private static final String QUEUE_TIME = "queue_time";//入队
+  private static final String FETCH_TIME = "fetch_time";//fetch
+  private static final String TOTAL_TIME = "total_time";//总时间
+  private static final String IMAGE_SIZE = "image_size";//图片尺寸
 
-  private final Call.Factory mCallFactory;
+  private final Call.Factory mCallFactory;//call的工厂
 
+  /**
+   * 用于执行下载的线程池。实际上核心线程为0
+   */
   private Executor mCancellationExecutor;
 
   /**
@@ -115,7 +118,7 @@ public class OkHttpNetworkFetcher extends
       final Request request) {
     final Call call = mCallFactory.newCall(request);//创建请求
 
-    //cancel
+    //监听取消事件
     fetchState.getContext().addCallbacks(
         new BaseProducerContextCallbacks() {
           @Override

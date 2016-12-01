@@ -30,15 +30,32 @@ import com.facebook.imagepipeline.image.EncodedImage;
  */
 public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchState> {
 
+    /**
+     * 三个线程用于网络下载
+     */
     private static final int NUM_NETWORK_THREADS = 3;
+
+    /**
+     * 最多5次重定向
+     */
     private static final int MAX_REDIRECTS = 5;
 
+    /**
+     * 临时的重定向
+     */
     public static final int HTTP_TEMPORARY_REDIRECT = 307;
+
+    /**
+     * 永久的重定向
+     */
     public static final int HTTP_PERMANENT_REDIRECT = 308;
 
     private final ExecutorService mExecutorService;
 
     public HttpUrlConnectionNetworkFetcher() {
+        /**
+         * 创建带有3个核心线程的线程池
+         */
         this(Executors.newFixedThreadPool(NUM_NETWORK_THREADS));
     }
 
@@ -64,6 +81,10 @@ public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchSta
                         fetchSync(fetchState, callback);
                     }
                 });
+
+        /**
+         * 注册取消任务的回调
+         */
         fetchState.getContext().addCallbacks(
                 new BaseProducerContextCallbacks() {
                     @Override
@@ -83,7 +104,7 @@ public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchSta
             connection = downloadFrom(fetchState.getUri(), MAX_REDIRECTS);
 
             if (connection != null) {
-                //回调输入流
+                //回调输入流，给NetworkProducer
                 callback.onResponse(connection.getInputStream(), -1);
             }
         } catch (IOException e) {
@@ -97,6 +118,14 @@ public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchSta
 
     }
 
+    /**
+     * 从指定的url下载数据，最多允许5次跳转(location)
+     *
+     * @param uri
+     * @param maxRedirects
+     * @return
+     * @throws IOException
+     */
     private HttpURLConnection downloadFrom(Uri uri, int maxRedirects) throws IOException {
         HttpURLConnection connection = openConnectionTo(uri);
         int responseCode = connection.getResponseCode();
@@ -107,11 +136,14 @@ public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchSta
         }
         else if (isHttpRedirect(responseCode)) {//url跳转
             String nextUriString = connection.getHeaderField("Location");//获取跳转url
-            connection.disconnect();
+            connection.disconnect();//重定向后，需要断掉之前的链接。
 
             Uri nextUri = (nextUriString == null) ? null : Uri.parse(nextUriString);
             String originalScheme = uri.getScheme();
 
+            /**
+             * 只有小于重定向的次数才会下载
+             */
             if (maxRedirects > 0 && nextUri != null && !nextUri.getScheme().equals(originalScheme)) {
                 return downloadFrom(nextUri, maxRedirects - 1);
             }
@@ -124,6 +156,9 @@ public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchSta
 
         }
         else {
+            /**
+             * 无效的链接，直接断掉
+             */
             connection.disconnect();
             throw new IOException(String
                     .format("Image URL %s returned HTTP code %d", uri.toString(), responseCode));
@@ -136,11 +171,23 @@ public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchSta
         return (HttpURLConnection) url.openConnection();
     }
 
+    /**
+     * 是否请求成功
+     *
+     * @param responseCode
+     * @return
+     */
     private static boolean isHttpSuccess(int responseCode) {
         return (responseCode >= HttpURLConnection.HTTP_OK &&
                 responseCode < HttpURLConnection.HTTP_MULT_CHOICE);
     }
 
+    /**
+     * 是否是重定向
+     *
+     * @param responseCode
+     * @return
+     */
     private static boolean isHttpRedirect(int responseCode) {
         switch (responseCode) {
             case HttpURLConnection.HTTP_MULT_CHOICE:

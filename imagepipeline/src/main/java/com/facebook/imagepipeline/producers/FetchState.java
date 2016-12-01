@@ -21,7 +21,7 @@ import com.facebook.imagepipeline.image.EncodedImage;
 public class FetchState {
 
     /**
-     * 消费者
+     * 消费者，结果类型是编码的图片
      */
     private final Consumer<EncodedImage> mConsumer;
     /**

@@ -29,8 +29,8 @@ import android.os.Build;
 
 import com.facebook.common.internal.ByteStreams;
 import com.facebook.common.internal.Throwables;
-import com.facebook.imagepipeline.core.ImagePipelineConfig;
-import com.facebook.imagepipeline.core.ImagePipelineFactory;
+///import com.facebook.imagepipeline.core.ImagePipelineConfig;
+//import com.facebook.imagepipeline.core.ImagePipelineFactory;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,10 +48,10 @@ public class WebpBitmapFactoryTest extends InstrumentationTestCase {
   public void setUp() {
     mInstrumentation = InstrumentationRegistry.getInstrumentation();
     mWebpBitmapFactory = new WebpBitmapFactoryImpl();
-    ImagePipelineConfig.Builder configBuilder =
-        ImagePipelineConfig.newBuilder(mInstrumentation.getContext())
-            .experiment().setWebpBitmapFactory(mWebpBitmapFactory);
-    ImagePipelineFactory.initialize(configBuilder.build());
+//    ImagePipelineConfig.Builder configBuilder =
+//        ImagePipelineConfig.newBuilder(mInstrumentation.getContext())
+//            .experiment().setWebpBitmapFactory(mWebpBitmapFactory);
+//    ImagePipelineFactory.initialize(configBuilder.build());
   }
 
   private FileDescriptor getImageFileDescriptor(String path) {
@@ -151,7 +151,7 @@ public class WebpBitmapFactoryTest extends InstrumentationTestCase {
     Bitmap inBitmap = Bitmap.createBitmap(20, 20, Bitmap.Config.ARGB_8888);
 
     BitmapFactory.Options options = new BitmapFactory.Options();
-    options.inBitmap = inBitmap;
+//    options.inBitmap = inBitmap;
 
     final Bitmap outBitmap = mWebpBitmapFactory.decodeStream(
         getTestWebpInputStream(),

@@ -10,8 +10,9 @@ package com.facebook.imagepipeline.producers;
 
 /**
  * Delegating consumer.
+ * 代理的Delegating
  */
-public abstract class DelegatingConsumer<I, O> extends BaseConsumer<I> {
+public abstract class DelegatingConsumer<I, O/*实际的*/> extends BaseConsumer<I> {
 
   private final Consumer<O> mConsumer;
 

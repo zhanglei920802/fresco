@@ -23,8 +23,8 @@ import android.test.InstrumentationTestCase;
 
 import com.facebook.common.internal.ByteStreams;
 import com.facebook.common.internal.Throwables;
-import com.facebook.imagepipeline.core.ImagePipelineConfig;
-import com.facebook.imagepipeline.core.ImagePipelineFactory;
+//import com.facebook.imagepipeline.core.ImagePipelineConfig;
+//import com.facebook.imagepipeline.core.ImagePipelineFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,10 +47,10 @@ public class WebpDecodingTest extends InstrumentationTestCase {
   public void setUp() {
     mInstrumentation = InstrumentationRegistry.getInstrumentation();
     mWebpBitmapFactory = new WebpBitmapFactoryImpl();
-    ImagePipelineConfig.Builder configBuilder =
-        ImagePipelineConfig.newBuilder(mInstrumentation.getContext())
-            .experiment().setWebpBitmapFactory(mWebpBitmapFactory);
-    ImagePipelineFactory.initialize(configBuilder.build());
+//    ImagePipelineConfig.Builder configBuilder =
+//        ImagePipelineConfig.newBuilder(mInstrumentation.getContext())
+//            .experiment().setWebpBitmapFactory(mWebpBitmapFactory);
+//    ImagePipelineFactory.initialize(configBuilder.build());
   }
 
   private MemoryFile getMemoryFile(String path) {
@@ -77,12 +77,13 @@ public class WebpDecodingTest extends InstrumentationTestCase {
   }
 
   private FileDescriptor getMemoryFileDescriptor(MemoryFile memoryFile) {
-    try {
-      Object rawFD = getFileDescriptorMethod().invoke(memoryFile);
-      return (FileDescriptor) rawFD;
-    } catch (Exception e) {
-      throw Throwables.propagate(e);
-    }
+//    try {
+//      Object rawFD = getFileDesCriptorMethod().invoke(memoryFile);
+//      return (FileDescriptor) rawFD;
+//    } catch (Exception e) {
+//      throw Throwables.propagate(e);
+//    }
+    return null;
   }
 
   private InputStream getTestImageInputStream(String path) {
