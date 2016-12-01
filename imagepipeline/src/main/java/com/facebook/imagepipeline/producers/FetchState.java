@@ -15,48 +15,54 @@ import com.facebook.imagepipeline.image.EncodedImage;
 
 /**
  * Used by {@link NetworkFetcher} to encapsulate the state of one network fetch.
- *
+ * <p>
  * <p>Implementations can subclass this to store additional fetch-scoped fields.
  */
 public class FetchState {
 
-  private final Consumer<EncodedImage> mConsumer;
-  private final ProducerContext mContext;
-  private long mLastIntermediateResultTimeMs;
+    /**
+     * 消费者
+     */
+    private final Consumer<EncodedImage> mConsumer;
+    /**
+     * 生产者上下文
+     */
+    private final ProducerContext mContext;
+    private long mLastIntermediateResultTimeMs;
 
-  public FetchState(
-      Consumer<EncodedImage> consumer,
-      ProducerContext context) {
-    mConsumer = consumer;
-    mContext = context;
-    mLastIntermediateResultTimeMs = 0;
-  }
+    public FetchState(
+            Consumer<EncodedImage> consumer,
+            ProducerContext context) {
+        mConsumer = consumer;
+        mContext = context;
+        mLastIntermediateResultTimeMs = 0;
+    }
 
-  public Consumer<EncodedImage> getConsumer() {
-    return mConsumer;
-  }
+    public Consumer<EncodedImage> getConsumer() {
+        return mConsumer;
+    }
 
-  public ProducerContext getContext() {
-    return mContext;
-  }
+    public ProducerContext getContext() {
+        return mContext;
+    }
 
-  public String getId() {
-    return mContext.getId();
-  }
+    public String getId() {
+        return mContext.getId();
+    }
 
-  public ProducerListener getListener() {
-    return mContext.getListener();
-  }
+    public ProducerListener getListener() {
+        return mContext.getListener();
+    }
 
-  public Uri getUri() {
-    return mContext.getImageRequest().getSourceUri();
-  }
+    public Uri getUri() {
+        return mContext.getImageRequest().getSourceUri();
+    }
 
-  public long getLastIntermediateResultTimeMs() {
-    return mLastIntermediateResultTimeMs;
-  }
+    public long getLastIntermediateResultTimeMs() {
+        return mLastIntermediateResultTimeMs;
+    }
 
-  public void setLastIntermediateResultTimeMs(long lastIntermediateResultTimeMs) {
-    mLastIntermediateResultTimeMs = lastIntermediateResultTimeMs;
-  }
+    public void setLastIntermediateResultTimeMs(long lastIntermediateResultTimeMs) {
+        mLastIntermediateResultTimeMs = lastIntermediateResultTimeMs;
+    }
 }

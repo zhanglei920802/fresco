@@ -87,9 +87,9 @@ public class OkHttpNetworkFetcher extends
     fetchState.submitTime = SystemClock.elapsedRealtime();
     final Uri uri = fetchState.getUri();
     final Request request = new Request.Builder()
-        .cacheControl(new CacheControl.Builder().noStore().build())
-        .url(uri.toString())
-        .get()
+        .cacheControl(new CacheControl.Builder().noStore().build())//no-cache
+        .url(uri.toString())//url
+        .get()//GET Request
         .build();
     fetchWithRequest(fetchState, callback, request);
   }
@@ -113,8 +113,9 @@ public class OkHttpNetworkFetcher extends
       final OkHttpNetworkFetchState fetchState,
       final Callback callback,
       final Request request) {
-    final Call call = mCallFactory.newCall(request);
+    final Call call = mCallFactory.newCall(request);//创建请求
 
+    //cancel
     fetchState.getContext().addCallbacks(
         new BaseProducerContextCallbacks() {
           @Override
@@ -131,18 +132,17 @@ public class OkHttpNetworkFetcher extends
           }
         });
 
+    //将请求入队列
     call.enqueue(
         new okhttp3.Callback() {
           @Override
           public void onResponse(Call call, Response response) throws IOException {
-            fetchState.responseTime = SystemClock.elapsedRealtime();
+            fetchState.responseTime = SystemClock.elapsedRealtime();//标记响应时间
             final ResponseBody body = response.body();
             try {
-              if (!response.isSuccessful()) {
-                handleException(
-                    call,
-                    new IOException("Unexpected HTTP code " + response),
-                    callback);
+              if (!response.isSuccessful()) {//没有成功
+                //处理异常
+                handleException(call, new IOException("Unexpected HTTP code " + response), callback);
                 return;
               }
 
@@ -150,8 +150,11 @@ public class OkHttpNetworkFetcher extends
               if (contentLength < 0) {
                 contentLength = 0;
               }
+
+              //回调字节流
               callback.onResponse(body.byteStream(), (int) contentLength);
             } catch (Exception e) {
+              //处理异常
               handleException(call, e, callback);
             } finally {
               try {
@@ -164,6 +167,7 @@ public class OkHttpNetworkFetcher extends
 
           @Override
           public void onFailure(Call call, IOException e) {
+            //处理异常
             handleException(call, e, callback);
           }
         });

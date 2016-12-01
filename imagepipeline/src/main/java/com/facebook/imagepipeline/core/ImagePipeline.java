@@ -568,6 +568,7 @@ public class ImagePipeline {
               !UriUtil.isNetworkUri(imageRequest.getSourceUri()),
           imageRequest.getPriority());
 
+      //创建并且加载图片
       return CloseableProducerToDataSourceAdapter.create(
           producerSequence,
           settableProducerContext,

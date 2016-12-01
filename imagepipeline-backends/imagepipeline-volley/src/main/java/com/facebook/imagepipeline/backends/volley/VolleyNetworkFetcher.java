@@ -73,19 +73,21 @@ public class VolleyNetworkFetcher extends
 
   @Override
   public void fetch(final VolleyNetworkFetchState fetchState, final Callback callback) {
-    fetchState.submitTime = SystemClock.elapsedRealtime();
+    fetchState.submitTime = SystemClock.elapsedRealtime();//标记任务提交时间
 
     final RawRequest request = new RawRequest(
         fetchState.getUri().toString(),
         new Response.Listener<byte[]>() {
           @Override
           public void onResponse(byte[] bytes) {
-            fetchState.responseTime = SystemClock.uptimeMillis();
+            fetchState.responseTime = SystemClock.uptimeMillis();//标记任务响应时间
 
             try {
               InputStream is = new ByteArrayInputStream(bytes);
+              //回调输入流
               callback.onResponse(is, bytes.length);
             } catch (IOException e) {
+              //失败回调
               callback.onFailure(e);
             }
           }
@@ -93,6 +95,7 @@ public class VolleyNetworkFetcher extends
         new Response.ErrorListener() {
           @Override
           public void onErrorResponse(VolleyError volleyError) {
+            //失败回调
             callback.onFailure(volleyError);
           }
         });

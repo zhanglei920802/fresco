@@ -27,175 +27,191 @@ import com.facebook.imagepipeline.memory.PooledByteBufferOutputStream;
 
 /**
  * A producer to actually fetch images from the network.
- *
+ * <p>
  * <p> Downloaded bytes may be passed to the consumer as they are downloaded, but not more often
  * than {@link #TIME_BETWEEN_PARTIAL_RESULTS_MS}.
-
+ * <p>
  * <p>Clients should provide an instance of {@link NetworkFetcher} to make use of their networking
  * stack. Use {@link HttpUrlConnectionNetworkFetcher} as a model.
  */
 public class NetworkFetchProducer implements Producer<EncodedImage> {
 
-  public static final String PRODUCER_NAME = "NetworkFetchProducer";
-  public static final String INTERMEDIATE_RESULT_PRODUCER_EVENT = "intermediate_result";
-  private static final int READ_SIZE = 16 * 1024;
+    public static final String PRODUCER_NAME = "NetworkFetchProducer";
+    public static final String INTERMEDIATE_RESULT_PRODUCER_EVENT = "intermediate_result";
+    private static final int READ_SIZE = 16 * 1024;
 
-  /**
-   * Time between two consecutive partial results are propagated upstream
-   *
-   * TODO 5399646: make this configurable
-   */
-  @VisibleForTesting static final long TIME_BETWEEN_PARTIAL_RESULTS_MS = 100;
+    /**
+     * Time between two consecutive partial results are propagated upstream
+     * <p>
+     * TODO 5399646: make this configurable
+     */
+    @VisibleForTesting
+    static final long TIME_BETWEEN_PARTIAL_RESULTS_MS = 100;
 
-  private final PooledByteBufferFactory mPooledByteBufferFactory;
-  private final ByteArrayPool mByteArrayPool;
-  private final NetworkFetcher mNetworkFetcher;
+    private final PooledByteBufferFactory mPooledByteBufferFactory;
+    private final ByteArrayPool mByteArrayPool;
+    private final NetworkFetcher mNetworkFetcher;
 
-  public NetworkFetchProducer(
-      PooledByteBufferFactory pooledByteBufferFactory,
-      ByteArrayPool byteArrayPool,
-      NetworkFetcher networkFetcher) {
-    mPooledByteBufferFactory = pooledByteBufferFactory;
-    mByteArrayPool = byteArrayPool;
-    mNetworkFetcher = networkFetcher;
-  }
-
-  @Override
-  public void produceResults(Consumer<EncodedImage> consumer, ProducerContext context) {
-    context.getListener()
-        .onProducerStart(context.getId(), PRODUCER_NAME);
-    final FetchState fetchState = mNetworkFetcher.createFetchState(consumer, context);
-    mNetworkFetcher.fetch(
-        fetchState, new NetworkFetcher.Callback() {
-          @Override
-          public void onResponse(InputStream response, int responseLength) throws IOException {
-            NetworkFetchProducer.this.onResponse(fetchState, response, responseLength);
-          }
-
-          @Override
-          public void onFailure(Throwable throwable) {
-            NetworkFetchProducer.this.onFailure(fetchState, throwable);
-          }
-
-          @Override
-          public void onCancellation() {
-            NetworkFetchProducer.this.onCancellation(fetchState);
-          }
-        });
-  }
-
-  private void onResponse(
-      FetchState fetchState,
-      InputStream responseData,
-      int responseContentLength)
-      throws IOException {
-    final PooledByteBufferOutputStream pooledOutputStream;
-    if (responseContentLength > 0) {
-      pooledOutputStream = mPooledByteBufferFactory.newOutputStream(responseContentLength);
-    } else {
-      pooledOutputStream = mPooledByteBufferFactory.newOutputStream();
+    public NetworkFetchProducer(
+            PooledByteBufferFactory pooledByteBufferFactory,
+            ByteArrayPool byteArrayPool,
+            NetworkFetcher networkFetcher) {
+        mPooledByteBufferFactory = pooledByteBufferFactory;
+        mByteArrayPool = byteArrayPool;
+        mNetworkFetcher = networkFetcher;
     }
-    final byte[] ioArray = mByteArrayPool.get(READ_SIZE);
-    try {
-      int length;
-      while ((length = responseData.read(ioArray)) >= 0) {
-        if (length > 0) {
-          pooledOutputStream.write(ioArray, 0, length);
-          maybeHandleIntermediateResult(pooledOutputStream, fetchState);
-          float progress = calculateProgress(pooledOutputStream.size(), responseContentLength);
-          fetchState.getConsumer().onProgressUpdate(progress);
+
+    @Override
+    public void produceResults(Consumer<EncodedImage> consumer, ProducerContext context) {
+        context.getListener()
+               .onProducerStart(context.getId(), PRODUCER_NAME);
+        /**
+         * 创建一个fetchState
+         */
+        final FetchState fetchState = mNetworkFetcher.createFetchState(consumer, context);
+
+        /**
+         * 使用NetworkFetcher下载图片,默认使用是http来下载
+         * TODO 但是在哪里构造的呢？因为有Volley,OkHttp,Http三种类型，应该是有一定的策略的
+         */
+        mNetworkFetcher.fetch(
+                fetchState, new NetworkFetcher.Callback() {
+                    @Override
+                    public void onResponse(InputStream response, int responseLength) throws IOException {
+                        NetworkFetchProducer.this.onResponse(fetchState, response, responseLength);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        NetworkFetchProducer.this.onFailure(fetchState, throwable);
+                    }
+
+                    @Override
+                    public void onCancellation() {
+                        NetworkFetchProducer.this.onCancellation(fetchState);
+                    }
+                });
+    }
+
+    private void onResponse(
+            FetchState fetchState,//fetch状态
+            InputStream responseData,//输入流
+            int responseContentLength)
+            throws IOException {
+        final PooledByteBufferOutputStream pooledOutputStream;
+        if (responseContentLength > 0) {
+            pooledOutputStream = mPooledByteBufferFactory.newOutputStream(responseContentLength);
         }
-      }
-      mNetworkFetcher.onFetchCompletion(fetchState, pooledOutputStream.size());
-      handleFinalResult(pooledOutputStream, fetchState);
-    } finally {
-      mByteArrayPool.release(ioArray);
-      pooledOutputStream.close();
+        else {
+            pooledOutputStream = mPooledByteBufferFactory.newOutputStream();
+        }
+        final byte[] ioArray = mByteArrayPool.get(READ_SIZE);
+        try {
+            int length;
+            while ((length = responseData.read(ioArray)) >= 0) {
+                if (length > 0) {
+                    pooledOutputStream.write(ioArray, 0, length);
+                    maybeHandleIntermediateResult(pooledOutputStream, fetchState);
+                    float progress = calculateProgress(pooledOutputStream.size(), responseContentLength);
+                    //更新图片加载的进度
+                    fetchState.getConsumer().onProgressUpdate(progress);
+                }
+            }
+            mNetworkFetcher.onFetchCompletion(fetchState, pooledOutputStream.size());//标记fetchTime
+            //通知消费者已经有结果了
+            handleFinalResult(pooledOutputStream, fetchState);
+        } finally {
+            mByteArrayPool.release(ioArray);
+            pooledOutputStream.close();
+        }
     }
-  }
 
-  private static float calculateProgress(int downloaded, int total) {
-    if (total > 0) {
-      return (float) downloaded / total;
-    } else {
-      // If we don't know the total number of bytes, we approximate the progress by an exponential
-      // that approaches 1. Here are some values of the progress, given the number of bytes:
-      // 0.5 kB ~  1%
-      // 2.5 kB ~  5%
-      //   5 kB ~ 10%
-      //  14 kB ~ 25%
-      //  34 kB ~ 50%
-      //  68 kB ~ 75%
-      // 113 kB ~ 90%
-      // 147 kB ~ 95%
-      // 225 kB ~ 99%
-      return 1 - (float) Math.exp(-downloaded / 5e4);
+    private static float calculateProgress(int downloaded, int total) {
+        if (total > 0) {
+            return (float) downloaded / total;
+        }
+        else {
+            // If we don't know the total number of bytes, we approximate the progress by an exponential
+            // that approaches 1. Here are some values of the progress, given the number of bytes:
+            // 0.5 kB ~  1%
+            // 2.5 kB ~  5%
+            //   5 kB ~ 10%
+            //  14 kB ~ 25%
+            //  34 kB ~ 50%
+            //  68 kB ~ 75%
+            // 113 kB ~ 90%
+            // 147 kB ~ 95%
+            // 225 kB ~ 99%
+            return 1 - (float) Math.exp(-downloaded / 5e4);
+        }
     }
-  }
 
-  private void maybeHandleIntermediateResult(
-      PooledByteBufferOutputStream pooledOutputStream,
-      FetchState fetchState) {
-    final long nowMs = SystemClock.uptimeMillis();
-    if (shouldPropagateIntermediateResults(fetchState) &&
-        nowMs - fetchState.getLastIntermediateResultTimeMs() >= TIME_BETWEEN_PARTIAL_RESULTS_MS) {
-      fetchState.setLastIntermediateResultTimeMs(nowMs);
-      fetchState.getListener()
-          .onProducerEvent(fetchState.getId(), PRODUCER_NAME, INTERMEDIATE_RESULT_PRODUCER_EVENT);
-      notifyConsumer(pooledOutputStream, false, fetchState.getConsumer());
+    private void maybeHandleIntermediateResult(
+            PooledByteBufferOutputStream pooledOutputStream,
+            FetchState fetchState) {
+        final long nowMs = SystemClock.uptimeMillis();
+        if (shouldPropagateIntermediateResults(fetchState) &&
+                nowMs - fetchState.getLastIntermediateResultTimeMs() >= TIME_BETWEEN_PARTIAL_RESULTS_MS) {
+            fetchState.setLastIntermediateResultTimeMs(nowMs);
+            fetchState.getListener()
+                      .onProducerEvent(fetchState.getId(), PRODUCER_NAME, INTERMEDIATE_RESULT_PRODUCER_EVENT);
+            notifyConsumer(pooledOutputStream, false, fetchState.getConsumer());
+        }
     }
-  }
 
-  private void handleFinalResult(
-      PooledByteBufferOutputStream pooledOutputStream,
-      FetchState fetchState) {
-    Map<String, String> extraMap = getExtraMap(fetchState, pooledOutputStream.size());
-    fetchState.getListener()
-        .onProducerFinishWithSuccess(fetchState.getId(), PRODUCER_NAME, extraMap);
-    notifyConsumer(pooledOutputStream, true, fetchState.getConsumer());
-  }
-
-  private void notifyConsumer(
-      PooledByteBufferOutputStream pooledOutputStream,
-      boolean isFinal,
-      Consumer<EncodedImage> consumer) {
-    CloseableReference<PooledByteBuffer> result =
-        CloseableReference.of(pooledOutputStream.toByteBuffer());
-    EncodedImage encodedImage = null;
-    try {
-      encodedImage = new EncodedImage(result);
-      encodedImage.parseMetaData();
-      consumer.onNewResult(encodedImage, isFinal);
-    } finally {
-      EncodedImage.closeSafely(encodedImage);
-      CloseableReference.closeSafely(result);
+    private void handleFinalResult(
+            PooledByteBufferOutputStream pooledOutputStream,
+            FetchState fetchState) {
+        Map<String, String> extraMap = getExtraMap(fetchState, pooledOutputStream.size());
+        fetchState.getListener()
+                  .onProducerFinishWithSuccess(fetchState.getId(), PRODUCER_NAME, extraMap);
+        notifyConsumer(pooledOutputStream, true, fetchState.getConsumer());
     }
-  }
 
-  private void onFailure(FetchState fetchState, Throwable e) {
-    fetchState.getListener()
-        .onProducerFinishWithFailure(fetchState.getId(), PRODUCER_NAME, e, null);
-    fetchState.getConsumer().onFailure(e);
-  }
+    private void notifyConsumer(
+            PooledByteBufferOutputStream pooledOutputStream,
+            boolean isFinal,
+            Consumer<EncodedImage> consumer) {
+        CloseableReference<PooledByteBuffer> result =
+                CloseableReference.of(pooledOutputStream.toByteBuffer());
+        EncodedImage encodedImage = null;
+        try {
+            //解析图片
+            encodedImage = new EncodedImage(result);
+            encodedImage.parseMetaData();
 
-  private void onCancellation(FetchState fetchState) {
-    fetchState.getListener()
-        .onProducerFinishWithCancellation(fetchState.getId(), PRODUCER_NAME, null);
-    fetchState.getConsumer().onCancellation();
-  }
-
-  private boolean shouldPropagateIntermediateResults(FetchState fetchState) {
-    if (!fetchState.getContext().getImageRequest().getProgressiveRenderingEnabled()) {
-      return false;
+            //通知新的结果
+            consumer.onNewResult(encodedImage, isFinal);
+        } finally {
+            EncodedImage.closeSafely(encodedImage);
+            CloseableReference.closeSafely(result);
+        }
     }
-    return mNetworkFetcher.shouldPropagate(fetchState);
-  }
 
-  @Nullable
-  private Map<String, String> getExtraMap(FetchState fetchState, int byteSize) {
-    if (!fetchState.getListener().requiresExtraMap(fetchState.getId())) {
-      return null;
+    private void onFailure(FetchState fetchState, Throwable e) {
+        fetchState.getListener()
+                  .onProducerFinishWithFailure(fetchState.getId(), PRODUCER_NAME, e, null);
+        fetchState.getConsumer().onFailure(e);
     }
-    return mNetworkFetcher.getExtraMap(fetchState, byteSize);
-  }
+
+    private void onCancellation(FetchState fetchState) {
+        fetchState.getListener()
+                  .onProducerFinishWithCancellation(fetchState.getId(), PRODUCER_NAME, null);
+        fetchState.getConsumer().onCancellation();
+    }
+
+    private boolean shouldPropagateIntermediateResults(FetchState fetchState) {
+        if (!fetchState.getContext().getImageRequest().getProgressiveRenderingEnabled()) {
+            return false;
+        }
+        return mNetworkFetcher.shouldPropagate(fetchState);
+    }
+
+    @Nullable
+    private Map<String, String> getExtraMap(FetchState fetchState, int byteSize) {
+        if (!fetchState.getListener().requiresExtraMap(fetchState.getId())) {
+            return null;
+        }
+        return mNetworkFetcher.getExtraMap(fetchState, byteSize);
+    }
 }
