@@ -19,16 +19,17 @@ package com.facebook.samples.comparison.urlsfetcher;
  * we should request "nice-imageb.jpeg".
  */
 public enum ImageSize {
-  ORIGINAL_IMAGE(""),
-  SMALL_SQUARE("s"),
-  BIG_SQUARE("b"),
-  SMALL_THUMBNAIL("t"),
-  MEDIUM_THUMBNAIL("m"),
-  LARGE_THUMBNAIL("l"),
-  HUGE_THUMBNAIL("h");
+    ORIGINAL_IMAGE(""),
+    SMALL_SQUARE("s"),
+    BIG_SQUARE("b"),
+    SMALL_THUMBNAIL("t"),
+    MEDIUM_THUMBNAIL("m"),
+    LARGE_THUMBNAIL("l"),
+    HUGE_THUMBNAIL("h");
 
-  public final String suffix;
-  private ImageSize(final String suffix) {
-    this.suffix = suffix;
-  }
+    public final String suffix;
+
+    private ImageSize(final String suffix) {
+        this.suffix = suffix;
+    }
 }

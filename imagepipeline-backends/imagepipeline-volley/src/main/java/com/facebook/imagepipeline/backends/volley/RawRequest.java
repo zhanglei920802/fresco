@@ -21,21 +21,21 @@ import com.android.volley.toolbox.HttpHeaderParser;
  */
 public class RawRequest extends Request<byte[]> {
 
-  private final Listener<byte[]> mListener;
+    private final Listener<byte[]> mListener;
 
-  public RawRequest(String url, Listener<byte[]> listener, ErrorListener errorListener) {
-    super(0, url, errorListener);
-    this.mListener = listener;
-    setShouldCache(false);
-  }
+    public RawRequest(String url, Listener<byte[]> listener, ErrorListener errorListener) {
+        super(0, url, errorListener);
+        this.mListener = listener;
+        setShouldCache(false);
+    }
 
-  @Override
-  protected Response<byte[]> parseNetworkResponse(NetworkResponse response) {
-    return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
-  }
+    @Override
+    protected Response<byte[]> parseNetworkResponse(NetworkResponse response) {
+        return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
+    }
 
-  @Override
-  protected void deliverResponse(byte[] bytes) {
-    mListener.onResponse(bytes);
-  }
+    @Override
+    protected void deliverResponse(byte[] bytes) {
+        mListener.onResponse(bytes);
+    }
 }

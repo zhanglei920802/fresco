@@ -25,11 +25,11 @@ package com.facebook.common.internal;
  * @since 2.0 (imported from Google Collections Library)
  */
 public interface Supplier<T> {
-  /**
-   * Retrieves an instance of the appropriate type. The returned object may or
-   * may not be a new instance, depending on the implementation.
-   *
-   * @return an instance of the appropriate type
-   */
-  T get();
+    /**
+     * Retrieves an instance of the appropriate type. The returned object may or
+     * may not be a new instance, depending on the implementation.
+     *
+     * @return an instance of the appropriate type
+     */
+    T get();
 }

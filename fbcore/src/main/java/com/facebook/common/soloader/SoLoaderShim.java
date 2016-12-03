@@ -14,54 +14,54 @@ package com.facebook.common.soloader;
  */
 public class SoLoaderShim {
 
-  /**
-   * Handler that can be overridden by the application.
-   */
-  public interface Handler {
+    private static volatile Handler sHandler = new DefaultHandler();
 
-    void loadLibrary(String libraryName);
-  }
-
-  /**
-   * Default handler for loading libraries.
-   */
-  public static class DefaultHandler implements Handler {
-
-    @Override
-    public void loadLibrary(String libraryName) {
-      System.loadLibrary(libraryName);
+    /**
+     * Sets the handler.
+     *
+     * @param handler the new handler
+     */
+    public static void setHandler(Handler handler) {
+        if (handler == null) {
+            throw new NullPointerException("Handler cannot be null");
+        }
+        sHandler = handler;
     }
-  }
 
-  private static volatile Handler sHandler = new DefaultHandler();
-
-  /**
-   * Sets the handler.
-   *
-   * @param handler the new handler
-   */
-  public static void setHandler(Handler handler) {
-    if (handler == null) {
-      throw new NullPointerException("Handler cannot be null");
+    /**
+     * See {@link Runtime#loadLibrary}.
+     *
+     * @param libraryName the library to load
+     */
+    public static void loadLibrary(String libraryName) {
+        sHandler.loadLibrary(libraryName);
     }
-    sHandler = handler;
-  }
 
-  /**
-   * See {@link Runtime#loadLibrary}.
-   *
-   * @param libraryName the library to load
-   */
-  public static void loadLibrary(String libraryName) {
-    sHandler.loadLibrary(libraryName);
-  }
+    public static void setInTestMode() {
+        setHandler(
+                new Handler() {
+                    @Override
+                    public void loadLibrary(String libraryName) {
+                    }
+                });
+    }
 
-  public static void setInTestMode() {
-    setHandler(
-        new Handler() {
-          @Override
-          public void loadLibrary(String libraryName) {
-          }
-        });
-  }
+    /**
+     * Handler that can be overridden by the application.
+     */
+    public interface Handler {
+
+        void loadLibrary(String libraryName);
+    }
+
+    /**
+     * Default handler for loading libraries.
+     */
+    public static class DefaultHandler implements Handler {
+
+        @Override
+        public void loadLibrary(String libraryName) {
+            System.loadLibrary(libraryName);
+        }
+    }
 }

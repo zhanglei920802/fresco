@@ -17,13 +17,13 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public interface HandlerExecutorService extends ScheduledExecutorService {
 
-  /**
-   * Quit the handler
-   */
-  void quit();
+    /**
+     * Quit the handler
+     */
+    void quit();
 
-  /**
-   * Check if we are currently in the handler thread of this HandlerExecutorService.
-   */
-  boolean isHandlerThread();
+    /**
+     * Check if we are currently in the handler thread of this HandlerExecutorService.
+     */
+    boolean isHandlerThread();
 }

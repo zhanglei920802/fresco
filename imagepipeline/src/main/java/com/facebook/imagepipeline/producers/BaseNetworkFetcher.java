@@ -9,32 +9,32 @@
 
 package com.facebook.imagepipeline.producers;
 
-import javax.annotation.Nullable;
-
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /**
  * Base class for {@link NetworkFetcher}.
- *
+ * <p>
  * <p> Intermediate results are propagated.
  * <p> {#code getExtraMap} returns null.
  */
 public abstract class BaseNetworkFetcher<FETCH_STATE extends FetchState>
-    implements NetworkFetcher<FETCH_STATE> {
+        implements NetworkFetcher<FETCH_STATE> {
 
-  @Override
-  public boolean shouldPropagate(FETCH_STATE fetchState) {
-    return true;
-  }
+    @Override
+    public boolean shouldPropagate(FETCH_STATE fetchState) {
+        return true;
+    }
 
-  @Override
-  public void onFetchCompletion(FETCH_STATE fetchState, int byteSize) {
-    // no-op
-  }
+    @Override
+    public void onFetchCompletion(FETCH_STATE fetchState, int byteSize) {
+        // no-op
+    }
 
-  @Nullable
-  @Override
-  public Map<String, String> getExtraMap(FETCH_STATE fetchState, int byteSize) {
-    return null;
-  }
+    @Nullable
+    @Override
+    public Map<String, String> getExtraMap(FETCH_STATE fetchState, int byteSize) {
+        return null;
+    }
 }

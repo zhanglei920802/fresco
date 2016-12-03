@@ -9,34 +9,35 @@
 
 package com.facebook.imagepipeline.nativecode;
 
+import com.facebook.imageformat.ImageFormat;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-import com.facebook.imageformat.ImageFormat;
 
 /**
  * The abstraction for WebpTranscoder
  */
 public interface WebpTranscoder {
 
-  /**
-  * @return true if given type of WebP is supported natively by the framework
-  */
-  boolean isWebpNativelySupported(ImageFormat webpFormat);
+    /**
+     * @return true if given type of WebP is supported natively by the framework
+     */
+    boolean isWebpNativelySupported(ImageFormat webpFormat);
 
-  /**
-   * Transcodes webp image given by input stream into jpeg.
-   */
-  void transcodeWebpToJpeg(
-      InputStream inputStream,
-      OutputStream outputStream,
-      int quality) throws IOException;
+    /**
+     * Transcodes webp image given by input stream into jpeg.
+     */
+    void transcodeWebpToJpeg(
+            InputStream inputStream,
+            OutputStream outputStream,
+            int quality) throws IOException;
 
-  /**
-   * Transcodes Webp image given by input stream into png.
-   */
-  void transcodeWebpToPng(
-      InputStream inputStream,
-      OutputStream outputStream) throws IOException;
+    /**
+     * Transcodes Webp image given by input stream into png.
+     */
+    void transcodeWebpToPng(
+            InputStream inputStream,
+            OutputStream outputStream) throws IOException;
 
 }

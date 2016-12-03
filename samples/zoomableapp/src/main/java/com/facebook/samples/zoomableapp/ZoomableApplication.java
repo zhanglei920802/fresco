@@ -33,8 +33,8 @@ public class ZoomableApplication extends Application {
         Set<RequestListener> listeners = new HashSet<>();
         listeners.add(new RequestLoggingListener());
         ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this)
-                .setRequestListeners(listeners)
-                .build();
+                                                        .setRequestListeners(listeners)
+                                                        .build();
         Fresco.initialize(this, config);
     }
 }

@@ -10,6 +10,7 @@
 package com.facebook.imagepipeline.backends.volley;
 
 import android.os.SystemClock;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.RequestQueue.RequestFilter;
@@ -36,99 +37,98 @@ import java.util.Map;
  * along as complete byte arrays, which will not allow for progressive JPEG streaming.
  */
 public class VolleyNetworkFetcher extends
-    BaseNetworkFetcher<VolleyNetworkFetcher.VolleyNetworkFetchState> {
+        BaseNetworkFetcher<VolleyNetworkFetcher.VolleyNetworkFetchState> {
 
-  public static class VolleyNetworkFetchState extends FetchState {
-    long submitTime;
-    long responseTime;
-    long fetchCompleteTime;
+    private static final String QUEUE_TIME = "queue_time";
+    private static final String FETCH_TIME = "fetch_time";
+    private static final String TOTAL_TIME = "total_time";
+    private static final String IMAGE_SIZE = "image_size";
+    private final RequestQueue mRequestQueue;
 
-    public VolleyNetworkFetchState(
-        Consumer<EncodedImage> consumer,
-        ProducerContext producerContext) {
-      super(consumer, producerContext);
+    /**
+     * @param requestQueue The Volley {@link RequestQueue} to use
+     */
+    public VolleyNetworkFetcher(RequestQueue requestQueue) {
+        mRequestQueue = requestQueue;
     }
-  }
 
-  private static final String QUEUE_TIME = "queue_time";
-  private static final String FETCH_TIME = "fetch_time";
-  private static final String TOTAL_TIME = "total_time";
-  private static final String IMAGE_SIZE = "image_size";
+    @Override
+    public VolleyNetworkFetchState createFetchState(
+            Consumer<EncodedImage> consumer,
+            ProducerContext context) {
+        return new VolleyNetworkFetchState(consumer, context);
+    }
 
-  private final RequestQueue mRequestQueue;
+    @Override
+    public void fetch(final VolleyNetworkFetchState fetchState, final Callback callback) {
+        fetchState.submitTime = SystemClock.elapsedRealtime();//标记任务提交时间
 
-  /**
-   * @param requestQueue The Volley {@link RequestQueue} to use
-   */
-  public VolleyNetworkFetcher(RequestQueue requestQueue) {
-    mRequestQueue = requestQueue;
-  }
+        final RawRequest request = new RawRequest(
+                fetchState.getUri().toString(),
+                new Response.Listener<byte[]>() {
+                    @Override
+                    public void onResponse(byte[] bytes) {
+                        fetchState.responseTime = SystemClock.uptimeMillis();//标记任务响应时间
 
-  @Override
-  public VolleyNetworkFetchState createFetchState(
-      Consumer<EncodedImage> consumer,
-      ProducerContext context) {
-    return new VolleyNetworkFetchState(consumer, context);
-  }
+                        try {
+                            InputStream is = new ByteArrayInputStream(bytes);
+                            //回调输入流
+                            callback.onResponse(is, bytes.length);
+                        } catch (IOException e) {
+                            //失败回调
+                            callback.onFailure(e);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        //失败回调
+                        callback.onFailure(volleyError);
+                    }
+                });
 
-  @Override
-  public void fetch(final VolleyNetworkFetchState fetchState, final Callback callback) {
-    fetchState.submitTime = SystemClock.elapsedRealtime();//标记任务提交时间
+        fetchState.getContext().addCallbacks(
+                new BaseProducerContextCallbacks() {
+                    @Override
+                    public void onCancellationRequested() {
+                        mRequestQueue.cancelAll(new RequestFilter() {
+                            @Override
+                            public boolean apply(Request<?> candidate) {
+                                return candidate != null && request.getSequence() == candidate.getSequence();
+                            }
+                        });
+                    }
+                });
 
-    final RawRequest request = new RawRequest(
-        fetchState.getUri().toString(),
-        new Response.Listener<byte[]>() {
-          @Override
-          public void onResponse(byte[] bytes) {
-            fetchState.responseTime = SystemClock.uptimeMillis();//标记任务响应时间
+        mRequestQueue.add(request);
+    }
 
-            try {
-              InputStream is = new ByteArrayInputStream(bytes);
-              //回调输入流
-              callback.onResponse(is, bytes.length);
-            } catch (IOException e) {
-              //失败回调
-              callback.onFailure(e);
-            }
-          }
-        },
-        new Response.ErrorListener() {
-          @Override
-          public void onErrorResponse(VolleyError volleyError) {
-            //失败回调
-            callback.onFailure(volleyError);
-          }
-        });
+    @Override
+    public void onFetchCompletion(VolleyNetworkFetchState fetchState, int byteSize) {
+        fetchState.fetchCompleteTime = SystemClock.elapsedRealtime();
+    }
 
-    fetchState.getContext().addCallbacks(
-        new BaseProducerContextCallbacks() {
-          @Override
-          public void onCancellationRequested() {
-            mRequestQueue.cancelAll(new RequestFilter() {
-              @Override
-              public boolean apply(Request<?> candidate) {
-                return candidate != null && request.getSequence() == candidate.getSequence();
-              }
-            });
-          }
-        });
+    @Override
+    public Map<String, String> getExtraMap(VolleyNetworkFetchState fetchState, int byteSize) {
+        Map<String, String> extraMap = new HashMap<>(4);
+        extraMap.put(QUEUE_TIME, Long.toString(fetchState.responseTime - fetchState.submitTime));
+        extraMap.put(FETCH_TIME, Long.toString(fetchState.fetchCompleteTime - fetchState.responseTime));
+        extraMap.put(TOTAL_TIME, Long.toString(fetchState.fetchCompleteTime - fetchState.submitTime));
+        extraMap.put(IMAGE_SIZE, Integer.toString(byteSize));
+        return extraMap;
+    }
 
-    mRequestQueue.add(request);
-  }
+    public static class VolleyNetworkFetchState extends FetchState {
+        long submitTime;
+        long responseTime;
+        long fetchCompleteTime;
 
-  @Override
-  public void onFetchCompletion(VolleyNetworkFetchState fetchState, int byteSize) {
-    fetchState.fetchCompleteTime = SystemClock.elapsedRealtime();
-  }
-
-  @Override
-  public Map<String, String> getExtraMap(VolleyNetworkFetchState fetchState, int byteSize) {
-    Map<String, String> extraMap = new HashMap<>(4);
-    extraMap.put(QUEUE_TIME, Long.toString(fetchState.responseTime - fetchState.submitTime));
-    extraMap.put(FETCH_TIME, Long.toString(fetchState.fetchCompleteTime - fetchState.responseTime));
-    extraMap.put(TOTAL_TIME, Long.toString(fetchState.fetchCompleteTime - fetchState.submitTime));
-    extraMap.put(IMAGE_SIZE, Integer.toString(byteSize));
-    return extraMap;
-  }
+        public VolleyNetworkFetchState(
+                Consumer<EncodedImage> consumer,
+                ProducerContext producerContext) {
+            super(consumer, producerContext);
+        }
+    }
 
 }

@@ -9,12 +9,6 @@
 
 package com.facebook.imagepipeline.producers;
 
-import javax.annotation.Nullable;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-
 import android.os.SystemClock;
 
 import com.facebook.common.internal.VisibleForTesting;
@@ -24,6 +18,12 @@ import com.facebook.imagepipeline.memory.ByteArrayPool;
 import com.facebook.imagepipeline.memory.PooledByteBuffer;
 import com.facebook.imagepipeline.memory.PooledByteBufferFactory;
 import com.facebook.imagepipeline.memory.PooledByteBufferOutputStream;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /**
  * A producer to actually fetch images from the network.
@@ -38,8 +38,6 @@ public class NetworkFetchProducer implements Producer<EncodedImage> {
 
     public static final String PRODUCER_NAME = "NetworkFetchProducer";
     public static final String INTERMEDIATE_RESULT_PRODUCER_EVENT = "intermediate_result";
-    private static final int READ_SIZE = 16 * 1024;
-
     /**
      * Time between two consecutive partial results are propagated upstream
      * <p>
@@ -47,7 +45,7 @@ public class NetworkFetchProducer implements Producer<EncodedImage> {
      */
     @VisibleForTesting
     static final long TIME_BETWEEN_PARTIAL_RESULTS_MS = 100;
-
+    private static final int READ_SIZE = 16 * 1024;
     private final PooledByteBufferFactory mPooledByteBufferFactory;
     private final ByteArrayPool mByteArrayPool;
     private final NetworkFetcher mNetworkFetcher;
@@ -59,6 +57,26 @@ public class NetworkFetchProducer implements Producer<EncodedImage> {
         mPooledByteBufferFactory = pooledByteBufferFactory;
         mByteArrayPool = byteArrayPool;
         mNetworkFetcher = networkFetcher;
+    }
+
+    private static float calculateProgress(int downloaded, int total) {
+        if (total > 0) {
+            return (float) downloaded / total;
+        }
+        else {
+            // If we don't know the total number of bytes, we approximate the progress by an exponential
+            // that approaches 1. Here are some values of the progress, given the number of bytes:
+            // 0.5 kB ~  1%
+            // 2.5 kB ~  5%
+            //   5 kB ~ 10%
+            //  14 kB ~ 25%
+            //  34 kB ~ 50%
+            //  68 kB ~ 75%
+            // 113 kB ~ 90%
+            // 147 kB ~ 95%
+            // 225 kB ~ 99%
+            return 1 - (float) Math.exp(-downloaded / 5e4);
+        }
     }
 
     @Override
@@ -123,26 +141,6 @@ public class NetworkFetchProducer implements Producer<EncodedImage> {
         } finally {
             mByteArrayPool.release(ioArray);
             pooledOutputStream.close();
-        }
-    }
-
-    private static float calculateProgress(int downloaded, int total) {
-        if (total > 0) {
-            return (float) downloaded / total;
-        }
-        else {
-            // If we don't know the total number of bytes, we approximate the progress by an exponential
-            // that approaches 1. Here are some values of the progress, given the number of bytes:
-            // 0.5 kB ~  1%
-            // 2.5 kB ~  5%
-            //   5 kB ~ 10%
-            //  14 kB ~ 25%
-            //  34 kB ~ 50%
-            //  68 kB ~ 75%
-            // 113 kB ~ 90%
-            // 147 kB ~ 95%
-            // 225 kB ~ 99%
-            return 1 - (float) Math.exp(-downloaded / 5e4);
         }
     }
 

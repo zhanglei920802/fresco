@@ -26,24 +26,27 @@ import com.facebook.samples.scrollperf.internal.ScrollPerfExecutorSupplier;
  */
 public class ScrollPerfApplication extends Application {
 
-  @Override
-  public void onCreate() {
-    super.onCreate();
-    final Config config = Config.load(this);
-    ImagePipelineConfig.Builder imagePipelineConfigBuilder = ImagePipelineConfig.newBuilder(this)
-        .setResizeAndRotateEnabledForNetwork(false)
-        .setDownsampleEnabled(config.downsampling);
-    if (config.decodingThreadCount == 0) {
-      imagePipelineConfigBuilder.setExecutorSupplier(
-          new DefaultExecutorSupplier(Const.NUMBER_OF_PROCESSORS));
-    } else {
-      imagePipelineConfigBuilder.setExecutorSupplier(
-          new ScrollPerfExecutorSupplier(Const.NUMBER_OF_PROCESSORS, config.decodingThreadCount));
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        final Config config = Config.load(this);
+        ImagePipelineConfig.Builder imagePipelineConfigBuilder = ImagePipelineConfig.newBuilder(this)
+                                                                                    .setResizeAndRotateEnabledForNetwork(
+                                                                                            false)
+                                                                                    .setDownsampleEnabled(
+                                                                                            config.downsampling);
+        if (config.decodingThreadCount == 0) {
+            imagePipelineConfigBuilder.setExecutorSupplier(
+                    new DefaultExecutorSupplier(Const.NUMBER_OF_PROCESSORS));
+        }
+        else {
+            imagePipelineConfigBuilder.setExecutorSupplier(
+                    new ScrollPerfExecutorSupplier(Const.NUMBER_OF_PROCESSORS, config.decodingThreadCount));
+        }
+        if (WebpSupportStatus.sIsWebpSupportRequired) {
+            imagePipelineConfigBuilder.experiment().setWebpSupportEnabled(config.webpSupportEnabled);
+        }
+        imagePipelineConfigBuilder.experiment().setDecodeCancellationEnabled(config.decodeCancellation);
+        Fresco.initialize(this, imagePipelineConfigBuilder.build());
     }
-    if (WebpSupportStatus.sIsWebpSupportRequired) {
-      imagePipelineConfigBuilder.experiment().setWebpSupportEnabled(config.webpSupportEnabled);
-    }
-    imagePipelineConfigBuilder.experiment().setDecodeCancellationEnabled(config.decodeCancellation);
-    Fresco.initialize(this, imagePipelineConfigBuilder.build());
-  }
 }

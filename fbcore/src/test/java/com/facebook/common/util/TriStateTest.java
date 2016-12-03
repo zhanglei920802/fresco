@@ -11,47 +11,51 @@ package com.facebook.common.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /** Unit test for {@link TriState}. */
 public class TriStateTest {
 
-  @Test
-  public void testIsSet() {
-    assertTrue(TriState.YES.isSet());
-    assertTrue(TriState.NO.isSet());
-    assertFalse(TriState.UNSET.isSet());
-  }
+    @Test
+    public void testIsSet() {
+        assertTrue(TriState.YES.isSet());
+        assertTrue(TriState.NO.isSet());
+        assertFalse(TriState.UNSET.isSet());
+    }
 
-  @Test
-  public void testValueOf() {
-    assertEquals(TriState.YES, TriState.valueOf(true));
-    assertEquals(TriState.NO, TriState.valueOf(false));
-  }
+    @Test
+    public void testValueOf() {
+        assertEquals(TriState.YES, TriState.valueOf(true));
+        assertEquals(TriState.NO, TriState.valueOf(false));
+    }
 
-  @Test
-  public void testAsBooleanValidValues() {
-    assertTrue(TriState.YES.asBoolean());
-    assertFalse(TriState.NO.asBoolean());
-  }
+    @Test
+    public void testAsBooleanValidValues() {
+        assertTrue(TriState.YES.asBoolean());
+        assertFalse(TriState.NO.asBoolean());
+    }
 
-  @Test(expected = IllegalStateException.class)
-  public void testAsBooleanInvalidValues() {
-    TriState.UNSET.asBoolean();
-  }
+    @Test(expected = IllegalStateException.class)
+    public void testAsBooleanInvalidValues() {
+        TriState.UNSET.asBoolean();
+    }
 
-  @Test
-  public void testAsBooleanDefault() {
-    assertTrue(TriState.YES.asBoolean(false));
-    assertFalse(TriState.NO.asBoolean(true));
-    assertTrue(TriState.UNSET.asBoolean(true));
-    assertFalse(TriState.UNSET.asBoolean(false));
-  }
+    @Test
+    public void testAsBooleanDefault() {
+        assertTrue(TriState.YES.asBoolean(false));
+        assertFalse(TriState.NO.asBoolean(true));
+        assertTrue(TriState.UNSET.asBoolean(true));
+        assertFalse(TriState.UNSET.asBoolean(false));
+    }
 
-  @Test
-  public void testAsBooleanObject() {
-    assertSame(Boolean.TRUE, TriState.YES.asBooleanObject());
-    assertSame(Boolean.FALSE, TriState.NO.asBooleanObject());
-    assertNull(TriState.UNSET.asBooleanObject());
-  }
+    @Test
+    public void testAsBooleanObject() {
+        assertSame(Boolean.TRUE, TriState.YES.asBooleanObject());
+        assertSame(Boolean.FALSE, TriState.NO.asBooleanObject());
+        assertNull(TriState.UNSET.asBooleanObject());
+    }
 }

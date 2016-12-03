@@ -16,68 +16,71 @@ import javax.annotation.Nullable;
  */
 public class ImageFormat {
 
-  public interface FormatChecker {
+    // Unknown image format
+    public static final ImageFormat UNKNOWN = new ImageFormat("UNKNOWN", null);
+    private final String mFileExtension;
+    private final String mName;
+
+    public ImageFormat(String name, @Nullable String fileExtension) {
+        mName = name;
+        mFileExtension = fileExtension;
+    }
 
     /**
-     * Get the number of header bytes the format checker requires
-     * @return the number of header bytes needed
+     * Maps an image format to the file extension.
+     * Deprecated. Use {@link #getFileExtension()} instead.
+     *
+     * @param imageFormat image format
+     * @return file extension for the image format
+     * @throws UnsupportedOperationException
      */
-    int getHeaderSize();
+    @Deprecated
+    public static String getFileExtension(ImageFormat imageFormat)
+            throws UnsupportedOperationException {
+        String extension = imageFormat.getFileExtension();
+        if (extension == null) {
+            throw new UnsupportedOperationException("Unknown image format " + imageFormat.getName());
+        }
+        return extension;
+    }
 
     /**
-     * Returns an {@link ImageFormat} if the checker is able to determine the format
-     * or null otherwise.
-     * @param headerBytes the header bytes to check
-     * @param headerSize the size of the header in bytes
-     * @return the image format or null if unknown
+     * Get the default file extension for the given image format.
+     *
+     * @return file extension for the image format
      */
     @Nullable
-    ImageFormat determineFormat(byte[] headerBytes, int headerSize);
-  }
-
-  // Unknown image format
-  public static final ImageFormat UNKNOWN = new ImageFormat("UNKNOWN", null);
-
-  /**
-   * Maps an image format to the file extension.
-   * Deprecated. Use {@link #getFileExtension()} instead.
-   * @param imageFormat image format
-   * @return  file extension for the image format
-   * @throws UnsupportedOperationException
-   */
-  @Deprecated
-  public static String getFileExtension(ImageFormat imageFormat)
-      throws UnsupportedOperationException {
-    String extension = imageFormat.getFileExtension();
-    if (extension == null) {
-      throw new UnsupportedOperationException("Unknown image format " + imageFormat.getName());
+    public String getFileExtension() {
+        return mFileExtension;
     }
-    return extension;
-  }
 
-  private final String mFileExtension;
-  private final String mName;
+    @Override
+    public String toString() {
+        return getName();
+    }
 
-  public ImageFormat(String name, @Nullable String fileExtension) {
-    mName = name;
-    mFileExtension = fileExtension;
-  }
+    public String getName() {
+        return mName;
+    }
 
-  /**
-   * Get the default file extension for the given image format.
-   * @return file extension for the image format
-   */
-  @Nullable
-  public String getFileExtension() {
-    return mFileExtension;
-  }
+    public interface FormatChecker {
 
-  @Override
-  public String toString() {
-    return getName();
-  }
+        /**
+         * Get the number of header bytes the format checker requires
+         *
+         * @return the number of header bytes needed
+         */
+        int getHeaderSize();
 
-  public String getName() {
-    return mName;
-  }
+        /**
+         * Returns an {@link ImageFormat} if the checker is able to determine the format
+         * or null otherwise.
+         *
+         * @param headerBytes the header bytes to check
+         * @param headerSize  the size of the header in bytes
+         * @return the image format or null if unknown
+         */
+        @Nullable
+        ImageFormat determineFormat(byte[] headerBytes, int headerSize);
+    }
 }

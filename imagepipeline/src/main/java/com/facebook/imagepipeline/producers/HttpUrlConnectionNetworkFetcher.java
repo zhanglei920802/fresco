@@ -9,6 +9,11 @@
 
 package com.facebook.imagepipeline.producers;
 
+import android.net.Uri;
+
+import com.facebook.common.internal.VisibleForTesting;
+import com.facebook.imagepipeline.image.EncodedImage;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -16,11 +21,6 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import android.net.Uri;
-
-import com.facebook.common.internal.VisibleForTesting;
-import com.facebook.imagepipeline.image.EncodedImage;
 
 /**
  * Network fetcher that uses the simplest Android stack.
@@ -30,12 +30,10 @@ import com.facebook.imagepipeline.image.EncodedImage;
  */
 public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchState> {
 
-    private static final int NUM_NETWORK_THREADS = 3;
-    private static final int MAX_REDIRECTS = 5;
-
     public static final int HTTP_TEMPORARY_REDIRECT = 307;
     public static final int HTTP_PERMANENT_REDIRECT = 308;
-
+    private static final int NUM_NETWORK_THREADS = 3;
+    private static final int MAX_REDIRECTS = 5;
     private final ExecutorService mExecutorService;
 
     public HttpUrlConnectionNetworkFetcher() {
@@ -45,6 +43,35 @@ public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchSta
     @VisibleForTesting
     HttpUrlConnectionNetworkFetcher(ExecutorService executorService) {
         mExecutorService = executorService;
+    }
+
+    @VisibleForTesting
+    static HttpURLConnection openConnectionTo(Uri uri) throws IOException {
+        URL url = new URL(uri.toString());
+        return (HttpURLConnection) url.openConnection();
+    }
+
+    private static boolean isHttpSuccess(int responseCode) {
+        return (responseCode >= HttpURLConnection.HTTP_OK &&
+                responseCode < HttpURLConnection.HTTP_MULT_CHOICE);
+    }
+
+    private static boolean isHttpRedirect(int responseCode) {
+        switch (responseCode) {
+            case HttpURLConnection.HTTP_MULT_CHOICE:
+            case HttpURLConnection.HTTP_MOVED_PERM:
+            case HttpURLConnection.HTTP_MOVED_TEMP:
+            case HttpURLConnection.HTTP_SEE_OTHER:
+            case HTTP_TEMPORARY_REDIRECT:
+            case HTTP_PERMANENT_REDIRECT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private static String error(String format, Object... args) {
+        return String.format(Locale.getDefault(), format, args);
     }
 
     @Override
@@ -128,35 +155,6 @@ public class HttpUrlConnectionNetworkFetcher extends BaseNetworkFetcher<FetchSta
             throw new IOException(String
                     .format("Image URL %s returned HTTP code %d", uri.toString(), responseCode));
         }
-    }
-
-    @VisibleForTesting
-    static HttpURLConnection openConnectionTo(Uri uri) throws IOException {
-        URL url = new URL(uri.toString());
-        return (HttpURLConnection) url.openConnection();
-    }
-
-    private static boolean isHttpSuccess(int responseCode) {
-        return (responseCode >= HttpURLConnection.HTTP_OK &&
-                responseCode < HttpURLConnection.HTTP_MULT_CHOICE);
-    }
-
-    private static boolean isHttpRedirect(int responseCode) {
-        switch (responseCode) {
-            case HttpURLConnection.HTTP_MULT_CHOICE:
-            case HttpURLConnection.HTTP_MOVED_PERM:
-            case HttpURLConnection.HTTP_MOVED_TEMP:
-            case HttpURLConnection.HTTP_SEE_OTHER:
-            case HTTP_TEMPORARY_REDIRECT:
-            case HTTP_PERMANENT_REDIRECT:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private static String error(String format, Object... args) {
-        return String.format(Locale.getDefault(), format, args);
     }
 
 }

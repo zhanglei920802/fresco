@@ -16,44 +16,45 @@ import java.util.Deque;
 import java.util.concurrent.Executor;
 
 public class ThreadHandoffProducerQueue {
-  private boolean mQueueing = false;
-  private final Deque<Runnable> mRunnableList;
-  private final Executor mExecutor;
+    private final Deque<Runnable> mRunnableList;
+    private final Executor mExecutor;
+    private boolean mQueueing = false;
 
-  public ThreadHandoffProducerQueue(Executor executor) {
-    mExecutor = Preconditions.checkNotNull(executor);
-    mRunnableList = new ArrayDeque<>();
-  }
-
-  public synchronized void addToQueueOrExecute(Runnable runnable) {
-    if (mQueueing) {
-      mRunnableList.add(runnable);
-    } else {
-      mExecutor.execute(runnable);
+    public ThreadHandoffProducerQueue(Executor executor) {
+        mExecutor = Preconditions.checkNotNull(executor);
+        mRunnableList = new ArrayDeque<>();
     }
-  }
 
-  public synchronized void startQueueing() {
-    mQueueing = true;
-  }
-
-  public synchronized void stopQueuing() {
-    mQueueing = false;
-    execInQueue();
-  }
-
-  private void execInQueue() {
-    while (!mRunnableList.isEmpty()) {
-      mExecutor.execute(mRunnableList.pop());
+    public synchronized void addToQueueOrExecute(Runnable runnable) {
+        if (mQueueing) {
+            mRunnableList.add(runnable);
+        }
+        else {
+            mExecutor.execute(runnable);
+        }
     }
-    mRunnableList.clear();
-  }
 
-  public synchronized void remove(Runnable runnable) {
-    mRunnableList.remove(runnable);
-  }
+    public synchronized void startQueueing() {
+        mQueueing = true;
+    }
 
-  public synchronized boolean isQueueing() {
-    return mQueueing;
-  }
+    public synchronized void stopQueuing() {
+        mQueueing = false;
+        execInQueue();
+    }
+
+    private void execInQueue() {
+        while (!mRunnableList.isEmpty()) {
+            mExecutor.execute(mRunnableList.pop());
+        }
+        mRunnableList.clear();
+    }
+
+    public synchronized void remove(Runnable runnable) {
+        mRunnableList.remove(runnable);
+    }
+
+    public synchronized boolean isQueueing() {
+        return mQueueing;
+    }
 }

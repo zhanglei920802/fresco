@@ -19,18 +19,18 @@ import java.io.File;
  */
 public interface FileTreeVisitor {
 
-  /**
-   * Called before iterating over a directory (including the root directory of the iteration)
-   */
-  void preVisitDirectory(File directory);
+    /**
+     * Called before iterating over a directory (including the root directory of the iteration)
+     */
+    void preVisitDirectory(File directory);
 
-  /**
-   * Called for each file contained in a directory (after preVisitDirectory)
-   */
-  void visitFile(File file);
+    /**
+     * Called for each file contained in a directory (after preVisitDirectory)
+     */
+    void visitFile(File file);
 
-  /**
-   * Called after iterating over a directory (including the root directory of the iteration)
-   */
-  void postVisitDirectory(File directory);
+    /**
+     * Called after iterating over a directory (including the root directory of the iteration)
+     */
+    void postVisitDirectory(File directory);
 }

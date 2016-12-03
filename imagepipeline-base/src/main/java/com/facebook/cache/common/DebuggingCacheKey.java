@@ -17,15 +17,15 @@ import javax.annotation.Nullable;
  */
 public class DebuggingCacheKey extends SimpleCacheKey {
 
-  private final Object mCallerContext;
+    private final Object mCallerContext;
 
-  public DebuggingCacheKey(String key, @Nullable Object callerContext) {
-    super(key);
-    mCallerContext = callerContext;
-  }
+    public DebuggingCacheKey(String key, @Nullable Object callerContext) {
+        super(key);
+        mCallerContext = callerContext;
+    }
 
-  @Nullable
-  public Object getCallerContext() {
-    return mCallerContext;
-  }
+    @Nullable
+    public Object getCallerContext() {
+        return mCallerContext;
+    }
 }

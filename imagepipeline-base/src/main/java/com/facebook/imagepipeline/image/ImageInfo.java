@@ -14,18 +14,18 @@ package com.facebook.imagepipeline.image;
  */
 public interface ImageInfo {
 
-  /**
-   * @return width of the image
-   */
-  int getWidth();
+    /**
+     * @return width of the image
+     */
+    int getWidth();
 
-  /**
-   * @return height of the image
-   */
-  int getHeight();
+    /**
+     * @return height of the image
+     */
+    int getHeight();
 
-  /**
-   * @return quality information for the image
-   */
-  QualityInfo getQualityInfo();
+    /**
+     * @return quality information for the image
+     */
+    QualityInfo getQualityInfo();
 }

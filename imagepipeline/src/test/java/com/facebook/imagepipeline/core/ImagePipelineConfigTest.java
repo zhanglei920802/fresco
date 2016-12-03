@@ -29,52 +29,52 @@ import static org.mockito.Mockito.mock;
 @RunWith(RobolectricTestRunner.class)
 public class ImagePipelineConfigTest {
 
-  private Uri mUri;
+    private Uri mUri;
 
-  @Before
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
-    mUri = mock(Uri.class);
-  }
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mUri = mock(Uri.class);
+    }
 
-  @Test
-  public void testDefaultConfigIsFalseByDefault() {
-    ImagePipelineConfig.resetDefaultRequestConfig();
-    assertFalse(ImagePipelineConfig.getDefaultImageRequestConfig().isProgressiveRenderingEnabled());
-  }
+    @Test
+    public void testDefaultConfigIsFalseByDefault() {
+        ImagePipelineConfig.resetDefaultRequestConfig();
+        assertFalse(ImagePipelineConfig.getDefaultImageRequestConfig().isProgressiveRenderingEnabled());
+    }
 
-  @Test
-  public void testDefaultConfigIsTrueIfChanged() {
-    ImagePipelineConfig.resetDefaultRequestConfig();
-    ImagePipelineConfig.getDefaultImageRequestConfig().setProgressiveRenderingEnabled(true);
-    assertTrue(ImagePipelineConfig.getDefaultImageRequestConfig().isProgressiveRenderingEnabled());
-  }
+    @Test
+    public void testDefaultConfigIsTrueIfChanged() {
+        ImagePipelineConfig.resetDefaultRequestConfig();
+        ImagePipelineConfig.getDefaultImageRequestConfig().setProgressiveRenderingEnabled(true);
+        assertTrue(ImagePipelineConfig.getDefaultImageRequestConfig().isProgressiveRenderingEnabled());
+    }
 
-  @Test
-  public void testImageRequestDefault() {
-    ImagePipelineConfig.resetDefaultRequestConfig();
-    final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(mUri).build();
-    assertFalse(imageRequest.getProgressiveRenderingEnabled());
-  }
+    @Test
+    public void testImageRequestDefault() {
+        ImagePipelineConfig.resetDefaultRequestConfig();
+        final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(mUri).build();
+        assertFalse(imageRequest.getProgressiveRenderingEnabled());
+    }
 
-  @Test
-  public void testImageRequestWhenChanged() {
-    ImagePipelineConfig.resetDefaultRequestConfig();
-    ImagePipelineConfig.getDefaultImageRequestConfig().setProgressiveRenderingEnabled(true);
-    final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(mUri).build();
-    assertTrue(imageRequest.getProgressiveRenderingEnabled());
-  }
+    @Test
+    public void testImageRequestWhenChanged() {
+        ImagePipelineConfig.resetDefaultRequestConfig();
+        ImagePipelineConfig.getDefaultImageRequestConfig().setProgressiveRenderingEnabled(true);
+        final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(mUri).build();
+        assertTrue(imageRequest.getProgressiveRenderingEnabled());
+    }
 
-  @Test
-  public void testImageRequestWhenChangedAndOverriden() {
-    ImagePipelineConfig.resetDefaultRequestConfig();
-    final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(mUri)
-        .setProgressiveRenderingEnabled(true)
-        .build();
-    assertTrue(imageRequest.getProgressiveRenderingEnabled());
-    final ImageRequest imageRequest2 = ImageRequestBuilder.newBuilderWithSource(mUri)
-        .setProgressiveRenderingEnabled(false)
-        .build();
-    assertFalse(imageRequest2.getProgressiveRenderingEnabled());
-  }
+    @Test
+    public void testImageRequestWhenChangedAndOverriden() {
+        ImagePipelineConfig.resetDefaultRequestConfig();
+        final ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(mUri)
+                                                             .setProgressiveRenderingEnabled(true)
+                                                             .build();
+        assertTrue(imageRequest.getProgressiveRenderingEnabled());
+        final ImageRequest imageRequest2 = ImageRequestBuilder.newBuilderWithSource(mUri)
+                                                              .setProgressiveRenderingEnabled(false)
+                                                              .build();
+        assertFalse(imageRequest2.getProgressiveRenderingEnabled());
+    }
 }

@@ -9,12 +9,12 @@
 
 package com.facebook.imagepipeline.datasource;
 
-import javax.annotation.concurrent.ThreadSafe;
-
 import com.facebook.datasource.DataSource;
+import com.facebook.imagepipeline.listener.RequestListener;
 import com.facebook.imagepipeline.producers.Producer;
 import com.facebook.imagepipeline.producers.SettableProducerContext;
-import com.facebook.imagepipeline.listener.RequestListener;
+
+import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * DataSource<T> backed by a Producer<T>
@@ -23,22 +23,22 @@ import com.facebook.imagepipeline.listener.RequestListener;
  */
 @ThreadSafe
 public class ProducerToDataSourceAdapter<T>
-    extends AbstractProducerToDataSourceAdapter<T> {
+        extends AbstractProducerToDataSourceAdapter<T> {
 
-  public static <T> DataSource<T> create(
-      Producer<T> producer,
-      SettableProducerContext settableProducerContext,
-      RequestListener listener) {
-    return new ProducerToDataSourceAdapter<T>(
-        producer,
-        settableProducerContext,
-        listener);
-  }
+    private ProducerToDataSourceAdapter(
+            Producer<T> producer,
+            SettableProducerContext settableProducerContext,
+            RequestListener listener) {
+        super(producer, settableProducerContext, listener);
+    }
 
-  private ProducerToDataSourceAdapter(
-      Producer<T> producer,
-      SettableProducerContext settableProducerContext,
-      RequestListener listener) {
-    super(producer, settableProducerContext, listener);
-  }
+    public static <T> DataSource<T> create(
+            Producer<T> producer,
+            SettableProducerContext settableProducerContext,
+            RequestListener listener) {
+        return new ProducerToDataSourceAdapter<T>(
+                producer,
+                settableProducerContext,
+                listener);
+    }
 }

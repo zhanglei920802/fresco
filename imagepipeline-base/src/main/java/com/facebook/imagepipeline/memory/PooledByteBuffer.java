@@ -17,53 +17,56 @@ import java.io.Closeable;
  */
 public interface PooledByteBuffer extends Closeable {
 
-  /**
-   * Get the size of the byte buffer
-   * @return the size of the byte buffer
-   */
-  int size();
+    /**
+     * Get the size of the byte buffer
+     *
+     * @return the size of the byte buffer
+     */
+    int size();
 
-  /**
-   * Read byte at given offset
-   * @param offset
-   * @return byte at given offset
-   */
-  byte read(int offset);
+    /**
+     * Read byte at given offset
+     *
+     * @param offset
+     * @return byte at given offset
+     */
+    byte read(int offset);
 
-  /**
-   * Read consecutive bytes.
-   *
-   * @param offset the position in the PooledByteBuffer of the first byte to read
-   * @param buffer the byte array where read bytes will be copied to
-   * @param bufferOffset the position within the buffer of the first copied byte
-   * @param length number of bytes to copy
-   * @return number of bytes copied
-   */
-  void read(int offset, byte[] buffer, int bufferOffset, int length);
+    /**
+     * Read consecutive bytes.
+     *
+     * @param offset       the position in the PooledByteBuffer of the first byte to read
+     * @param buffer       the byte array where read bytes will be copied to
+     * @param bufferOffset the position within the buffer of the first copied byte
+     * @param length       number of bytes to copy
+     * @return number of bytes copied
+     */
+    void read(int offset, byte[] buffer, int bufferOffset, int length);
 
-  /**
-   * @return pointer to native memory backing this buffer
-   */
-  long getNativePtr();
+    /**
+     * @return pointer to native memory backing this buffer
+     */
+    long getNativePtr();
 
-  /**
-   * Close this PooledByteBuffer and release all underlying resources
-   */
-  @Override
-  void close();
+    /**
+     * Close this PooledByteBuffer and release all underlying resources
+     */
+    @Override
+    void close();
 
-  /**
-   * Check if this instance has already been closed
-   * @return true, if the instance has been closed
-   */
-  boolean isClosed();
+    /**
+     * Check if this instance has already been closed
+     *
+     * @return true, if the instance has been closed
+     */
+    boolean isClosed();
 
-  /**
-   * Exception indicating that the PooledByteBuffer is closed
-   */
-  class ClosedException extends RuntimeException {
-    public ClosedException() {
-      super("Invalid bytebuf. Already closed");
+    /**
+     * Exception indicating that the PooledByteBuffer is closed
+     */
+    class ClosedException extends RuntimeException {
+        public ClosedException() {
+            super("Invalid bytebuf. Already closed");
+        }
     }
-  }
 }

@@ -13,17 +13,23 @@ package com.facebook.drawee.drawable;
  */
 public interface Rounded {
 
-  void setCircle(boolean isCircle);
-  boolean isCircle();
+    boolean isCircle();
 
-  void setRadius(float radius);
-  void setRadii(float[] radii);
-  float[] getRadii();
+    void setCircle(boolean isCircle);
 
-  void setBorder(int color, float width);
-  int getBorderColor();
-  float getBorderWidth();
+    void setRadius(float radius);
 
-  void setPadding(float padding);
-  float getPadding();
+    float[] getRadii();
+
+    void setRadii(float[] radii);
+
+    void setBorder(int color, float width);
+
+    int getBorderColor();
+
+    float getBorderWidth();
+
+    float getPadding();
+
+    void setPadding(float padding);
 }

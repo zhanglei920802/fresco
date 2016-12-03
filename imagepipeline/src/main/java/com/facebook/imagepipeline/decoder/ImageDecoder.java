@@ -19,9 +19,9 @@ import com.facebook.imagepipeline.image.QualityInfo;
  */
 public interface ImageDecoder {
 
-  CloseableImage decode(
-      EncodedImage encodedImage,
-      int length,
-      QualityInfo qualityInfo,
-      ImageDecodeOptions options);
+    CloseableImage decode(
+            EncodedImage encodedImage,
+            int length,
+            QualityInfo qualityInfo,
+            ImageDecodeOptions options);
 }

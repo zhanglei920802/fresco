@@ -38,78 +38,81 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class AnimatedFrameCacheTest {
 
-  @Mock public MemoryTrimmableRegistry mMemoryTrimmableRegistry;
-  @Mock public Supplier<MemoryCacheParams> mMemoryCacheParamsSupplier;
-  @Mock public PlatformBitmapFactory mPlatformBitmapFactory;
+    @Mock
+    public MemoryTrimmableRegistry mMemoryTrimmableRegistry;
+    @Mock
+    public Supplier<MemoryCacheParams> mMemoryCacheParamsSupplier;
+    @Mock
+    public PlatformBitmapFactory mPlatformBitmapFactory;
 
-  private CacheKey mCacheKey;
-  private AnimatedFrameCache mAnimatedFrameCache;
-  private CloseableReference<CloseableImage> mFrame1;
-  private CloseableReference<CloseableImage> mFrame2;
+    private CacheKey mCacheKey;
+    private AnimatedFrameCache mAnimatedFrameCache;
+    private CloseableReference<CloseableImage> mFrame1;
+    private CloseableReference<CloseableImage> mFrame2;
 
-  @Before
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
-    MemoryCacheParams params = new MemoryCacheParams(
-        4 * ByteConstants.MB,
-        256,
-        Integer.MAX_VALUE,
-        Integer.MAX_VALUE,
-        Integer.MAX_VALUE);
-    when(mMemoryCacheParamsSupplier.get()).thenReturn(params);
-    CountingMemoryCache<CacheKey, CloseableImage> countingMemoryCache =
-        BitmapCountingMemoryCacheFactory.get(
-            mMemoryCacheParamsSupplier,
-            mMemoryTrimmableRegistry,
-            mPlatformBitmapFactory,
-            true);
-    mCacheKey = new SimpleCacheKey("key");
-    mAnimatedFrameCache = new AnimatedFrameCache(mCacheKey, countingMemoryCache);
-    mFrame1 = CloseableReference.of(mock(CloseableImage.class));
-    mFrame2 = CloseableReference.of(mock(CloseableImage.class));
-  }
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        MemoryCacheParams params = new MemoryCacheParams(
+                4 * ByteConstants.MB,
+                256,
+                Integer.MAX_VALUE,
+                Integer.MAX_VALUE,
+                Integer.MAX_VALUE);
+        when(mMemoryCacheParamsSupplier.get()).thenReturn(params);
+        CountingMemoryCache<CacheKey, CloseableImage> countingMemoryCache =
+                BitmapCountingMemoryCacheFactory.get(
+                        mMemoryCacheParamsSupplier,
+                        mMemoryTrimmableRegistry,
+                        mPlatformBitmapFactory,
+                        true);
+        mCacheKey = new SimpleCacheKey("key");
+        mAnimatedFrameCache = new AnimatedFrameCache(mCacheKey, countingMemoryCache);
+        mFrame1 = CloseableReference.of(mock(CloseableImage.class));
+        mFrame2 = CloseableReference.of(mock(CloseableImage.class));
+    }
 
-  @Test
-  public void testBasic() {
-    CloseableReference<CloseableImage> ret = mAnimatedFrameCache.cache(1, mFrame1);
-    assertSame(ret.get(), mFrame1.get());
-  }
+    @Test
+    public void testBasic() {
+        CloseableReference<CloseableImage> ret = mAnimatedFrameCache.cache(1, mFrame1);
+        assertSame(ret.get(), mFrame1.get());
+    }
 
-  @Test
-  public void testMultipleFrames() {
-    mAnimatedFrameCache.cache(1, mFrame1);
-    mAnimatedFrameCache.cache(2, mFrame2);
-    assertSame(mFrame1.get(), mAnimatedFrameCache.get(1).get());
-    assertSame(mFrame2.get(), mAnimatedFrameCache.get(2).get());
-  }
+    @Test
+    public void testMultipleFrames() {
+        mAnimatedFrameCache.cache(1, mFrame1);
+        mAnimatedFrameCache.cache(2, mFrame2);
+        assertSame(mFrame1.get(), mAnimatedFrameCache.get(1).get());
+        assertSame(mFrame2.get(), mAnimatedFrameCache.get(2).get());
+    }
 
-  @Test
-  public void testReplace() {
-    mAnimatedFrameCache.cache(1, mFrame1);
-    mAnimatedFrameCache.cache(1, mFrame2);
-    assertNotSame(mFrame1.get(), mAnimatedFrameCache.get(1).get());
-    assertSame(mFrame2.get(), mAnimatedFrameCache.get(1).get());
-  }
+    @Test
+    public void testReplace() {
+        mAnimatedFrameCache.cache(1, mFrame1);
+        mAnimatedFrameCache.cache(1, mFrame2);
+        assertNotSame(mFrame1.get(), mAnimatedFrameCache.get(1).get());
+        assertSame(mFrame2.get(), mAnimatedFrameCache.get(1).get());
+    }
 
-  @Test
-  public void testReuse() {
-    CloseableReference<CloseableImage> ret = mAnimatedFrameCache.cache(1, mFrame1);
-    ret.close();
-    CloseableReference<CloseableImage> free = mAnimatedFrameCache.getForReuse();
-    assertNotNull(free);
-  }
+    @Test
+    public void testReuse() {
+        CloseableReference<CloseableImage> ret = mAnimatedFrameCache.cache(1, mFrame1);
+        ret.close();
+        CloseableReference<CloseableImage> free = mAnimatedFrameCache.getForReuse();
+        assertNotNull(free);
+    }
 
-  @Test
-  public void testCantReuseIfNotClosed() {
-    CloseableReference<CloseableImage> ret = mAnimatedFrameCache.cache(1, mFrame1);
-    CloseableReference<CloseableImage> free = mAnimatedFrameCache.getForReuse();
-    assertNull(free);
-  }
+    @Test
+    public void testCantReuseIfNotClosed() {
+        CloseableReference<CloseableImage> ret = mAnimatedFrameCache.cache(1, mFrame1);
+        CloseableReference<CloseableImage> free = mAnimatedFrameCache.getForReuse();
+        assertNull(free);
+    }
 
-  @Test
-  public void testStillThereIfClosed() {
-    CloseableReference<CloseableImage> ret = mAnimatedFrameCache.cache(1, mFrame1);
-    ret.close();
-    assertNotNull(mAnimatedFrameCache.get(1));
-  }
+    @Test
+    public void testStillThereIfClosed() {
+        CloseableReference<CloseableImage> ret = mAnimatedFrameCache.cache(1, mFrame1);
+        ret.close();
+        assertNotNull(mAnimatedFrameCache.get(1));
+    }
 }

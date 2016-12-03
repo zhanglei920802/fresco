@@ -28,36 +28,36 @@ import com.facebook.samples.scrollperf.util.DraweeUtil;
  */
 public class DraweeViewAdapter extends RecyclerView.Adapter<DraweeViewHolder> {
 
-  private final SimpleAdapter<Uri> mSimpleAdapter;
+    private final SimpleAdapter<Uri> mSimpleAdapter;
 
-  private final Context mContext;
+    private final Context mContext;
 
-  private final Config mConfig;
+    private final Config mConfig;
 
-  private final int mPaddingPx;
+    private final int mPaddingPx;
 
-  public DraweeViewAdapter(Context context, SimpleAdapter<Uri> simpleAdapter, Config config) {
-    this.mContext = context;
-    this.mSimpleAdapter = simpleAdapter;
-    this.mConfig = config;
-    this.mPaddingPx = context.getResources().getDimensionPixelSize(R.dimen.drawee_padding);
-  }
+    public DraweeViewAdapter(Context context, SimpleAdapter<Uri> simpleAdapter, Config config) {
+        this.mContext = context;
+        this.mSimpleAdapter = simpleAdapter;
+        this.mConfig = config;
+        this.mPaddingPx = context.getResources().getDimensionPixelSize(R.dimen.drawee_padding);
+    }
 
-  @Override
-  public DraweeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    GenericDraweeHierarchy gdh = DraweeUtil.createDraweeHierarchy(mContext, mConfig);
-    final SimpleDraweeView simpleDraweeView = new SimpleDraweeView(mContext, gdh);
-    simpleDraweeView.setPadding(mPaddingPx, mPaddingPx, mPaddingPx, mPaddingPx);
-    return new DraweeViewHolder(parent, simpleDraweeView, mConfig);
-  }
+    @Override
+    public DraweeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        GenericDraweeHierarchy gdh = DraweeUtil.createDraweeHierarchy(mContext, mConfig);
+        final SimpleDraweeView simpleDraweeView = new SimpleDraweeView(mContext, gdh);
+        simpleDraweeView.setPadding(mPaddingPx, mPaddingPx, mPaddingPx, mPaddingPx);
+        return new DraweeViewHolder(parent, simpleDraweeView, mConfig);
+    }
 
-  @Override
-  public void onBindViewHolder(DraweeViewHolder holder, int position) {
-    holder.bind(mSimpleAdapter.get(position));
-  }
+    @Override
+    public void onBindViewHolder(DraweeViewHolder holder, int position) {
+        holder.bind(mSimpleAdapter.get(position));
+    }
 
-  @Override
-  public int getItemCount() {
-    return mSimpleAdapter.getSize();
-  }
+    @Override
+    public int getItemCount() {
+        return mSimpleAdapter.getSize();
+    }
 }

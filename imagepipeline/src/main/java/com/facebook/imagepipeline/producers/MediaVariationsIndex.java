@@ -9,20 +9,20 @@
 
 package com.facebook.imagepipeline.producers;
 
-import java.util.List;
-
 import com.facebook.cache.common.CacheKey;
 import com.facebook.imagepipeline.image.EncodedImage;
 import com.facebook.imagepipeline.request.MediaVariations;
+
+import java.util.List;
 
 import bolts.Task;
 
 public interface MediaVariationsIndex {
 
-  Task<List<MediaVariations.Variant>> getCachedVariants(String mediaId);
+    Task<List<MediaVariations.Variant>> getCachedVariants(String mediaId);
 
-  void saveCachedVariant(
-      String mediaId,
-      CacheKey cacheKey,
-      EncodedImage encodedImage);
+    void saveCachedVariant(
+            String mediaId,
+            CacheKey cacheKey,
+            EncodedImage encodedImage);
 }

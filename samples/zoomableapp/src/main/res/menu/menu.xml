@@ -4,9 +4,9 @@
     xmlns:tools="schemas.android.com/tools"
     tools:context="com.facebook.samples.zoomableapp.MainActivity"
     >
-  <item
-      android:id="@+id/allow_zoomed_swiping"
-      android:checkable="true"
-      android:title="@string/allow_zoomed_swiping"
-      />
+    <item
+        android:id="@+id/allow_zoomed_swiping"
+        android:checkable="true"
+        android:title="@string/allow_zoomed_swiping"
+        />
 </menu>

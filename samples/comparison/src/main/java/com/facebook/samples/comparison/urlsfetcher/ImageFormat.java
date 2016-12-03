@@ -16,24 +16,24 @@ package com.facebook.samples.comparison.urlsfetcher;
  * Formats of images we download from imgur.
  */
 public enum ImageFormat {
-  JPEG("image/jpeg"),
-  PNG("image/png"),
-  GIF("image/gif");
+    JPEG("image/jpeg"),
+    PNG("image/png"),
+    GIF("image/gif");
 
-  private static final ImageFormat[] VALUES = values();
+    private static final ImageFormat[] VALUES = values();
 
-  public final String mime;
+    public final String mime;
 
-  private ImageFormat(final String mime) {
-    this.mime = mime;
-  }
-
-  public static ImageFormat getImageFormatForMime(String mime) {
-    for (ImageFormat type : VALUES) {
-      if (type.mime.equals(mime)) {
-        return type;
-      }
+    private ImageFormat(final String mime) {
+        this.mime = mime;
     }
-    return null;
-  }
+
+    public static ImageFormat getImageFormatForMime(String mime) {
+        for (ImageFormat type : VALUES) {
+            if (type.mime.equals(mime)) {
+                return type;
+            }
+        }
+        return null;
+    }
 }

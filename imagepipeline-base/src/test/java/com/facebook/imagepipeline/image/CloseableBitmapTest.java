@@ -14,51 +14,57 @@ import android.graphics.Bitmap;
 import com.facebook.common.references.ResourceReleaser;
 
 import junit.framework.Assert;
-import org.junit.*;
-import org.junit.runner.*;
-import org.mockito.*;
-import org.robolectric.*;
 
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+
+import static org.mockito.Mockito.verify;
+
 /**
  * Basic tests for closeable bitmap
  */
 @RunWith(RobolectricTestRunner.class)
-public class CloseableBitmapTest  {
+public class CloseableBitmapTest {
 
-  @Mock public Bitmap mBitmap;
-  @Mock public ResourceReleaser<Bitmap> mResourceReleaser;
-  private CloseableStaticBitmap mCloseableStaticBitmap;
+    @Mock
+    public Bitmap mBitmap;
+    @Mock
+    public ResourceReleaser<Bitmap> mResourceReleaser;
+    private CloseableStaticBitmap mCloseableStaticBitmap;
 
-  @Before
-  public void setup() {
-    MockitoAnnotations.initMocks(this);
-    mCloseableStaticBitmap =
-        new CloseableStaticBitmap(mBitmap, mResourceReleaser, ImmutableQualityInfo.FULL_QUALITY, 0);
-  }
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        mCloseableStaticBitmap =
+                new CloseableStaticBitmap(mBitmap, mResourceReleaser, ImmutableQualityInfo.FULL_QUALITY, 0);
+    }
 
-  @Test
-  public void testBasic() throws Exception {
-    Assert.assertFalse(mCloseableStaticBitmap.isClosed());
-    Assert.assertSame(mBitmap, mCloseableStaticBitmap.getUnderlyingBitmap());
+    @Test
+    public void testBasic() throws Exception {
+        Assert.assertFalse(mCloseableStaticBitmap.isClosed());
+        Assert.assertSame(mBitmap, mCloseableStaticBitmap.getUnderlyingBitmap());
 
-    // close it now
-    mCloseableStaticBitmap.close();
-    Assert.assertTrue(mCloseableStaticBitmap.isClosed());
-    Assert.assertNull(mCloseableStaticBitmap.getUnderlyingBitmap());
-    verify(mResourceReleaser).release(mBitmap);
+        // close it now
+        mCloseableStaticBitmap.close();
+        Assert.assertTrue(mCloseableStaticBitmap.isClosed());
+        Assert.assertNull(mCloseableStaticBitmap.getUnderlyingBitmap());
+        verify(mResourceReleaser).release(mBitmap);
 
-    // close it again
-    mCloseableStaticBitmap.close();
-    Assert.assertTrue(mCloseableStaticBitmap.isClosed());
-    Assert.assertNull(mCloseableStaticBitmap.getUnderlyingBitmap());
-  }
+        // close it again
+        mCloseableStaticBitmap.close();
+        Assert.assertTrue(mCloseableStaticBitmap.isClosed());
+        Assert.assertNull(mCloseableStaticBitmap.getUnderlyingBitmap());
+    }
 
-  @Test
-  public void testFinalize() throws Throwable {
-    mCloseableStaticBitmap.finalize();
-    Assert.assertTrue(mCloseableStaticBitmap.isClosed());
-    Assert.assertNull(mCloseableStaticBitmap.getUnderlyingBitmap());
-    verify(mResourceReleaser).release(mBitmap);
-  }
+    @Test
+    public void testFinalize() throws Throwable {
+        mCloseableStaticBitmap.finalize();
+        Assert.assertTrue(mCloseableStaticBitmap.isClosed());
+        Assert.assertNull(mCloseableStaticBitmap.getUnderlyingBitmap());
+        verify(mResourceReleaser).release(mBitmap);
+    }
 }

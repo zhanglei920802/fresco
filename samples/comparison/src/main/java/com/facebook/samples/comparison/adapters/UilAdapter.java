@@ -26,26 +26,26 @@ import com.nostra13.universalimageloader.core.ImageLoader;
  */
 public class UilAdapter extends ImageListAdapter {
 
-  private final ImageLoader mImageLoader;
+    private final ImageLoader mImageLoader;
 
-  public UilAdapter(
-      Context context,
-      PerfListener perfListener) {
-    super(context, perfListener);
-    mImageLoader = SampleUilFactory.getImageLoader(context);
-  }
+    public UilAdapter(
+            Context context,
+            PerfListener perfListener) {
+        super(context, perfListener);
+        mImageLoader = SampleUilFactory.getImageLoader(context);
+    }
 
-  @Override
-  public UilHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    final InstrumentedImageView instrumentedImageView = new InstrumentedImageView(getContext());
-    return new UilHolder(
-        getContext(), mImageLoader, parent,
-        instrumentedImageView, getPerfListener());
-  }
+    @Override
+    public UilHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final InstrumentedImageView instrumentedImageView = new InstrumentedImageView(getContext());
+        return new UilHolder(
+                getContext(), mImageLoader, parent,
+                instrumentedImageView, getPerfListener());
+    }
 
-  @Override
-  public void shutDown() {
-    super.clear();
-    mImageLoader.clearMemoryCache();
-  }
+    @Override
+    public void shutDown() {
+        super.clear();
+        mImageLoader.clearMemoryCache();
+    }
 }

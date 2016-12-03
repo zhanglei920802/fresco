@@ -36,59 +36,60 @@ import com.facebook.samples.scrollperf.util.SizeUtil;
  */
 public class DraweeViewListAdapter extends BaseAdapter {
 
-  private final SimpleAdapter<Uri> mSimpleAdapter;
+    private final SimpleAdapter<Uri> mSimpleAdapter;
 
-  private final Config mConfig;
+    private final Config mConfig;
 
-  private final int mPaddingPx;
+    private final int mPaddingPx;
 
-  public DraweeViewListAdapter(Context context, SimpleAdapter<Uri> simpleAdapter, Config config) {
-    this.mSimpleAdapter = simpleAdapter;
-    this.mConfig = config;
-    this.mPaddingPx = context.getResources().getDimensionPixelSize(R.dimen.drawee_padding);
-  }
-
-  @Override
-  public int getCount() {
-    return mSimpleAdapter.getSize();
-  }
-
-  @Override
-  public Uri getItem(int position) {
-    return mSimpleAdapter.get(position);
-  }
-
-  @Override
-  public long getItemId(int position) {
-    return position;
-  }
-
-  @Override
-  public View getView(int position, View convertView, ViewGroup parent) {
-    SimpleDraweeView draweeView;
-    if (convertView == null) {
-      final Context context = parent.getContext();
-      GenericDraweeHierarchy gdh = DraweeUtil.createDraweeHierarchy(context, mConfig);
-      draweeView = new SimpleDraweeView(context, gdh);
-      SizeUtil.setConfiguredSize(parent, draweeView, mConfig);
-      draweeView.setPadding(mPaddingPx, mPaddingPx, mPaddingPx, mPaddingPx);
-    } else {
-      draweeView = (SimpleDraweeView) convertView;
+    public DraweeViewListAdapter(Context context, SimpleAdapter<Uri> simpleAdapter, Config config) {
+        this.mSimpleAdapter = simpleAdapter;
+        this.mConfig = config;
+        this.mPaddingPx = context.getResources().getDimensionPixelSize(R.dimen.drawee_padding);
     }
-    ImageRequestBuilder imageRequestBuilder = ImageRequestBuilder
-            .newBuilderWithSource(getItem(position))
-            .setResizeOptions(
-                    new ResizeOptions(
-                            draweeView.getLayoutParams().width,
-                            draweeView.getLayoutParams().height));
-    PipelineUtil.addOptionalFeatures(imageRequestBuilder, mConfig);
-    // Create the Builder
-    PipelineDraweeControllerBuilder builder = Fresco.newDraweeControllerBuilder()
-            .setImageRequest(imageRequestBuilder.build());
-    if (mConfig.reuseOldController) {
-      builder.setOldController(draweeView.getController());
+
+    @Override
+    public int getCount() {
+        return mSimpleAdapter.getSize();
     }
-    draweeView.setController(builder.build());
-    return draweeView;
-  }
+
+    @Override
+    public Uri getItem(int position) {
+        return mSimpleAdapter.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        SimpleDraweeView draweeView;
+        if (convertView == null) {
+            final Context context = parent.getContext();
+            GenericDraweeHierarchy gdh = DraweeUtil.createDraweeHierarchy(context, mConfig);
+            draweeView = new SimpleDraweeView(context, gdh);
+            SizeUtil.setConfiguredSize(parent, draweeView, mConfig);
+            draweeView.setPadding(mPaddingPx, mPaddingPx, mPaddingPx, mPaddingPx);
+        }
+        else {
+            draweeView = (SimpleDraweeView) convertView;
+        }
+        ImageRequestBuilder imageRequestBuilder = ImageRequestBuilder
+                .newBuilderWithSource(getItem(position))
+                .setResizeOptions(
+                        new ResizeOptions(
+                                draweeView.getLayoutParams().width,
+                                draweeView.getLayoutParams().height));
+        PipelineUtil.addOptionalFeatures(imageRequestBuilder, mConfig);
+        // Create the Builder
+        PipelineDraweeControllerBuilder builder = Fresco.newDraweeControllerBuilder()
+                                                        .setImageRequest(imageRequestBuilder.build());
+        if (mConfig.reuseOldController) {
+            builder.setOldController(draweeView.getController());
+        }
+        draweeView.setController(builder.build());
+        return draweeView;
+    }
 }

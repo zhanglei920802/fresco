@@ -9,34 +9,39 @@
 
 package com.facebook.imagepipeline.producers;
 
-import org.junit.*;
-import org.junit.runner.*;
-import org.mockito.*;
-import org.robolectric.*;
-import org.robolectric.annotation.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 /**
  * Checks basic properties of NullProducer, that is that it always returns null.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest= Config.NONE)
+@Config(manifest = Config.NONE)
 public class NullProducerTest {
-  @Mock public Consumer mConsumer;
-  @Mock public ProducerContext mProducerContext;
-  @Mock public ProducerListener mProducerListener;
-  private NullProducer mNullProducer;
+    @Mock
+    public Consumer mConsumer;
+    @Mock
+    public ProducerContext mProducerContext;
+    @Mock
+    public ProducerListener mProducerListener;
+    private NullProducer mNullProducer;
 
-  @Before
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
-    mNullProducer = new NullProducer();
-  }
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mNullProducer = new NullProducer();
+    }
 
-  @Test
-  public void testNullProducerReturnsNull() {
-    mNullProducer.produceResults(mConsumer, mProducerContext);
-    verify(mConsumer).onNewResult(null, true);
-  }
+    @Test
+    public void testNullProducerReturnsNull() {
+        mNullProducer.produceResults(mConsumer, mProducerContext);
+        verify(mConsumer).onNewResult(null, true);
+    }
 }

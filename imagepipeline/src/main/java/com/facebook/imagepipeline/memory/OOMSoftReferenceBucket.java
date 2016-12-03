@@ -9,11 +9,11 @@
 
 package com.facebook.imagepipeline.memory;
 
-import javax.annotation.concurrent.NotThreadSafe;
+import com.facebook.common.references.OOMSoftReference;
 
 import java.util.LinkedList;
 
-import com.facebook.common.references.OOMSoftReference;
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A Bucket that uses OOMSoftReferences to store its free list.
@@ -21,29 +21,29 @@ import com.facebook.common.references.OOMSoftReference;
 @NotThreadSafe
 class OOMSoftReferenceBucket<V> extends Bucket<V> {
 
-  private LinkedList<OOMSoftReference<V>> mSpareReferences;
+    private LinkedList<OOMSoftReference<V>> mSpareReferences;
 
-  public OOMSoftReferenceBucket(int itemSize, int maxLength, int inUseLength) {
-    super(itemSize, maxLength, inUseLength);
-    mSpareReferences = new LinkedList<>();
-  }
-
-  @Override
-  public V pop() {
-    OOMSoftReference<V> ref = (OOMSoftReference<V>) mFreeList.poll();
-    V value = ref.get();
-    ref.clear();
-    mSpareReferences.add(ref);
-    return value;
-  }
-
-  @Override
-  void addToFreeList(V value) {
-    OOMSoftReference<V> ref = mSpareReferences.poll();
-    if (ref == null) {
-      ref = new OOMSoftReference<>();
+    public OOMSoftReferenceBucket(int itemSize, int maxLength, int inUseLength) {
+        super(itemSize, maxLength, inUseLength);
+        mSpareReferences = new LinkedList<>();
     }
-    ref.set(value);
-    mFreeList.add(ref);
-  }
+
+    @Override
+    public V pop() {
+        OOMSoftReference<V> ref = (OOMSoftReference<V>) mFreeList.poll();
+        V value = ref.get();
+        ref.clear();
+        mSpareReferences.add(ref);
+        return value;
+    }
+
+    @Override
+    void addToFreeList(V value) {
+        OOMSoftReference<V> ref = mSpareReferences.poll();
+        if (ref == null) {
+            ref = new OOMSoftReference<>();
+        }
+        ref.set(value);
+        mFreeList.add(ref);
+    }
 }

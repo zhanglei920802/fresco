@@ -22,23 +22,23 @@ import com.facebook.drawee.view.SimpleDraweeView;
 
 public class SourceActivity extends Activity {
 
-  private SimpleDraweeView mSimpleDraweeView;
+    private SimpleDraweeView mSimpleDraweeView;
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.drawee_source);
-    mSimpleDraweeView = (SimpleDraweeView) findViewById(R.id.image);
-    mSimpleDraweeView.setImageURI("res:/" + R.drawable.test_image);
-  }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.drawee_source);
+        mSimpleDraweeView = (SimpleDraweeView) findViewById(R.id.image);
+        mSimpleDraweeView.setImageURI("res:/" + R.drawable.test_image);
+    }
 
-  public void startTransition(View view) {
-    Intent intent = new Intent(this, DestinationActivity.class);
-    final String transitionName = getString(R.string.transition_name);
-    final ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
-          this,
-          mSimpleDraweeView,
-          transitionName);
-    startActivity(intent, options.toBundle());
-  }
+    public void startTransition(View view) {
+        Intent intent = new Intent(this, DestinationActivity.class);
+        final String transitionName = getString(R.string.transition_name);
+        final ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(
+                this,
+                mSimpleDraweeView,
+                transitionName);
+        startActivity(intent, options.toBundle());
+    }
 }

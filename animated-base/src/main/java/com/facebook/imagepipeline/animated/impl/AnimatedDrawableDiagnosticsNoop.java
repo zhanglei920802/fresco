@@ -20,49 +20,49 @@ import com.facebook.imagepipeline.animated.base.AnimatedDrawableDiagnostics;
  */
 public class AnimatedDrawableDiagnosticsNoop implements AnimatedDrawableDiagnostics {
 
-  private static AnimatedDrawableDiagnosticsNoop sInstance = new AnimatedDrawableDiagnosticsNoop();
+    private static AnimatedDrawableDiagnosticsNoop sInstance = new AnimatedDrawableDiagnosticsNoop();
 
-  public static AnimatedDrawableDiagnosticsNoop getInstance() {
-    return sInstance;
-  }
+    public static AnimatedDrawableDiagnosticsNoop getInstance() {
+        return sInstance;
+    }
 
-  @Override
-  public void setBackend(AnimatedDrawableCachingBackend animatedDrawableBackend) {
-  }
+    @Override
+    public void setBackend(AnimatedDrawableCachingBackend animatedDrawableBackend) {
+    }
 
-  @Override
-  public void onStartMethodBegin() {
-  }
+    @Override
+    public void onStartMethodBegin() {
+    }
 
-  @Override
-  public void onStartMethodEnd() {
-  }
+    @Override
+    public void onStartMethodEnd() {
+    }
 
-  @Override
-  public void onNextFrameMethodBegin() {
-  }
+    @Override
+    public void onNextFrameMethodBegin() {
+    }
 
-  @Override
-  public void onNextFrameMethodEnd() {
-  }
+    @Override
+    public void onNextFrameMethodEnd() {
+    }
 
-  @Override
-  public void incrementDroppedFrames(int droppedFrames) {
-  }
+    @Override
+    public void incrementDroppedFrames(int droppedFrames) {
+    }
 
-  @Override
-  public void incrementDrawnFrames(int drawnFrames) {
-  }
+    @Override
+    public void incrementDrawnFrames(int drawnFrames) {
+    }
 
-  @Override
-  public void onDrawMethodBegin() {
-  }
+    @Override
+    public void onDrawMethodBegin() {
+    }
 
-  @Override
-  public void onDrawMethodEnd() {
-  }
+    @Override
+    public void onDrawMethodEnd() {
+    }
 
-  @Override
-  public void drawDebugOverlay(Canvas canvas, Rect destRect) {
-  }
+    @Override
+    public void drawDebugOverlay(Canvas canvas, Rect destRect) {
+    }
 }

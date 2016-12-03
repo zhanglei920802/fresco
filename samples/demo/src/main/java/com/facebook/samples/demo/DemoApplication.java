@@ -35,11 +35,11 @@ public class DemoApplication extends Application {
         Set<RequestListener> listeners = new HashSet<>();
         listeners.add(new RequestLoggingListener());
         ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this)
-                .setRequestListeners(listeners)
-                .build();
+                                                        .setRequestListeners(listeners)
+                                                        .build();
         DraweeConfig draweeConfig = DraweeConfig.newBuilder()
-            .setDrawDebugOverlay(DebugOverlayHelper.isDebugOverlayEnabled(this))
-            .build();
+                                                .setDrawDebugOverlay(DebugOverlayHelper.isDebugOverlayEnabled(this))
+                                                .build();
         Fresco.initialize(this, config, draweeConfig);
     }
 }

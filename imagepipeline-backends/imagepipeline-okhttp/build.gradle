@@ -4,10 +4,10 @@ project.group = GROUP
 version = VERSION_NAME
 
 dependencies {
-  compile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
+    compile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
 
-  compile project(':fbcore')
-  compile project(':imagepipeline')
+    compile project(':fbcore')
+    compile project(':imagepipeline')
 }
 apply from: rootProject.file('release.gradle')
 

@@ -29,37 +29,37 @@ import com.facebook.samples.scrollperf.util.SizeUtil;
  */
 public class DraweeViewHolder extends RecyclerView.ViewHolder {
 
-  private final View mParentView;
+    private final View mParentView;
 
-  private final SimpleDraweeView mDraweeView;
+    private final SimpleDraweeView mDraweeView;
 
-  private final Config mConfig;
+    private final Config mConfig;
 
-  public DraweeViewHolder(View parentView, SimpleDraweeView simpleDraweeView, Config config) {
-    super(simpleDraweeView);
-    mParentView = parentView;
-    mDraweeView = simpleDraweeView;
-    mConfig = config;
-    SizeUtil.setConfiguredSize(mParentView, mDraweeView, config);
-  }
-
-  /**
-   * @param uri The Uri to show into the DraweeView for this Holder
-   */
-  public void bind(Uri uri) {
-    ImageRequestBuilder imageRequestBuilder = ImageRequestBuilder
-        .newBuilderWithSource(uri)
-        .setResizeOptions(
-            new ResizeOptions(
-              mDraweeView.getLayoutParams().width,
-              mDraweeView.getLayoutParams().height));
-    PipelineUtil.addOptionalFeatures(imageRequestBuilder, mConfig);
-    // Create the Builder
-    PipelineDraweeControllerBuilder builder = Fresco.newDraweeControllerBuilder()
-                                                      .setImageRequest(imageRequestBuilder.build());
-    if (mConfig.reuseOldController) {
-      builder.setOldController(mDraweeView.getController());
+    public DraweeViewHolder(View parentView, SimpleDraweeView simpleDraweeView, Config config) {
+        super(simpleDraweeView);
+        mParentView = parentView;
+        mDraweeView = simpleDraweeView;
+        mConfig = config;
+        SizeUtil.setConfiguredSize(mParentView, mDraweeView, config);
     }
-    mDraweeView.setController(builder.build());
-  }
+
+    /**
+     * @param uri The Uri to show into the DraweeView for this Holder
+     */
+    public void bind(Uri uri) {
+        ImageRequestBuilder imageRequestBuilder = ImageRequestBuilder
+                .newBuilderWithSource(uri)
+                .setResizeOptions(
+                        new ResizeOptions(
+                                mDraweeView.getLayoutParams().width,
+                                mDraweeView.getLayoutParams().height));
+        PipelineUtil.addOptionalFeatures(imageRequestBuilder, mConfig);
+        // Create the Builder
+        PipelineDraweeControllerBuilder builder = Fresco.newDraweeControllerBuilder()
+                                                        .setImageRequest(imageRequestBuilder.build());
+        if (mConfig.reuseOldController) {
+            builder.setOldController(mDraweeView.getController());
+        }
+        mDraweeView.setController(builder.build());
+    }
 }

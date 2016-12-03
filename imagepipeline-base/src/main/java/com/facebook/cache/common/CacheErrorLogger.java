@@ -16,42 +16,43 @@ import javax.annotation.Nullable;
  */
 public interface CacheErrorLogger {
 
-  /**
-   * A categorizaton of different cache and storage related errors.
-   */
-  enum CacheErrorCategory {
-    READ_DECODE,
-    READ_FILE,
-    READ_FILE_NOT_FOUND,
-    READ_INVALID_ENTRY,
+    /**
+     * Log an error of the specified category.
+     *
+     * @param category  Error category
+     * @param clazz     Class reporting the error
+     * @param message   An optional error message
+     * @param throwable An optional exception
+     */
+    void logError(
+            CacheErrorCategory category,
+            Class<?> clazz,
+            String message,
+            @Nullable Throwable throwable);
 
-    WRITE_ENCODE,
-    WRITE_CREATE_TEMPFILE,
-    WRITE_UPDATE_FILE_NOT_FOUND,
-    WRITE_RENAME_FILE_TEMPFILE_NOT_FOUND,
-    WRITE_RENAME_FILE_TEMPFILE_PARENT_NOT_FOUND,
-    WRITE_RENAME_FILE_OTHER,
-    WRITE_CREATE_DIR,
-    WRITE_CALLBACK_ERROR,
-    WRITE_INVALID_ENTRY,
+    /**
+     * A categorizaton of different cache and storage related errors.
+     */
+    enum CacheErrorCategory {
+        READ_DECODE,
+        READ_FILE,
+        READ_FILE_NOT_FOUND,
+        READ_INVALID_ENTRY,
 
-    DELETE_FILE,
+        WRITE_ENCODE,
+        WRITE_CREATE_TEMPFILE,
+        WRITE_UPDATE_FILE_NOT_FOUND,
+        WRITE_RENAME_FILE_TEMPFILE_NOT_FOUND,
+        WRITE_RENAME_FILE_TEMPFILE_PARENT_NOT_FOUND,
+        WRITE_RENAME_FILE_OTHER,
+        WRITE_CREATE_DIR,
+        WRITE_CALLBACK_ERROR,
+        WRITE_INVALID_ENTRY,
 
-    EVICTION,
-    GENERIC_IO,
-    OTHER
-  }
+        DELETE_FILE,
 
-  /**
-   * Log an error of the specified category.
-   * @param category Error category
-   * @param clazz Class reporting the error
-   * @param message An optional error message
-   * @param throwable An optional exception
-   */
-  void logError(
-      CacheErrorCategory category,
-      Class<?> clazz,
-      String message,
-      @Nullable Throwable throwable);
+        EVICTION,
+        GENERIC_IO,
+        OTHER
+    }
 }

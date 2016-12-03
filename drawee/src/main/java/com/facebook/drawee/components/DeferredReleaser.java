@@ -9,13 +9,13 @@
 
 package com.facebook.drawee.components;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import android.os.Handler;
 import android.os.Looper;
 
 import com.facebook.common.internal.Preconditions;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Component that defers {@code release} until after the main Looper has completed its current
@@ -34,72 +34,71 @@ import com.facebook.common.internal.Preconditions;
  */
 public class DeferredReleaser {
 
-  private static DeferredReleaser sInstance = null;
-
-  public static synchronized DeferredReleaser getInstance() {
-    if (sInstance == null) {
-      sInstance = new DeferredReleaser();
+    private static DeferredReleaser sInstance = null;
+    private final Set<Releasable> mPendingReleasables;
+    private final Handler mUiHandler;
+    /*
+     * Walks through the set of pending releasables, and calls release on them.
+     * Resets the pending list to an empty list when done.
+     */
+    private final Runnable releaseRunnable = new Runnable() {
+        @Override
+        public void run() {
+            ensureOnUiThread();
+            for (Releasable releasable : mPendingReleasables) {
+                releasable.release();
+            }
+            mPendingReleasables.clear();
+        }
+    };
+    public DeferredReleaser() {
+        mPendingReleasables = new HashSet<Releasable>();
+        mUiHandler = new Handler(Looper.getMainLooper());
     }
-    return sInstance;
-  }
 
-  public interface Releasable {
-    public void release();
-  }
-
-  private final Set<Releasable> mPendingReleasables;
-  private final Handler mUiHandler;
-
-  public DeferredReleaser() {
-    mPendingReleasables =  new HashSet<Releasable>();
-    mUiHandler = new Handler(Looper.getMainLooper());
-  }
-
-  /*
-   * Walks through the set of pending releasables, and calls release on them.
-   * Resets the pending list to an empty list when done.
-   */
-  private final Runnable releaseRunnable = new Runnable() {
-    @Override
-    public void run() {
-      ensureOnUiThread();
-      for (Releasable releasable : mPendingReleasables) {
-        releasable.release();
-      }
-      mPendingReleasables.clear();
+    public static synchronized DeferredReleaser getInstance() {
+        if (sInstance == null) {
+            sInstance = new DeferredReleaser();
+        }
+        return sInstance;
     }
-  };
 
-  /**
-   * Schedules deferred release.
-   * <p>
-   * The object will be released after the current Looper's loop,
-   * unless {@code cancelDeferredRelease} is called before then.
-   * @param releasable Object to release.
-   */
-  public void scheduleDeferredRelease(Releasable releasable) {
-    ensureOnUiThread();
-
-    if (!mPendingReleasables.add(releasable)) {
-      return;
+    private static void ensureOnUiThread() {
+        Preconditions.checkState(Looper.getMainLooper().getThread() == Thread.currentThread());
     }
-    // Posting to the UI queue is an O(n) operation, so we only do it once.
-    // The one runnable does all the releases.
-    if (mPendingReleasables.size() == 1) {
-      mUiHandler.post(releaseRunnable);
+
+    /**
+     * Schedules deferred release.
+     * <p>
+     * The object will be released after the current Looper's loop,
+     * unless {@code cancelDeferredRelease} is called before then.
+     *
+     * @param releasable Object to release.
+     */
+    public void scheduleDeferredRelease(Releasable releasable) {
+        ensureOnUiThread();
+
+        if (!mPendingReleasables.add(releasable)) {
+            return;
+        }
+        // Posting to the UI queue is an O(n) operation, so we only do it once.
+        // The one runnable does all the releases.
+        if (mPendingReleasables.size() == 1) {
+            mUiHandler.post(releaseRunnable);
+        }
     }
-  }
 
-  /**
-   * Cancels a pending release for this object.
-   * @param releasable Object to cancel release of.
-   */
-  public void cancelDeferredRelease(Releasable releasable) {
-    ensureOnUiThread();
-    mPendingReleasables.remove(releasable);
-  }
+    /**
+     * Cancels a pending release for this object.
+     *
+     * @param releasable Object to cancel release of.
+     */
+    public void cancelDeferredRelease(Releasable releasable) {
+        ensureOnUiThread();
+        mPendingReleasables.remove(releasable);
+    }
 
-  private static void ensureOnUiThread() {
-    Preconditions.checkState(Looper.getMainLooper().getThread() == Thread.currentThread());
-  }
+    public interface Releasable {
+        public void release();
+    }
 }

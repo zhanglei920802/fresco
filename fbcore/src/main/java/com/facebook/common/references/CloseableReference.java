@@ -9,8 +9,10 @@
 
 package com.facebook.common.references;
 
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.GuardedBy;
+import com.facebook.common.internal.Closeables;
+import com.facebook.common.internal.Preconditions;
+import com.facebook.common.internal.VisibleForTesting;
+import com.facebook.common.logging.FLog;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -19,20 +21,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.facebook.common.internal.Closeables;
-import com.facebook.common.internal.Preconditions;
-import com.facebook.common.internal.VisibleForTesting;
-import com.facebook.common.logging.FLog;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.GuardedBy;
 
 /**
  * A smart pointer-like class for Java.
- *
+ * <p>
  * <p>This class allows reference-counting semantics in a Java-friendlier way. A single object
  * can have any number of CloseableReferences pointing to it. When all of these have been closed,
  * the object either has its {@link Closeable#close} method called, if it implements
  * {@link Closeable}, or its designated {@link ResourceReleaser#release},
  * if it does not.
- *
+ * <p>
  * <p>Callers can construct a CloseableReference wrapping a {@link Closeable} with:
  * <pre>
  * Closeable foo;
@@ -57,7 +57,7 @@ import com.facebook.common.logging.FLog;
  * copy.close();
  * c.close();
  * </pre>
- *
+ * <p>
  * <p>As with any Closeable, try-finally semantics may be needed to ensure that close is called.
  * <p>Do not rely upon the finalizer; the purpose of this class is for expensive resources to
  * be released without waiting for the garbage collector. The finalizer will log an error if
@@ -65,261 +65,272 @@ import com.facebook.common.logging.FLog;
  */
 public final class CloseableReference<T> implements Cloneable, Closeable {
 
-  public static class Stats {
-    public final int totalFinalized;
-    public final int unclosedInFinalize;
+    private static final ResourceReleaser<Closeable> DEFAULT_CLOSEABLE_RELEASER =
+            new ResourceReleaser<Closeable>() {
+                @Override
+                public void release(Closeable value) {
+                    try {
+                        Closeables.close(value, true);
+                    } catch (IOException ioe) {
+                        // This will not happen, Closeable.close swallows and logs IOExceptions
+                    }
+                }
+            };
+    private static final AtomicInteger TOTAL_FINALIZED = new AtomicInteger(0);
+    private static final AtomicInteger UNCLOSED_IN_FINALIZE = new AtomicInteger(0);
+    private static Class<CloseableReference> TAG = CloseableReference.class;
+    private static volatile boolean sTraceTracking;
+    private final
+    @Nullable
+    Throwable mObtainedTrace;
+    private final SharedReference<T> mSharedReference;
+    private
+    @Nullable
+    Throwable mClonedTrace;
 
-    private Stats(int totalFinalized, int unclosedInFinalize) {
-      this.totalFinalized = totalFinalized;
-      this.unclosedInFinalize = unclosedInFinalize;
+    @GuardedBy("this")
+    private boolean mIsClosed = false;
+
+    /**
+     * The caller should guarantee that reference count of sharedReference is not decreased to zero,
+     * so that the reference is valid during execution of this method.
+     */
+    private CloseableReference(SharedReference<T> sharedReference) {
+        mSharedReference = Preconditions.checkNotNull(sharedReference);
+        sharedReference.addReference();
+        mObtainedTrace = getTraceOrNull();
     }
-  }
 
-  private static Class<CloseableReference> TAG = CloseableReference.class;
+    private CloseableReference(T t, ResourceReleaser<T> resourceReleaser) {
+        // Ref-count pre-set to 1
+        mSharedReference = new SharedReference<T>(t, resourceReleaser);
+        mObtainedTrace = getTraceOrNull();
+    }
 
-  private static final ResourceReleaser<Closeable> DEFAULT_CLOSEABLE_RELEASER =
-      new ResourceReleaser<Closeable>() {
-        @Override
-        public void release(Closeable value) {
-          try {
-            Closeables.close(value, true);
-          } catch (IOException ioe) {
-            // This will not happen, Closeable.close swallows and logs IOExceptions
-          }
+    /**
+     * Constructs a CloseableReference.
+     * <p>
+     * <p>Returns null if the parameter is null.
+     */
+    public static
+    @Nullable
+    <T extends Closeable> CloseableReference<T> of(@Nullable T t) {
+        if (t == null) {
+            return null;
         }
-      };
-
-  private static final AtomicInteger TOTAL_FINALIZED = new AtomicInteger(0);
-  private static final AtomicInteger UNCLOSED_IN_FINALIZE = new AtomicInteger(0);
-
-  private static volatile boolean sTraceTracking;
-  private final @Nullable Throwable mObtainedTrace;
-  private @Nullable Throwable mClonedTrace;
-
-  @GuardedBy("this")
-  private boolean mIsClosed = false;
-
-  private final SharedReference<T> mSharedReference;
-
-  /**
-   * The caller should guarantee that reference count of sharedReference is not decreased to zero,
-   * so that the reference is valid during execution of this method.
-   */
-  private CloseableReference(SharedReference<T> sharedReference) {
-    mSharedReference = Preconditions.checkNotNull(sharedReference);
-    sharedReference.addReference();
-    mObtainedTrace = getTraceOrNull();
-  }
-
-  private CloseableReference(T t, ResourceReleaser<T> resourceReleaser) {
-    // Ref-count pre-set to 1
-    mSharedReference = new SharedReference<T>(t, resourceReleaser);
-    mObtainedTrace = getTraceOrNull();
-  }
-
-  /**
-   * Constructs a CloseableReference.
-   *
-   * <p>Returns null if the parameter is null.
-   */
-  public static @Nullable <T extends Closeable> CloseableReference<T> of(@Nullable T t) {
-    if (t == null) {
-      return null;
-    } else {
-      return new CloseableReference<T>(t, (ResourceReleaser<T>) DEFAULT_CLOSEABLE_RELEASER);
-    }
-  }
-
-  /**
-   * Constructs a CloseableReference (wrapping a SharedReference) of T with provided
-   * ResourceReleaser<T>. If t is null, this will just return null.
-   */
-  public static @Nullable <T> CloseableReference<T> of(
-      @Nullable T t,
-      ResourceReleaser<T> resourceReleaser) {
-    if (t == null) {
-      return null;
-    } else {
-      return new CloseableReference<T>(t, resourceReleaser);
-    }
-  }
-
-  /**
-   * Closes this CloseableReference.
-   *
-   * <p>Decrements the reference count of the underlying object. If it is zero, the object
-   * will be released.
-   *
-   * <p>This method is idempotent. Calling it multiple times on the same instance has no effect.
-   */
-  @Override
-  public void close() {
-    synchronized (this) {
-      if (mIsClosed) {
-        return;
-      }
-      mIsClosed = true;
-    }
-
-    mSharedReference.deleteReference();
-  }
-
-  /**
-   * Returns the underlying Closeable if this reference is not closed yet.
-   * Otherwise IllegalStateException is thrown.
-   */
-  public synchronized T get() {
-    Preconditions.checkState(!mIsClosed);
-    return mSharedReference.get();
-  }
-
-  /**
-   * Returns a new CloseableReference to the same underlying SharedReference. The SharedReference
-   * ref-count is incremented.
-   */
-  @Override
-  public synchronized CloseableReference<T> clone() {
-    mClonedTrace = getTraceOrNull();
-    Preconditions.checkState(isValid());
-    return new CloseableReference<T>(mSharedReference);
-  }
-
-  public synchronized CloseableReference<T> cloneOrNull() {
-    mClonedTrace = getTraceOrNull();
-    return isValid() ? new CloseableReference<T>(mSharedReference) : null;
-  }
-
-  /**
-   * Checks if this closable-reference is valid i.e. is not closed.
-   * @return true if the closeable reference is valid
-   */
-  public synchronized boolean isValid() {
-    return !mIsClosed;
-  }
-
-  @Override
-  protected void finalize() throws Throwable {
-    try {
-      TOTAL_FINALIZED.incrementAndGet();
-      // We put synchronized here so that lint doesn't warn about accessing mIsClosed, which is
-      // guarded by this. Lint isn't aware of finalize semantics.
-      synchronized (this) {
-        if (mIsClosed) {
-          return;
+        else {
+            return new CloseableReference<T>(t, (ResourceReleaser<T>) DEFAULT_CLOSEABLE_RELEASER);
         }
-      }
-
-      UNCLOSED_IN_FINALIZE.incrementAndGet();
-      String message = String.format(
-          "Finalized without closing: %x %x (type = %s)",
-          System.identityHashCode(this),
-          System.identityHashCode(mSharedReference),
-          mSharedReference.get().getClass().getSimpleName());
-      if (sTraceTracking) {
-        Throwable cause = mClonedTrace != null ? mClonedTrace : mObtainedTrace;
-        FLog.wtf(TAG, message, cause);
-      } else {
-        FLog.w(TAG, message);
-      }
-
-      close();
-    } finally {
-      super.finalize();
     }
-  }
 
-  /**
-   * A test-only method to get the underlying references.
-   *
-   * <p><b>DO NOT USE in application code.</b>
-   */
-  @VisibleForTesting
-  public synchronized SharedReference<T> getUnderlyingReferenceTestOnly() {
-    return mSharedReference;
-  }
-
-  /**
-   * Method used for tracking Closeables pointed by CloseableReference.
-   * Use only for debugging and logging.
-   */
-  public synchronized int getValueHash() {
-    return isValid() ? System.identityHashCode(mSharedReference.get()) : 0;
-  }
-
-  /**
-   * Checks if the closable-reference is valid i.e. is not null, and is not closed.
-   * @return true if the closeable reference is valid
-   */
-  public static boolean isValid(@Nullable CloseableReference<?> ref) {
-    return ref != null && ref.isValid();
-  }
-
-  /**
-   * Returns the cloned reference if valid, null otherwise.
-   *
-   * @param ref the reference to clone
-   */
-  @Nullable
-  public static <T> CloseableReference<T> cloneOrNull(@Nullable CloseableReference<T> ref) {
-    return (ref != null) ? ref.cloneOrNull() : null;
-  }
-
-  /**
-   * Clones a collection of references and returns a list. Returns null if the list is null. If
-   * the list is non-null, clones each reference. If a reference cannot be cloned due to already
-   * being closed, the list will contain a null value in its place.
-   *
-   * @param refs the references to clone
-   * @return the list of cloned references or null
-   */
-  public static <T> List<CloseableReference<T>> cloneOrNull(
-      Collection<CloseableReference<T>> refs) {
-    if (refs == null) {
-      return null;
+    /**
+     * Constructs a CloseableReference (wrapping a SharedReference) of T with provided
+     * ResourceReleaser<T>. If t is null, this will just return null.
+     */
+    public static
+    @Nullable
+    <T> CloseableReference<T> of(
+            @Nullable T t,
+            ResourceReleaser<T> resourceReleaser) {
+        if (t == null) {
+            return null;
+        }
+        else {
+            return new CloseableReference<T>(t, resourceReleaser);
+        }
     }
-    List<CloseableReference<T>> ret = new ArrayList<>(refs.size());
-    for (CloseableReference<T> ref : refs) {
-      ret.add(CloseableReference.cloneOrNull(ref));
+
+    /**
+     * Checks if the closable-reference is valid i.e. is not null, and is not closed.
+     *
+     * @return true if the closeable reference is valid
+     */
+    public static boolean isValid(@Nullable CloseableReference<?> ref) {
+        return ref != null && ref.isValid();
     }
-    return ret;
-  }
 
-  /**
-   * Closes the reference handling null.
-   *
-   * @param ref the reference to close
-   */
-  public static void closeSafely(@Nullable CloseableReference<?> ref) {
-    if (ref != null) {
-      ref.close();
+    /**
+     * Returns the cloned reference if valid, null otherwise.
+     *
+     * @param ref the reference to clone
+     */
+    @Nullable
+    public static <T> CloseableReference<T> cloneOrNull(@Nullable CloseableReference<T> ref) {
+        return (ref != null) ? ref.cloneOrNull() : null;
     }
-  }
 
-  /**
-   * Closes the references in the iterable handling null.
-   *
-   * @param references the reference to close
-   */
-  public static void closeSafely(@Nullable Iterable<? extends CloseableReference<?>> references) {
-    if (references != null) {
-      for (CloseableReference<?> ref : references) {
-        closeSafely(ref);
-      }
+    /**
+     * Clones a collection of references and returns a list. Returns null if the list is null. If
+     * the list is non-null, clones each reference. If a reference cannot be cloned due to already
+     * being closed, the list will contain a null value in its place.
+     *
+     * @param refs the references to clone
+     * @return the list of cloned references or null
+     */
+    public static <T> List<CloseableReference<T>> cloneOrNull(
+            Collection<CloseableReference<T>> refs) {
+        if (refs == null) {
+            return null;
+        }
+        List<CloseableReference<T>> ret = new ArrayList<>(refs.size());
+        for (CloseableReference<T> ref : refs) {
+            ret.add(CloseableReference.cloneOrNull(ref));
+        }
+        return ret;
     }
-  }
 
-  public static Stats getStats() {
-    return new Stats(TOTAL_FINALIZED.get(), UNCLOSED_IN_FINALIZE.get());
-  }
-
-  public static void setTraceTrackingEnabled(boolean enabled) {
-    sTraceTracking = enabled;
-  }
-
-  private static @Nullable Throwable getTraceOrNull() {
-    if (sTraceTracking) {
-      return new Throwable();
+    /**
+     * Closes the reference handling null.
+     *
+     * @param ref the reference to close
+     */
+    public static void closeSafely(@Nullable CloseableReference<?> ref) {
+        if (ref != null) {
+            ref.close();
+        }
     }
-    return null;
-  }
+
+    /**
+     * Closes the references in the iterable handling null.
+     *
+     * @param references the reference to close
+     */
+    public static void closeSafely(@Nullable Iterable<? extends CloseableReference<?>> references) {
+        if (references != null) {
+            for (CloseableReference<?> ref : references) {
+                closeSafely(ref);
+            }
+        }
+    }
+
+    public static Stats getStats() {
+        return new Stats(TOTAL_FINALIZED.get(), UNCLOSED_IN_FINALIZE.get());
+    }
+
+    public static void setTraceTrackingEnabled(boolean enabled) {
+        sTraceTracking = enabled;
+    }
+
+    private static
+    @Nullable
+    Throwable getTraceOrNull() {
+        if (sTraceTracking) {
+            return new Throwable();
+        }
+        return null;
+    }
+
+    /**
+     * Closes this CloseableReference.
+     * <p>
+     * <p>Decrements the reference count of the underlying object. If it is zero, the object
+     * will be released.
+     * <p>
+     * <p>This method is idempotent. Calling it multiple times on the same instance has no effect.
+     */
+    @Override
+    public void close() {
+        synchronized (this) {
+            if (mIsClosed) {
+                return;
+            }
+            mIsClosed = true;
+        }
+
+        mSharedReference.deleteReference();
+    }
+
+    /**
+     * Returns the underlying Closeable if this reference is not closed yet.
+     * Otherwise IllegalStateException is thrown.
+     */
+    public synchronized T get() {
+        Preconditions.checkState(!mIsClosed);
+        return mSharedReference.get();
+    }
+
+    /**
+     * Returns a new CloseableReference to the same underlying SharedReference. The SharedReference
+     * ref-count is incremented.
+     */
+    @Override
+    public synchronized CloseableReference<T> clone() {
+        mClonedTrace = getTraceOrNull();
+        Preconditions.checkState(isValid());
+        return new CloseableReference<T>(mSharedReference);
+    }
+
+    public synchronized CloseableReference<T> cloneOrNull() {
+        mClonedTrace = getTraceOrNull();
+        return isValid() ? new CloseableReference<T>(mSharedReference) : null;
+    }
+
+    /**
+     * Checks if this closable-reference is valid i.e. is not closed.
+     *
+     * @return true if the closeable reference is valid
+     */
+    public synchronized boolean isValid() {
+        return !mIsClosed;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            TOTAL_FINALIZED.incrementAndGet();
+            // We put synchronized here so that lint doesn't warn about accessing mIsClosed, which is
+            // guarded by this. Lint isn't aware of finalize semantics.
+            synchronized (this) {
+                if (mIsClosed) {
+                    return;
+                }
+            }
+
+            UNCLOSED_IN_FINALIZE.incrementAndGet();
+            String message = String.format(
+                    "Finalized without closing: %x %x (type = %s)",
+                    System.identityHashCode(this),
+                    System.identityHashCode(mSharedReference),
+                    mSharedReference.get().getClass().getSimpleName());
+            if (sTraceTracking) {
+                Throwable cause = mClonedTrace != null ? mClonedTrace : mObtainedTrace;
+                FLog.wtf(TAG, message, cause);
+            }
+            else {
+                FLog.w(TAG, message);
+            }
+
+            close();
+        } finally {
+            super.finalize();
+        }
+    }
+
+    /**
+     * A test-only method to get the underlying references.
+     * <p>
+     * <p><b>DO NOT USE in application code.</b>
+     */
+    @VisibleForTesting
+    public synchronized SharedReference<T> getUnderlyingReferenceTestOnly() {
+        return mSharedReference;
+    }
+
+    /**
+     * Method used for tracking Closeables pointed by CloseableReference.
+     * Use only for debugging and logging.
+     */
+    public synchronized int getValueHash() {
+        return isValid() ? System.identityHashCode(mSharedReference.get()) : 0;
+    }
+
+    public static class Stats {
+        public final int totalFinalized;
+        public final int unclosedInFinalize;
+
+        private Stats(int totalFinalized, int unclosedInFinalize) {
+            this.totalFinalized = totalFinalized;
+            this.unclosedInFinalize = unclosedInFinalize;
+        }
+    }
 }

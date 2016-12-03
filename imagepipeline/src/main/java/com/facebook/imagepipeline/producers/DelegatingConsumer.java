@@ -13,28 +13,28 @@ package com.facebook.imagepipeline.producers;
  */
 public abstract class DelegatingConsumer<I, O> extends BaseConsumer<I> {
 
-  private final Consumer<O> mConsumer;
+    private final Consumer<O> mConsumer;
 
-  public DelegatingConsumer(Consumer<O> consumer) {
-    mConsumer = consumer;
-  }
+    public DelegatingConsumer(Consumer<O> consumer) {
+        mConsumer = consumer;
+    }
 
-  public Consumer<O> getConsumer() {
-    return mConsumer;
-  }
+    public Consumer<O> getConsumer() {
+        return mConsumer;
+    }
 
-  @Override
-  protected void onFailureImpl(Throwable t) {
-    mConsumer.onFailure(t);
-  }
+    @Override
+    protected void onFailureImpl(Throwable t) {
+        mConsumer.onFailure(t);
+    }
 
-  @Override
-  protected void onCancellationImpl() {
-    mConsumer.onCancellation();
-  }
+    @Override
+    protected void onCancellationImpl() {
+        mConsumer.onCancellation();
+    }
 
-  @Override
-  protected void onProgressUpdateImpl(float progress) {
-    mConsumer.onProgressUpdate(progress);
-  }
+    @Override
+    protected void onProgressUpdateImpl(float progress) {
+        mConsumer.onProgressUpdate(progress);
+    }
 }

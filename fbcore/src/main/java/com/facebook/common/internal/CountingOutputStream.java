@@ -28,43 +28,43 @@ import java.io.OutputStream;
  */
 public class CountingOutputStream extends FilterOutputStream {
 
-  private long mCount;
+    private long mCount;
 
-  /**
-   * Constructs a new {@code FilterOutputStream} with {@code out} as its
-   * target stream.
-   *
-   * @param out the target stream that this stream writes to.
-   */
-  public CountingOutputStream(OutputStream out) {
-    super(out);
-    mCount = 0;
-  }
+    /**
+     * Constructs a new {@code FilterOutputStream} with {@code out} as its
+     * target stream.
+     *
+     * @param out the target stream that this stream writes to.
+     */
+    public CountingOutputStream(OutputStream out) {
+        super(out);
+        mCount = 0;
+    }
 
-  /**
-   * Returns the number of bytes written.
-   */
-  public long getCount() {
-    return mCount;
-  }
+    /**
+     * Returns the number of bytes written.
+     */
+    public long getCount() {
+        return mCount;
+    }
 
-  @Override
-  public void write(byte[] b, int off, int len) throws IOException {
-    out.write(b, off, len);
-    mCount += len;
-  }
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        out.write(b, off, len);
+        mCount += len;
+    }
 
-  @Override
-  public void write(int b) throws IOException {
-    out.write(b);
-    mCount++;
-  }
+    @Override
+    public void write(int b) throws IOException {
+        out.write(b);
+        mCount++;
+    }
 
-  // Overriding close() because FilterOutputStream's close() method pre-JDK8 has bad behavior:
-  // it silently ignores any exception thrown by flush(). Instead, just close the delegate stream.
-  // It should flush itself if necessary.
-  @Override
-  public void close() throws IOException {
-    out.close();
-  }
+    // Overriding close() because FilterOutputStream's close() method pre-JDK8 has bad behavior:
+    // it silently ignores any exception thrown by flush(). Instead, just close the delegate stream.
+    // It should flush itself if necessary.
+    @Override
+    public void close() throws IOException {
+        out.close();
+    }
 }

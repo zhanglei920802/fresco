@@ -34,122 +34,123 @@ import com.facebook.imagepipeline.image.ImageInfo;
 
 public class MainActivity extends Activity {
 
-  private SimpleDraweeView mAnimatedGifView;
-  private SimpleDraweeView mAnimatedWebpView;
+    private SimpleDraweeView mAnimatedGifView;
+    private SimpleDraweeView mAnimatedWebpView;
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-    // GIF
-    final ViewGroup gifControls = (ViewGroup) findViewById(R.id.gif_controls);
-    updateAnimationControls(gifControls, null);
+        // GIF
+        final ViewGroup gifControls = (ViewGroup) findViewById(R.id.gif_controls);
+        updateAnimationControls(gifControls, null);
 
-    mAnimatedGifView = (SimpleDraweeView) findViewById(R.id.animated_gif);
-    Uri animatedGifUri =
-        Uri.parse("http://s3.amazonaws.com/giphygifs/media/4aBQ9oNjgEQ2k/giphy.gif");
+        mAnimatedGifView = (SimpleDraweeView) findViewById(R.id.animated_gif);
+        Uri animatedGifUri =
+                Uri.parse("http://s3.amazonaws.com/giphygifs/media/4aBQ9oNjgEQ2k/giphy.gif");
 
-    final TextView gifInfo = (TextView) findViewById(R.id.gif_info);
+        final TextView gifInfo = (TextView) findViewById(R.id.gif_info);
 
-    DraweeController gifController = Fresco.newDraweeControllerBuilder()
-        .setUri(animatedGifUri)
-        .setControllerListener(new BaseControllerListener<ImageInfo>() {
-          @Override
-          public void onFinalImageSet(
-              String id,
-              ImageInfo imageInfo,
-              Animatable anim) {
-            updateAnimationControls(gifControls, anim);
-            gifInfo.setText(getAnimationInformation(anim));
-          }
-        })
-        .build();
-    mAnimatedGifView.setController(gifController);
+        DraweeController gifController = Fresco.newDraweeControllerBuilder()
+                                               .setUri(animatedGifUri)
+                                               .setControllerListener(new BaseControllerListener<ImageInfo>() {
+                                                   @Override
+                                                   public void onFinalImageSet(
+                                                           String id,
+                                                           ImageInfo imageInfo,
+                                                           Animatable anim) {
+                                                       updateAnimationControls(gifControls, anim);
+                                                       gifInfo.setText(getAnimationInformation(anim));
+                                                   }
+                                               })
+                                               .build();
+        mAnimatedGifView.setController(gifController);
 
-    // Animated WebP
-    final ViewGroup webpControls = (ViewGroup) findViewById(R.id.webp_controls);
-    updateAnimationControls(webpControls, null);
+        // Animated WebP
+        final ViewGroup webpControls = (ViewGroup) findViewById(R.id.webp_controls);
+        updateAnimationControls(webpControls, null);
 
-    mAnimatedWebpView = (SimpleDraweeView) findViewById(R.id.animated_webp);
-    final TextView webpInfo = (TextView) findViewById(R.id.webp_info);
+        mAnimatedWebpView = (SimpleDraweeView) findViewById(R.id.animated_webp);
+        final TextView webpInfo = (TextView) findViewById(R.id.webp_info);
 
-    Uri animatedWebpUri = Uri.parse("http://www.gstatic.com/webp/animated/1.webp");
-    DraweeController webpController = Fresco.newDraweeControllerBuilder()
-        .setUri(animatedWebpUri)
-        .setControllerListener(new BaseControllerListener<ImageInfo>() {
-          @Override
-          public void onFinalImageSet(
-              String id,
-              ImageInfo imageInfo,
-              Animatable anim) {
-            updateAnimationControls(webpControls, anim);
-            webpInfo.setText(getAnimationInformation(anim));
-          }
-        })
-        .build();
-    mAnimatedWebpView.setController(webpController);
-  }
-
-  public String getAnimationInformation(Animatable animatable) {
-    if (animatable instanceof AbstractAnimatedDrawable) {
-      AbstractAnimatedDrawable animatedDrawable = (AbstractAnimatedDrawable) animatable;
-      int animationDuration = animatedDrawable.getDuration();
-      int frameCount = animatedDrawable.getFrameCount();
-      String loopCountString = getLoopCountString(animatedDrawable);
-      return getString(R.string.animation_info, animationDuration, frameCount, loopCountString);
+        Uri animatedWebpUri = Uri.parse("http://www.gstatic.com/webp/animated/1.webp");
+        DraweeController webpController = Fresco.newDraweeControllerBuilder()
+                                                .setUri(animatedWebpUri)
+                                                .setControllerListener(new BaseControllerListener<ImageInfo>() {
+                                                    @Override
+                                                    public void onFinalImageSet(
+                                                            String id,
+                                                            ImageInfo imageInfo,
+                                                            Animatable anim) {
+                                                        updateAnimationControls(webpControls, anim);
+                                                        webpInfo.setText(getAnimationInformation(anim));
+                                                    }
+                                                })
+                                                .build();
+        mAnimatedWebpView.setController(webpController);
     }
-    return getString(R.string.unknown_animation_info);
-  }
 
-  public boolean tryPausing(Animatable animatable) {
-    // AbstractAnimatedDrawable supports pausing, but we could also have a different Animatable
-    if (animatable instanceof AbstractAnimatedDrawable) {
-      AbstractAnimatedDrawable animatedDrawable = (AbstractAnimatedDrawable) animatable;
-      animatedDrawable.pause();
-      return true;
-    } else {
-      Toast.makeText(this, "Could not pause animation", Toast.LENGTH_SHORT).show();
-      return false;
+    public String getAnimationInformation(Animatable animatable) {
+        if (animatable instanceof AbstractAnimatedDrawable) {
+            AbstractAnimatedDrawable animatedDrawable = (AbstractAnimatedDrawable) animatable;
+            int animationDuration = animatedDrawable.getDuration();
+            int frameCount = animatedDrawable.getFrameCount();
+            String loopCountString = getLoopCountString(animatedDrawable);
+            return getString(R.string.animation_info, animationDuration, frameCount, loopCountString);
+        }
+        return getString(R.string.unknown_animation_info);
     }
-  }
 
-  private void updateAnimationControls(
-          ViewGroup controlsContainer,
-          @Nullable final Animatable animatable) {
-    Button play = (Button) controlsContainer.findViewById(R.id.play);
-    Button pause = (Button) controlsContainer.findViewById(R.id.pause);
-    Button stop = (Button) controlsContainer.findViewById(R.id.stop);
+    public boolean tryPausing(Animatable animatable) {
+        // AbstractAnimatedDrawable supports pausing, but we could also have a different Animatable
+        if (animatable instanceof AbstractAnimatedDrawable) {
+            AbstractAnimatedDrawable animatedDrawable = (AbstractAnimatedDrawable) animatable;
+            animatedDrawable.pause();
+            return true;
+        }
+        else {
+            Toast.makeText(this, "Could not pause animation", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
 
-    play.setEnabled(animatable != null);
-    pause.setEnabled(animatable != null);
-    stop.setEnabled(animatable != null);
+    private void updateAnimationControls(
+            ViewGroup controlsContainer,
+            @Nullable final Animatable animatable) {
+        Button play = (Button) controlsContainer.findViewById(R.id.play);
+        Button pause = (Button) controlsContainer.findViewById(R.id.pause);
+        Button stop = (Button) controlsContainer.findViewById(R.id.stop);
 
-    play.setOnClickListener(animatable == null ? null : new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        animatable.start();
-      }
-    });
+        play.setEnabled(animatable != null);
+        pause.setEnabled(animatable != null);
+        stop.setEnabled(animatable != null);
 
-    pause.setOnClickListener(animatable == null ? null : new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        tryPausing(animatable);
-      }
-    });
+        play.setOnClickListener(animatable == null ? null : new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animatable.start();
+            }
+        });
 
-    stop.setOnClickListener(animatable == null ? null : new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        animatable.stop();
-      }
-    });
-  }
+        pause.setOnClickListener(animatable == null ? null : new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tryPausing(animatable);
+            }
+        });
 
-  private String getLoopCountString(AbstractAnimatedDrawable animatedDrawable) {
-    return animatedDrawable.getLoopCount() == AnimatedImage.LOOP_COUNT_INFINITE
-            ? getString(R.string.infinite)
-            : animatedDrawable.getLoopCount() + "";
-  }
+        stop.setOnClickListener(animatable == null ? null : new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animatable.stop();
+            }
+        });
+    }
+
+    private String getLoopCountString(AbstractAnimatedDrawable animatedDrawable) {
+        return animatedDrawable.getLoopCount() == AnimatedImage.LOOP_COUNT_INFINITE
+                ? getString(R.string.infinite)
+                : animatedDrawable.getLoopCount() + "";
+    }
 }

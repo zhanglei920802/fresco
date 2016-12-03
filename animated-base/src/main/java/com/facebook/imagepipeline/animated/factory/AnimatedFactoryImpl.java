@@ -8,23 +8,20 @@
  */
 package com.facebook.imagepipeline.animated.factory;
 
-import java.util.concurrent.ScheduledExecutorService;
-import javax.annotation.concurrent.NotThreadSafe;
-
-import android.graphics.Rect;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
-import com.facebook.common.time.MonotonicClock;
-import com.facebook.common.time.RealtimeSinceBootClock;
+import android.graphics.Rect;
+
 import com.facebook.common.executors.DefaultSerialExecutorService;
 import com.facebook.common.executors.SerialExecutorService;
 import com.facebook.common.executors.UiThreadImmediateExecutorService;
+import com.facebook.common.internal.DoNotStrip;
+import com.facebook.common.time.MonotonicClock;
+import com.facebook.common.time.RealtimeSinceBootClock;
 import com.facebook.imagepipeline.animated.base.AnimatedDrawableBackend;
 import com.facebook.imagepipeline.animated.base.AnimatedDrawableOptions;
 import com.facebook.imagepipeline.animated.base.AnimatedImageResult;
-import com.facebook.imagepipeline.animated.factory.AnimatedDrawableFactory;
-import com.facebook.imagepipeline.animated.factory.AnimatedImageFactory;
 import com.facebook.imagepipeline.animated.impl.AnimatedDrawableBackendImpl;
 import com.facebook.imagepipeline.animated.impl.AnimatedDrawableBackendProvider;
 import com.facebook.imagepipeline.animated.impl.AnimatedDrawableCachingBackendImpl;
@@ -32,134 +29,137 @@ import com.facebook.imagepipeline.animated.impl.AnimatedDrawableCachingBackendIm
 import com.facebook.imagepipeline.animated.util.AnimatedDrawableUtil;
 import com.facebook.imagepipeline.bitmaps.PlatformBitmapFactory;
 import com.facebook.imagepipeline.core.ExecutorSupplier;
-import com.facebook.common.internal.DoNotStrip;
+
+import java.util.concurrent.ScheduledExecutorService;
+
+import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
 @DoNotStrip
 public class AnimatedFactoryImpl implements AnimatedFactory {
 
-  private AnimatedDrawableBackendProvider mAnimatedDrawableBackendProvider;
-  private AnimatedDrawableUtil mAnimatedDrawableUtil;
-  private AnimatedDrawableFactory mAnimatedDrawableFactory;
-  private AnimatedImageFactory mAnimatedImageFactory;
+    private AnimatedDrawableBackendProvider mAnimatedDrawableBackendProvider;
+    private AnimatedDrawableUtil mAnimatedDrawableUtil;
+    private AnimatedDrawableFactory mAnimatedDrawableFactory;
+    private AnimatedImageFactory mAnimatedImageFactory;
 
-  private ExecutorSupplier mExecutorSupplier;
+    private ExecutorSupplier mExecutorSupplier;
 
-  private PlatformBitmapFactory mPlatformBitmapFactory;
+    private PlatformBitmapFactory mPlatformBitmapFactory;
 
-  @DoNotStrip
-  public AnimatedFactoryImpl(
-      PlatformBitmapFactory platformBitmapFactory,
-      ExecutorSupplier executorSupplier) {
-    this.mPlatformBitmapFactory = platformBitmapFactory;
-    this.mExecutorSupplier = executorSupplier;
-  }
+    @DoNotStrip
+    public AnimatedFactoryImpl(
+            PlatformBitmapFactory platformBitmapFactory,
+            ExecutorSupplier executorSupplier) {
+        this.mPlatformBitmapFactory = platformBitmapFactory;
+        this.mExecutorSupplier = executorSupplier;
+    }
 
-  private AnimatedDrawableFactory buildAnimatedDrawableFactory(
-      final SerialExecutorService serialExecutorService,
-      final ActivityManager activityManager,
-      final AnimatedDrawableUtil animatedDrawableUtil,
-      AnimatedDrawableBackendProvider animatedDrawableBackendProvider,
-      ScheduledExecutorService scheduledExecutorService,
-      final MonotonicClock monotonicClock,
-      Resources resources) {
-    AnimatedDrawableCachingBackendImplProvider animatedDrawableCachingBackendImplProvider =
-        new AnimatedDrawableCachingBackendImplProvider() {
-          @Override
-          public AnimatedDrawableCachingBackendImpl get(
-              AnimatedDrawableBackend animatedDrawableBackend,
-              AnimatedDrawableOptions options) {
-            return new AnimatedDrawableCachingBackendImpl(
-                serialExecutorService,
-                activityManager,
+    private AnimatedDrawableFactory buildAnimatedDrawableFactory(
+            final SerialExecutorService serialExecutorService,
+            final ActivityManager activityManager,
+            final AnimatedDrawableUtil animatedDrawableUtil,
+            AnimatedDrawableBackendProvider animatedDrawableBackendProvider,
+            ScheduledExecutorService scheduledExecutorService,
+            final MonotonicClock monotonicClock,
+            Resources resources) {
+        AnimatedDrawableCachingBackendImplProvider animatedDrawableCachingBackendImplProvider =
+                new AnimatedDrawableCachingBackendImplProvider() {
+                    @Override
+                    public AnimatedDrawableCachingBackendImpl get(
+                            AnimatedDrawableBackend animatedDrawableBackend,
+                            AnimatedDrawableOptions options) {
+                        return new AnimatedDrawableCachingBackendImpl(
+                                serialExecutorService,
+                                activityManager,
+                                animatedDrawableUtil,
+                                monotonicClock,
+                                animatedDrawableBackend,
+                                options);
+                    }
+                };
+
+        return createAnimatedDrawableFactory(
+                animatedDrawableBackendProvider,
+                animatedDrawableCachingBackendImplProvider,
                 animatedDrawableUtil,
-                monotonicClock,
-                animatedDrawableBackend,
-                options);
-          }
-        };
+                scheduledExecutorService,
+                resources);
+    }
 
-    return createAnimatedDrawableFactory(
-        animatedDrawableBackendProvider,
-        animatedDrawableCachingBackendImplProvider,
-        animatedDrawableUtil,
-        scheduledExecutorService,
-        resources);
-  }
-
-  private AnimatedDrawableBackendProvider getAnimatedDrawableBackendProvider() {
-    if (mAnimatedDrawableBackendProvider == null) {
-      mAnimatedDrawableBackendProvider = new AnimatedDrawableBackendProvider() {
-        @Override
-        public AnimatedDrawableBackend get(AnimatedImageResult animatedImageResult, Rect bounds) {
-          return new AnimatedDrawableBackendImpl(
-              getAnimatedDrawableUtil(),
-              animatedImageResult,
-              bounds);
+    private AnimatedDrawableBackendProvider getAnimatedDrawableBackendProvider() {
+        if (mAnimatedDrawableBackendProvider == null) {
+            mAnimatedDrawableBackendProvider = new AnimatedDrawableBackendProvider() {
+                @Override
+                public AnimatedDrawableBackend get(AnimatedImageResult animatedImageResult, Rect bounds) {
+                    return new AnimatedDrawableBackendImpl(
+                            getAnimatedDrawableUtil(),
+                            animatedImageResult,
+                            bounds);
+                }
+            };
         }
-      };
+        return mAnimatedDrawableBackendProvider;
     }
-    return mAnimatedDrawableBackendProvider;
-  }
 
-  @Override
-  public AnimatedDrawableFactory getAnimatedDrawableFactory(Context context) {
-    if (mAnimatedDrawableFactory == null) {
-      SerialExecutorService serialExecutorService =
-          new DefaultSerialExecutorService(mExecutorSupplier.forDecode());
-      ActivityManager activityManager =
-          (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-      mAnimatedDrawableFactory = buildAnimatedDrawableFactory(
-          serialExecutorService,
-          activityManager,
-          getAnimatedDrawableUtil(),
-          getAnimatedDrawableBackendProvider(),
-          UiThreadImmediateExecutorService.getInstance(),
-          RealtimeSinceBootClock.get(),
-          context.getResources());
+    @Override
+    public AnimatedDrawableFactory getAnimatedDrawableFactory(Context context) {
+        if (mAnimatedDrawableFactory == null) {
+            SerialExecutorService serialExecutorService =
+                    new DefaultSerialExecutorService(mExecutorSupplier.forDecode());
+            ActivityManager activityManager =
+                    (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            mAnimatedDrawableFactory = buildAnimatedDrawableFactory(
+                    serialExecutorService,
+                    activityManager,
+                    getAnimatedDrawableUtil(),
+                    getAnimatedDrawableBackendProvider(),
+                    UiThreadImmediateExecutorService.getInstance(),
+                    RealtimeSinceBootClock.get(),
+                    context.getResources());
+        }
+        return mAnimatedDrawableFactory;
     }
-    return mAnimatedDrawableFactory;
-  }
 
-  // We need some of these methods public for now so internal code can use them.
+    // We need some of these methods public for now so internal code can use them.
 
-  private AnimatedDrawableUtil getAnimatedDrawableUtil() {
-    if (mAnimatedDrawableUtil == null) {
-      mAnimatedDrawableUtil = new AnimatedDrawableUtil();
+    private AnimatedDrawableUtil getAnimatedDrawableUtil() {
+        if (mAnimatedDrawableUtil == null) {
+            mAnimatedDrawableUtil = new AnimatedDrawableUtil();
+        }
+        return mAnimatedDrawableUtil;
     }
-    return mAnimatedDrawableUtil;
-  }
 
-  private AnimatedImageFactory buildAnimatedImageFactory() {
-    AnimatedDrawableBackendProvider animatedDrawableBackendProvider =
-        new AnimatedDrawableBackendProvider() {
-          @Override
-          public AnimatedDrawableBackend get(AnimatedImageResult imageResult, Rect bounds) {
-            return new AnimatedDrawableBackendImpl(getAnimatedDrawableUtil(), imageResult, bounds);
-          }
-        };
-    return new AnimatedImageFactoryImpl(animatedDrawableBackendProvider, mPlatformBitmapFactory);
-  }
-
-  @Override
-  public AnimatedImageFactory getAnimatedImageFactory() {
-    if (mAnimatedImageFactory == null) {
-      mAnimatedImageFactory = buildAnimatedImageFactory();
+    private AnimatedImageFactory buildAnimatedImageFactory() {
+        AnimatedDrawableBackendProvider animatedDrawableBackendProvider =
+                new AnimatedDrawableBackendProvider() {
+                    @Override
+                    public AnimatedDrawableBackend get(AnimatedImageResult imageResult, Rect bounds) {
+                        return new AnimatedDrawableBackendImpl(getAnimatedDrawableUtil(), imageResult, bounds);
+                    }
+                };
+        return new AnimatedImageFactoryImpl(animatedDrawableBackendProvider, mPlatformBitmapFactory);
     }
-    return mAnimatedImageFactory;
-  }
 
-  protected AnimatedDrawableFactory createAnimatedDrawableFactory(
-      AnimatedDrawableBackendProvider animatedDrawableBackendProvider,
-      AnimatedDrawableCachingBackendImplProvider animatedDrawableCachingBackendImplProvider,
-      AnimatedDrawableUtil animatedDrawableUtil,
-      ScheduledExecutorService scheduledExecutorService,
-      Resources resources) {
-    return new AnimatedDrawableFactoryImpl(
-        animatedDrawableBackendProvider,
-        animatedDrawableCachingBackendImplProvider,
-        animatedDrawableUtil,
-        scheduledExecutorService,
-        resources);
-  }
+    @Override
+    public AnimatedImageFactory getAnimatedImageFactory() {
+        if (mAnimatedImageFactory == null) {
+            mAnimatedImageFactory = buildAnimatedImageFactory();
+        }
+        return mAnimatedImageFactory;
+    }
+
+    protected AnimatedDrawableFactory createAnimatedDrawableFactory(
+            AnimatedDrawableBackendProvider animatedDrawableBackendProvider,
+            AnimatedDrawableCachingBackendImplProvider animatedDrawableCachingBackendImplProvider,
+            AnimatedDrawableUtil animatedDrawableUtil,
+            ScheduledExecutorService scheduledExecutorService,
+            Resources resources) {
+        return new AnimatedDrawableFactoryImpl(
+                animatedDrawableBackendProvider,
+                animatedDrawableCachingBackendImplProvider,
+                animatedDrawableUtil,
+                scheduledExecutorService,
+                resources);
+    }
 }

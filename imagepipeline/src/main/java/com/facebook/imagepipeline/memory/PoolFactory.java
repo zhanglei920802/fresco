@@ -9,9 +9,9 @@
 
 package com.facebook.imagepipeline.memory;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
 import com.facebook.common.internal.Preconditions;
+
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * Factory class for pools.
@@ -19,85 +19,85 @@ import com.facebook.common.internal.Preconditions;
 @NotThreadSafe
 public class PoolFactory {
 
-  private final PoolConfig mConfig;
+    private final PoolConfig mConfig;
 
-  private BitmapPool mBitmapPool;
-  private FlexByteArrayPool mFlexByteArrayPool;
-  private NativeMemoryChunkPool mNativeMemoryChunkPool;
-  private PooledByteBufferFactory mPooledByteBufferFactory;
-  private PooledByteStreams mPooledByteStreams;
-  private SharedByteArray mSharedByteArray;
-  private ByteArrayPool mSmallByteArrayPool;
+    private BitmapPool mBitmapPool;
+    private FlexByteArrayPool mFlexByteArrayPool;
+    private NativeMemoryChunkPool mNativeMemoryChunkPool;
+    private PooledByteBufferFactory mPooledByteBufferFactory;
+    private PooledByteStreams mPooledByteStreams;
+    private SharedByteArray mSharedByteArray;
+    private ByteArrayPool mSmallByteArrayPool;
 
-  public PoolFactory(PoolConfig config) {
-    mConfig = Preconditions.checkNotNull(config);
-  }
-
-  public BitmapPool getBitmapPool() {
-    if (mBitmapPool == null) {
-      mBitmapPool = new BitmapPool(
-          mConfig.getMemoryTrimmableRegistry(),
-          mConfig.getBitmapPoolParams(),
-          mConfig.getBitmapPoolStatsTracker());
+    public PoolFactory(PoolConfig config) {
+        mConfig = Preconditions.checkNotNull(config);
     }
-    return mBitmapPool;
-  }
 
-  public FlexByteArrayPool getFlexByteArrayPool() {
-    if (mFlexByteArrayPool == null) {
-      mFlexByteArrayPool = new FlexByteArrayPool(
-          mConfig.getMemoryTrimmableRegistry(),
-          mConfig.getFlexByteArrayPoolParams());
+    public BitmapPool getBitmapPool() {
+        if (mBitmapPool == null) {
+            mBitmapPool = new BitmapPool(
+                    mConfig.getMemoryTrimmableRegistry(),
+                    mConfig.getBitmapPoolParams(),
+                    mConfig.getBitmapPoolStatsTracker());
+        }
+        return mBitmapPool;
     }
-    return mFlexByteArrayPool;
-  }
 
-  public int getFlexByteArrayPoolMaxNumThreads() {
-    return mConfig.getFlexByteArrayPoolParams().maxNumThreads;
-  }
-
-  public NativeMemoryChunkPool getNativeMemoryChunkPool() {
-    if (mNativeMemoryChunkPool == null) {
-      mNativeMemoryChunkPool = new NativeMemoryChunkPool(
-          mConfig.getMemoryTrimmableRegistry(),
-          mConfig.getNativeMemoryChunkPoolParams(),
-          mConfig.getNativeMemoryChunkPoolStatsTracker());
+    public FlexByteArrayPool getFlexByteArrayPool() {
+        if (mFlexByteArrayPool == null) {
+            mFlexByteArrayPool = new FlexByteArrayPool(
+                    mConfig.getMemoryTrimmableRegistry(),
+                    mConfig.getFlexByteArrayPoolParams());
+        }
+        return mFlexByteArrayPool;
     }
-    return mNativeMemoryChunkPool;
-  }
 
-  public PooledByteBufferFactory getPooledByteBufferFactory() {
-    if (mPooledByteBufferFactory == null) {
-      mPooledByteBufferFactory = new NativePooledByteBufferFactory(
-          getNativeMemoryChunkPool(),
-          getPooledByteStreams());
+    public int getFlexByteArrayPoolMaxNumThreads() {
+        return mConfig.getFlexByteArrayPoolParams().maxNumThreads;
     }
-    return mPooledByteBufferFactory;
-  }
 
-  public PooledByteStreams getPooledByteStreams() {
-    if (mPooledByteStreams == null) {
-      mPooledByteStreams = new PooledByteStreams(getSmallByteArrayPool());
+    public NativeMemoryChunkPool getNativeMemoryChunkPool() {
+        if (mNativeMemoryChunkPool == null) {
+            mNativeMemoryChunkPool = new NativeMemoryChunkPool(
+                    mConfig.getMemoryTrimmableRegistry(),
+                    mConfig.getNativeMemoryChunkPoolParams(),
+                    mConfig.getNativeMemoryChunkPoolStatsTracker());
+        }
+        return mNativeMemoryChunkPool;
     }
-    return mPooledByteStreams;
-  }
 
-  public SharedByteArray getSharedByteArray() {
-    if (mSharedByteArray == null) {
-      mSharedByteArray = new SharedByteArray(
-          mConfig.getMemoryTrimmableRegistry(),
-          mConfig.getFlexByteArrayPoolParams());
+    public PooledByteBufferFactory getPooledByteBufferFactory() {
+        if (mPooledByteBufferFactory == null) {
+            mPooledByteBufferFactory = new NativePooledByteBufferFactory(
+                    getNativeMemoryChunkPool(),
+                    getPooledByteStreams());
+        }
+        return mPooledByteBufferFactory;
     }
-    return mSharedByteArray;
-  }
 
-  public ByteArrayPool getSmallByteArrayPool() {
-    if (mSmallByteArrayPool == null) {
-      mSmallByteArrayPool = new GenericByteArrayPool(
-          mConfig.getMemoryTrimmableRegistry(),
-          mConfig.getSmallByteArrayPoolParams(),
-          mConfig.getSmallByteArrayPoolStatsTracker());
+    public PooledByteStreams getPooledByteStreams() {
+        if (mPooledByteStreams == null) {
+            mPooledByteStreams = new PooledByteStreams(getSmallByteArrayPool());
+        }
+        return mPooledByteStreams;
     }
-    return mSmallByteArrayPool;
-  }
+
+    public SharedByteArray getSharedByteArray() {
+        if (mSharedByteArray == null) {
+            mSharedByteArray = new SharedByteArray(
+                    mConfig.getMemoryTrimmableRegistry(),
+                    mConfig.getFlexByteArrayPoolParams());
+        }
+        return mSharedByteArray;
+    }
+
+    public ByteArrayPool getSmallByteArrayPool() {
+        if (mSmallByteArrayPool == null) {
+            mSmallByteArrayPool = new GenericByteArrayPool(
+                    mConfig.getMemoryTrimmableRegistry(),
+                    mConfig.getSmallByteArrayPoolParams(),
+                    mConfig.getSmallByteArrayPoolStatsTracker());
+        }
+        return mSmallByteArrayPool;
+    }
 }

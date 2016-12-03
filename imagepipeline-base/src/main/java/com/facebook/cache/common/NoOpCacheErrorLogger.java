@@ -15,30 +15,31 @@ import javax.annotation.Nullable;
  * An implementation of {@link CacheErrorLogger} that doesn't do anything.
  */
 public class NoOpCacheErrorLogger implements CacheErrorLogger {
-  private static NoOpCacheErrorLogger sInstance = null;
+    private static NoOpCacheErrorLogger sInstance = null;
 
-  private NoOpCacheErrorLogger() {
-  }
-
-  public static synchronized NoOpCacheErrorLogger getInstance() {
-    if (sInstance == null) {
-      sInstance = new NoOpCacheErrorLogger();
+    private NoOpCacheErrorLogger() {
     }
-    return sInstance;
-  }
 
-  /**
-   * Log an error of the specified category.
-   * @param category Error category
-   * @param clazz Class reporting the error
-   * @param message An optional error message
-   * @param throwable An optional exception
-   */
-  @Override
-  public void logError(
-      CacheErrorCategory category,
-      Class<?> clazz,
-      String message,
-      @Nullable Throwable throwable) {
-  }
+    public static synchronized NoOpCacheErrorLogger getInstance() {
+        if (sInstance == null) {
+            sInstance = new NoOpCacheErrorLogger();
+        }
+        return sInstance;
+    }
+
+    /**
+     * Log an error of the specified category.
+     *
+     * @param category  Error category
+     * @param clazz     Class reporting the error
+     * @param message   An optional error message
+     * @param throwable An optional exception
+     */
+    @Override
+    public void logError(
+            CacheErrorCategory category,
+            Class<?> clazz,
+            String message,
+            @Nullable Throwable throwable) {
+    }
 }

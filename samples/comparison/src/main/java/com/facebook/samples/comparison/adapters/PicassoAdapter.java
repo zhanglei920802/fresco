@@ -26,27 +26,27 @@ import com.squareup.picasso.Picasso;
  */
 public class PicassoAdapter extends ImageListAdapter {
 
-  private final Picasso mPicasso;
+    private final Picasso mPicasso;
 
-  public PicassoAdapter(
-      Context context,
-      PerfListener perfListener) {
-    super(context, perfListener);
-    mPicasso = SamplePicassoFactory.getPicasso(context);
-  }
-
-  @Override
-  public PicassoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    final InstrumentedImageView instrImageView = new InstrumentedImageView(getContext());
-    return new PicassoHolder(getContext(), mPicasso, parent, instrImageView, getPerfListener());
-  }
-
-  @Override
-  public void shutDown() {
-    for (int i = 0; i < getItemCount(); i++) {
-      String uri = getItem(i);
-      mPicasso.invalidate(uri);
+    public PicassoAdapter(
+            Context context,
+            PerfListener perfListener) {
+        super(context, perfListener);
+        mPicasso = SamplePicassoFactory.getPicasso(context);
     }
-    super.clear();
-  }
+
+    @Override
+    public PicassoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final InstrumentedImageView instrImageView = new InstrumentedImageView(getContext());
+        return new PicassoHolder(getContext(), mPicasso, parent, instrImageView, getPerfListener());
+    }
+
+    @Override
+    public void shutDown() {
+        for (int i = 0; i < getItemCount(); i++) {
+            String uri = getItem(i);
+            mPicasso.invalidate(uri);
+        }
+        super.clear();
+    }
 }

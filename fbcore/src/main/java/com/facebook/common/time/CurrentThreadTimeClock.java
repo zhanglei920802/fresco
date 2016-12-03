@@ -15,10 +15,11 @@ package com.facebook.common.time;
  */
 public class CurrentThreadTimeClock implements Clock {
 
-  public CurrentThreadTimeClock() {}
+    public CurrentThreadTimeClock() {
+    }
 
-  @Override
-  public long now() {
-    return android.os.SystemClock.currentThreadTimeMillis();
-  }
+    @Override
+    public long now() {
+        return android.os.SystemClock.currentThreadTimeMillis();
+    }
 }

@@ -19,12 +19,12 @@ import com.facebook.imagepipeline.animated.base.AnimatedImageResult;
  */
 public interface AnimatedDrawableBackendProvider {
 
-  /**
-   * Creates a new {@link AnimatedDrawableBackend}.
-   *
-   * @param animatedImageResult the image result.
-   * @param bounds the initial bounds for the drawable
-   * @return a new {@link AnimatedDrawableBackend}
-   */
-  AnimatedDrawableBackend get(AnimatedImageResult animatedImageResult, Rect bounds);
+    /**
+     * Creates a new {@link AnimatedDrawableBackend}.
+     *
+     * @param animatedImageResult the image result.
+     * @param bounds              the initial bounds for the drawable
+     * @return a new {@link AnimatedDrawableBackend}
+     */
+    AnimatedDrawableBackend get(AnimatedImageResult animatedImageResult, Rect bounds);
 }

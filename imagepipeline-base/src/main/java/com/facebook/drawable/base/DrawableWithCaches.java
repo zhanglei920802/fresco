@@ -16,8 +16,8 @@ package com.facebook.drawable.base;
  */
 public interface DrawableWithCaches {
 
-  /**
-   * Informs the Drawable to drop its caches.
-   */
-  void dropCaches();
+    /**
+     * Informs the Drawable to drop its caches.
+     */
+    void dropCaches();
 }

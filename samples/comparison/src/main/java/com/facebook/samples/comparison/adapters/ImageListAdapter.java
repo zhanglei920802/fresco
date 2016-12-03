@@ -15,8 +15,8 @@ package com.facebook.samples.comparison.adapters;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 
-import com.facebook.samples.comparison.instrumentation.PerfListener;
 import com.facebook.samples.comparison.holders.BaseViewHolder;
+import com.facebook.samples.comparison.instrumentation.PerfListener;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,50 +26,50 @@ import java.util.List;
  */
 public abstract class ImageListAdapter extends RecyclerView.Adapter<BaseViewHolder<?>> {
 
-  private final PerfListener mPerfListener;
+    private final PerfListener mPerfListener;
 
-  private final Context mContext;
+    private final Context mContext;
 
-  private List<String> mModel;
+    private List<String> mModel;
 
-  public ImageListAdapter(final Context context, final PerfListener perfListener) {
-    this.mContext = context;
-    this.mPerfListener = perfListener;
-    this.mModel = new LinkedList<String>();
-  }
+    public ImageListAdapter(final Context context, final PerfListener perfListener) {
+        this.mContext = context;
+        this.mPerfListener = perfListener;
+        this.mModel = new LinkedList<String>();
+    }
 
-  public void addUrl(final String url) {
-    mModel.add(url);
-  }
+    public void addUrl(final String url) {
+        mModel.add(url);
+    }
 
-  protected PerfListener getPerfListener() {
-    return mPerfListener;
-  }
+    protected PerfListener getPerfListener() {
+        return mPerfListener;
+    }
 
-  protected String getItem(final int position) {
-    return mModel.get(position);
-  }
+    protected String getItem(final int position) {
+        return mModel.get(position);
+    }
 
-  @Override
-  public int getItemCount() {
-    return mModel.size();
-  }
+    @Override
+    public int getItemCount() {
+        return mModel.size();
+    }
 
-  protected Context getContext() {
-    return mContext;
-  }
+    protected Context getContext() {
+        return mContext;
+    }
 
-  public void clear() {
-    mModel.clear();
-  }
+    public void clear() {
+        mModel.clear();
+    }
 
-  @Override
-  public void onBindViewHolder(BaseViewHolder<?> holder, int position) {
-    holder.bind(getItem(position));
-  }
+    @Override
+    public void onBindViewHolder(BaseViewHolder<?> holder, int position) {
+        holder.bind(getItem(position));
+    }
 
-  /**
-   * Releases any resources and tears down the adapter.
-   */
-  public abstract void shutDown();
+    /**
+     * Releases any resources and tears down the adapter.
+     */
+    public abstract void shutDown();
 }

@@ -11,30 +11,28 @@
  */
 package com.facebook.samples.decoders;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.facebook.common.util.UriUtil;
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 public class MainActivity extends AppCompatActivity {
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-    // Get the Drawee view
-    SimpleDraweeView drawee1 = (SimpleDraweeView) findViewById(R.id.drawee1);
+        // Get the Drawee view
+        SimpleDraweeView drawee1 = (SimpleDraweeView) findViewById(R.id.drawee1);
 
-    // Set a simple custom color resource as the image.
-    // The format of custom_color1 is <color>#4CAF50</color>
-    drawee1.setImageURI(UriUtil.getUriForResourceId(R.raw.custom_color1));
+        // Set a simple custom color resource as the image.
+        // The format of custom_color1 is <color>#4CAF50</color>
+        drawee1.setImageURI(UriUtil.getUriForResourceId(R.raw.custom_color1));
 
-    // Get another Drawee view and set another custom image resource
-    SimpleDraweeView drawee2 = (SimpleDraweeView) findViewById(R.id.drawee2);
-    drawee2.setImageURI(UriUtil.getUriForResourceId(R.raw.custom_color2));
-  }
+        // Get another Drawee view and set another custom image resource
+        SimpleDraweeView drawee2 = (SimpleDraweeView) findViewById(R.id.drawee2);
+        drawee2.setImageURI(UriUtil.getUriForResourceId(R.raw.custom_color2));
+    }
 }

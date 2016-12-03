@@ -13,48 +13,48 @@ package com.facebook.cache.common;
  * Implementation of {@link CacheEventListener} that doesn't do anything.
  */
 public class NoOpCacheEventListener implements CacheEventListener {
-  private static NoOpCacheEventListener sInstance = null;
+    private static NoOpCacheEventListener sInstance = null;
 
-  private NoOpCacheEventListener() {
-  }
-
-  public static synchronized NoOpCacheEventListener getInstance() {
-    if (sInstance == null) {
-      sInstance = new NoOpCacheEventListener();
+    private NoOpCacheEventListener() {
     }
-    return sInstance;
-  }
 
-  @Override
-  public void onHit(CacheEvent cacheEvent) {
+    public static synchronized NoOpCacheEventListener getInstance() {
+        if (sInstance == null) {
+            sInstance = new NoOpCacheEventListener();
+        }
+        return sInstance;
+    }
 
-  }
+    @Override
+    public void onHit(CacheEvent cacheEvent) {
 
-  @Override
-  public void onMiss(CacheEvent cacheEvent) {
-  }
+    }
 
-  @Override
-  public void onWriteAttempt(CacheEvent cacheEvent) {
-  }
+    @Override
+    public void onMiss(CacheEvent cacheEvent) {
+    }
 
-  @Override
-  public void onWriteSuccess(CacheEvent cacheEvent) {
-  }
+    @Override
+    public void onWriteAttempt(CacheEvent cacheEvent) {
+    }
 
-  @Override
-  public void onReadException(CacheEvent cacheEvent) {
-  }
+    @Override
+    public void onWriteSuccess(CacheEvent cacheEvent) {
+    }
 
-  @Override
-  public void onWriteException(CacheEvent cacheEvent) {
-  }
+    @Override
+    public void onReadException(CacheEvent cacheEvent) {
+    }
 
-  @Override
-  public void onEviction(CacheEvent cacheEvent) {
-  }
+    @Override
+    public void onWriteException(CacheEvent cacheEvent) {
+    }
 
-  @Override
-  public void onCleared() {
-  }
+    @Override
+    public void onEviction(CacheEvent cacheEvent) {
+    }
+
+    @Override
+    public void onCleared() {
+    }
 }

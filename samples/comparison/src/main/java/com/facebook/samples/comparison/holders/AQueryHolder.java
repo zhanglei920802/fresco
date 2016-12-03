@@ -15,27 +15,26 @@ package com.facebook.samples.comparison.holders;
 import android.content.Context;
 import android.view.View;
 
+import com.androidquery.AQuery;
 import com.facebook.samples.comparison.instrumentation.InstrumentedImageView;
 import com.facebook.samples.comparison.instrumentation.PerfListener;
-
-import com.androidquery.AQuery;
 
 /**
  * This is the Holder class for the RecycleView to use with Android Query
  */
 public class AQueryHolder extends BaseViewHolder<InstrumentedImageView> {
 
-  private final AQuery mAQuery;
+    private final AQuery mAQuery;
 
-  public AQueryHolder(
-      Context context, AQuery aQuery, View parentView,
-      InstrumentedImageView instrumentedImageView, PerfListener perfListener) {
-    super(context, parentView, instrumentedImageView, perfListener);
-    mAQuery = aQuery;
-  }
+    public AQueryHolder(
+            Context context, AQuery aQuery, View parentView,
+            InstrumentedImageView instrumentedImageView, PerfListener perfListener) {
+        super(context, parentView, instrumentedImageView, perfListener);
+        mAQuery = aQuery;
+    }
 
-  @Override
-  protected void onBind(String uri) {
-    mAQuery.id(mImageView).image(uri);
-  }
+    @Override
+    protected void onBind(String uri) {
+        mAQuery.id(mImageView).image(uri);
+    }
 }

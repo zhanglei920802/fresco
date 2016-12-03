@@ -18,55 +18,55 @@ import com.facebook.imagepipeline.animated.base.AnimatedImageResult;
  */
 public class CloseableAnimatedImage extends CloseableImage {
 
-  private AnimatedImageResult mImageResult;
+    private AnimatedImageResult mImageResult;
 
-  public CloseableAnimatedImage(AnimatedImageResult imageResult) {
-    mImageResult = imageResult;
-  }
-
-  @Override
-  public synchronized int getWidth() {
-    return isClosed() ? 0 : mImageResult.getImage().getWidth();
-  }
-
-  @Override
-  public synchronized int getHeight() {
-    return isClosed() ? 0 : mImageResult.getImage().getHeight();
-  }
-
-  @Override
-  public void close() {
-    AnimatedImageResult imageResult;
-    synchronized (this) {
-      if (mImageResult == null) {
-        return;
-      }
-      imageResult = mImageResult;
-      mImageResult = null;
+    public CloseableAnimatedImage(AnimatedImageResult imageResult) {
+        mImageResult = imageResult;
     }
-    imageResult.dispose();
-  }
 
-  @Override
-  public synchronized boolean isClosed() {
-    return mImageResult == null;
-  }
+    @Override
+    public synchronized int getWidth() {
+        return isClosed() ? 0 : mImageResult.getImage().getWidth();
+    }
 
-  @Override
-  public synchronized int getSizeInBytes() {
-    return isClosed() ? 0 : mImageResult.getImage().getSizeInBytes();
-  }
+    @Override
+    public synchronized int getHeight() {
+        return isClosed() ? 0 : mImageResult.getImage().getHeight();
+    }
 
-  @Override
-  public boolean isStateful() {
-    return true;
-  }
+    @Override
+    public void close() {
+        AnimatedImageResult imageResult;
+        synchronized (this) {
+            if (mImageResult == null) {
+                return;
+            }
+            imageResult = mImageResult;
+            mImageResult = null;
+        }
+        imageResult.dispose();
+    }
 
-  public synchronized AnimatedImageResult getImageResult() {
-    return mImageResult;
-  }
+    @Override
+    public synchronized boolean isClosed() {
+        return mImageResult == null;
+    }
 
-  public synchronized AnimatedImage getImage() {
-    return isClosed() ? null : mImageResult.getImage();
-  }
+    @Override
+    public synchronized int getSizeInBytes() {
+        return isClosed() ? 0 : mImageResult.getImage().getSizeInBytes();
+    }
+
+    @Override
+    public boolean isStateful() {
+        return true;
+    }
+
+    public synchronized AnimatedImageResult getImageResult() {
+        return mImageResult;
+    }
+
+    public synchronized AnimatedImage getImage() {
+        return isClosed() ? null : mImageResult.getImage();
+    }
 }

@@ -8,45 +8,44 @@
  */
 package com.facebook.imagepipeline.animated.factory;
 
-import java.util.concurrent.ScheduledExecutorService;
-import javax.annotation.concurrent.NotThreadSafe;
-
 import android.content.res.Resources;
-import com.facebook.imagepipeline.animated.base.AnimatedDrawableBackend;
-import com.facebook.imagepipeline.animated.factory.AnimatedDrawableFactory;
+
+import com.facebook.common.internal.DoNotStrip;
 import com.facebook.imagepipeline.animated.impl.AnimatedDrawableBackendProvider;
-import com.facebook.imagepipeline.animated.impl.AnimatedDrawableCachingBackendImpl;
 import com.facebook.imagepipeline.animated.impl.AnimatedDrawableCachingBackendImplProvider;
 import com.facebook.imagepipeline.animated.util.AnimatedDrawableUtil;
 import com.facebook.imagepipeline.bitmaps.PlatformBitmapFactory;
 import com.facebook.imagepipeline.core.ExecutorSupplier;
-import com.facebook.common.internal.DoNotStrip;
+
+import java.util.concurrent.ScheduledExecutorService;
+
+import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
 @DoNotStrip
 public class AnimatedFactoryImplSupport extends AnimatedFactoryImpl {
 
-  @DoNotStrip
-  public AnimatedFactoryImplSupport(
-      PlatformBitmapFactory platformBitmapFactory,
-      ExecutorSupplier executorSupplier) {
-    super(platformBitmapFactory,
-        executorSupplier);
-  }
+    @DoNotStrip
+    public AnimatedFactoryImplSupport(
+            PlatformBitmapFactory platformBitmapFactory,
+            ExecutorSupplier executorSupplier) {
+        super(platformBitmapFactory,
+                executorSupplier);
+    }
 
-  @Override
-  protected AnimatedDrawableFactory createAnimatedDrawableFactory(
-      AnimatedDrawableBackendProvider animatedDrawableBackendProvider,
-      AnimatedDrawableCachingBackendImplProvider animatedDrawableCachingBackendImplProvider,
-      AnimatedDrawableUtil animatedDrawableUtil,
-      ScheduledExecutorService scheduledExecutorService,
-      Resources resources) {
-    return new AnimatedDrawableFactoryImplSupport(
-        animatedDrawableBackendProvider,
-        animatedDrawableCachingBackendImplProvider,
-        animatedDrawableUtil,
-        scheduledExecutorService,
-        resources);
-  }
+    @Override
+    protected AnimatedDrawableFactory createAnimatedDrawableFactory(
+            AnimatedDrawableBackendProvider animatedDrawableBackendProvider,
+            AnimatedDrawableCachingBackendImplProvider animatedDrawableCachingBackendImplProvider,
+            AnimatedDrawableUtil animatedDrawableUtil,
+            ScheduledExecutorService scheduledExecutorService,
+            Resources resources) {
+        return new AnimatedDrawableFactoryImplSupport(
+                animatedDrawableBackendProvider,
+                animatedDrawableCachingBackendImplProvider,
+                animatedDrawableUtil,
+                scheduledExecutorService,
+                resources);
+    }
 
 }

@@ -23,19 +23,20 @@ import org.robolectric.annotation.RealObject;
 @Implements(Canvas.class)
 public class MyShadowCanvas {
 
-  @RealObject private Canvas mRealCanvas;
-  private Bitmap mBitmap;
+    @RealObject
+    private Canvas mRealCanvas;
+    private Bitmap mBitmap;
 
-  public void __constructor__(Bitmap bitmap) {
-    mBitmap = bitmap;
-  }
-
-  @Implementation
-  public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
-    for (int x = 0; x < bitmap.getWidth(); x++) {
-      for (int y = 0; y < bitmap.getHeight(); y++) {
-        mBitmap.setPixel(x, y, bitmap.getPixel(x, y));
-      }
+    public void __constructor__(Bitmap bitmap) {
+        mBitmap = bitmap;
     }
-  }
+
+    @Implementation
+    public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
+        for (int x = 0; x < bitmap.getWidth(); x++) {
+            for (int y = 0; y < bitmap.getHeight(); y++) {
+                mBitmap.setPixel(x, y, bitmap.getPixel(x, y));
+            }
+        }
+    }
 }

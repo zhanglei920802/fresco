@@ -12,11 +12,11 @@ package com.facebook.common.memory;
 /**
  * Intended for UI elements to backup and restore elements from memory on the UI thread
  */
-public interface MemoryUiTrimmable  {
+public interface MemoryUiTrimmable {
 
-  /** Trim memory that isn't needed */
-  void trim();
+    /** Trim memory that isn't needed */
+    void trim();
 
-  /** Restore memory that was trimmed. */
-  void untrim();
+    /** Restore memory that was trimmed. */
+    void untrim();
 }

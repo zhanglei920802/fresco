@@ -35,9 +35,9 @@ subprojects {
     }
 
     afterEvaluate { project ->
-      allclean.dependsOn(project.tasks.matching {it.name == 'clean'})
+        allclean.dependsOn(project.tasks.matching { it.name == 'clean' })
 
-        if (project.tasks.matching { it.name == 'assembleRelease'}) {
+        if (project.tasks.matching { it.name == 'assembleRelease' }) {
             def jarList = new ArrayList()
             task setJarList(dependsOn: assembleRelease) << {
                 configurations.compile.each {

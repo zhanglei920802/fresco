@@ -16,13 +16,13 @@ import com.facebook.imagepipeline.image.QualityInfo;
  */
 public interface ProgressiveJpegConfig {
 
-  /**
-   * Gets the next scan-number that should be decoded after the given scan-number.
-   */
-  int getNextScanNumberToDecode(int scanNumber);
+    /**
+     * Gets the next scan-number that should be decoded after the given scan-number.
+     */
+    int getNextScanNumberToDecode(int scanNumber);
 
-  /**
-   * Gets the quality information for the given scan-number.
-   */
-  QualityInfo getQualityInfo(int scanNumber);
+    /**
+     * Gets the quality information for the given scan-number.
+     */
+    QualityInfo getQualityInfo(int scanNumber);
 }

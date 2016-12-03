@@ -9,8 +9,6 @@
 
 package com.facebook.common.statfs;
 
-import java.io.File;
-
 import android.os.Environment;
 import android.os.StatFs;
 import android.os.SystemClock;
@@ -24,6 +22,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricTestRunner;
+
+import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
@@ -40,202 +40,198 @@ import static org.mockito.Mockito.when;
 @Ignore("t6344387")
 public class StatFsHelperTest {
 
-  @Rule
-  public PowerMockRule rule = new PowerMockRule();
+    private static final String INTERNAL_PATH = "/data";
+    private static final String EXTERNAL_PATH = "/mnt/sdcard/data";
+    private static final int INTERNAL_BLOCK_SIZE = 512;
+    private static final int EXTERNAL_BLOCK_SIZE = 2048;
+    private static final int INTERNAL_BLOCKS_FREE = 16;
+    private static final int EXTERNAL_BLOCKS_FREE = 32;
+    @Rule
+    public PowerMockRule rule = new PowerMockRule();
+    private File mMockFileInternal;
+    private File mMockFileExternal;
+    private StatFs mMockStatFsInternal;
+    private StatFs mMockStatFsExternal;
 
-  private File mMockFileInternal;
-  private File mMockFileExternal;
-  private StatFs mMockStatFsInternal;
-  private StatFs mMockStatFsExternal;
+    @Before
+    public void setUp() {
+        PowerMockito.mockStatic(Environment.class);
+        PowerMockito.mockStatic(StatFsHelper.class);
+        PowerMockito.mockStatic(SystemClock.class);
+        mMockFileInternal = mock(File.class);
+        mMockFileExternal = mock(File.class);
+        mMockStatFsInternal = mock(StatFs.class);
+        mMockStatFsExternal = mock(StatFs.class);
+        PowerMockito.when(SystemClock.uptimeMillis()).thenReturn(System.currentTimeMillis());
+    }
 
-  private static final String INTERNAL_PATH = "/data";
-  private static final String EXTERNAL_PATH = "/mnt/sdcard/data";
+    private void expectInternalSetup() {
+        PowerMockito.when(Environment.getDataDirectory()).thenReturn(mMockFileInternal);
+        when(mMockFileInternal.getAbsolutePath()).thenReturn(INTERNAL_PATH);
+        when(mMockFileInternal.exists()).thenReturn(true);
+        PowerMockito.when(StatFsHelper.createStatFs(INTERNAL_PATH)).thenReturn(mMockStatFsInternal);
+        when(mMockStatFsInternal.getBlockSize()).thenReturn(INTERNAL_BLOCK_SIZE);
+        when(mMockStatFsInternal.getAvailableBlocks()).thenReturn(INTERNAL_BLOCKS_FREE);
+    }
 
-  private static final int INTERNAL_BLOCK_SIZE = 512;
-  private static final int EXTERNAL_BLOCK_SIZE = 2048;
+    private void expectExternalSetup() {
+        PowerMockito.when(Environment.getExternalStorageDirectory()).thenReturn(mMockFileExternal);
+        when(mMockFileExternal.getAbsolutePath()).thenReturn(EXTERNAL_PATH);
+        when(mMockFileExternal.exists()).thenReturn(true);
+        PowerMockito.when(StatFsHelper.createStatFs(EXTERNAL_PATH)).thenReturn(mMockStatFsExternal);
+        when(mMockStatFsExternal.getBlockSize()).thenReturn(EXTERNAL_BLOCK_SIZE);
+        when(mMockStatFsExternal.getAvailableBlocks()).thenReturn(EXTERNAL_BLOCKS_FREE);
+    }
 
-  private static final int INTERNAL_BLOCKS_FREE = 16;
-  private static final int EXTERNAL_BLOCKS_FREE = 32;
+    @Test
+    public void testShouldCreateStatFsForInternalAndExternalStorage() {
 
-  @Before
-  public void setUp() {
-    PowerMockito.mockStatic(Environment.class);
-    PowerMockito.mockStatic(StatFsHelper.class);
-    PowerMockito.mockStatic(SystemClock.class);
-    mMockFileInternal = mock(File.class);
-    mMockFileExternal = mock(File.class);
-    mMockStatFsInternal = mock(StatFs.class);
-    mMockStatFsExternal = mock(StatFs.class);
-    PowerMockito.when(SystemClock.uptimeMillis()).thenReturn(System.currentTimeMillis());
-  }
+        expectInternalSetup();
+        expectExternalSetup();
 
-  private void expectInternalSetup() {
-    PowerMockito.when(Environment.getDataDirectory()).thenReturn(mMockFileInternal);
-    when(mMockFileInternal.getAbsolutePath()).thenReturn(INTERNAL_PATH);
-    when(mMockFileInternal.exists()).thenReturn(true);
-    PowerMockito.when(StatFsHelper.createStatFs(INTERNAL_PATH)).thenReturn(mMockStatFsInternal);
-    when(mMockStatFsInternal.getBlockSize()).thenReturn(INTERNAL_BLOCK_SIZE);
-    when(mMockStatFsInternal.getAvailableBlocks()).thenReturn(INTERNAL_BLOCKS_FREE);
-  }
+        StatFsHelper statFsHelper = new StatFsHelper();
 
-  private void expectExternalSetup() {
-    PowerMockito.when(Environment.getExternalStorageDirectory()).thenReturn(mMockFileExternal);
-    when(mMockFileExternal.getAbsolutePath()).thenReturn(EXTERNAL_PATH);
-    when(mMockFileExternal.exists()).thenReturn(true);
-    PowerMockito.when(StatFsHelper.createStatFs(EXTERNAL_PATH)).thenReturn(mMockStatFsExternal);
-    when(mMockStatFsExternal.getBlockSize()).thenReturn(EXTERNAL_BLOCK_SIZE);
-    when(mMockStatFsExternal.getAvailableBlocks()).thenReturn(EXTERNAL_BLOCKS_FREE);
-  }
+        long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
+        assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
 
-  @Test
-  public void testShouldCreateStatFsForInternalAndExternalStorage() {
+        freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
+        assertEquals(EXTERNAL_BLOCK_SIZE * EXTERNAL_BLOCKS_FREE, freeBytes);
 
-    expectInternalSetup();
-    expectExternalSetup();
+        statFsHelper.resetStats();
 
-    StatFsHelper statFsHelper = new StatFsHelper();
+        verify(mMockStatFsInternal).restat(INTERNAL_PATH);
+        verify(mMockStatFsExternal).restat(EXTERNAL_PATH);
+    }
 
-    long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
-    assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
+    @Test
+    public void testShouldCreateStatFsForInternalStorageOnly() {
 
-    freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
-    assertEquals(EXTERNAL_BLOCK_SIZE * EXTERNAL_BLOCKS_FREE, freeBytes);
+        expectInternalSetup();
+        // Configure external storage to be absent.
+        PowerMockito.when(Environment.getExternalStorageDirectory()).thenReturn(null);
+        StatFsHelper statFsHelper = new StatFsHelper();
 
-    statFsHelper.resetStats();
+        long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
+        assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
 
-    verify(mMockStatFsInternal).restat(INTERNAL_PATH);
-    verify(mMockStatFsExternal).restat(EXTERNAL_PATH);
-  }
+        freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
+        assertEquals(0, freeBytes);
 
-  @Test
-  public void testShouldCreateStatFsForInternalStorageOnly() {
+        statFsHelper.resetStats();
 
-    expectInternalSetup();
-    // Configure external storage to be absent.
-    PowerMockito.when(Environment.getExternalStorageDirectory()).thenReturn(null);
-    StatFsHelper statFsHelper = new StatFsHelper();
+        verify(mMockStatFsInternal).restat(INTERNAL_PATH);
+    }
 
-    long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
-    assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
+    @Test
+    public void testShouldHandleNoInternalStorage() {
+        // Configure internal storage to be absent.
+        PowerMockito.when(Environment.getDataDirectory()).thenReturn(null);
+        // Configure external storage to be absent.
+        PowerMockito.when(Environment.getExternalStorageDirectory()).thenReturn(null);
 
-    freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
-    assertEquals(0, freeBytes);
+        StatFsHelper statFsHelper = new StatFsHelper();
 
-    statFsHelper.resetStats();
+        long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
+        assertEquals(0, freeBytes);
 
-    verify(mMockStatFsInternal).restat(INTERNAL_PATH);
-  }
+        freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
+        assertEquals(0, freeBytes);
 
-  @Test
-  public void testShouldHandleNoInternalStorage() {
-    // Configure internal storage to be absent.
-    PowerMockito.when(Environment.getDataDirectory()).thenReturn(null);
-    // Configure external storage to be absent.
-    PowerMockito.when(Environment.getExternalStorageDirectory()).thenReturn(null);
-
-    StatFsHelper statFsHelper = new StatFsHelper();
-
-    long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
-    assertEquals(0, freeBytes);
-
-    freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
-    assertEquals(0, freeBytes);
-
-    statFsHelper.resetStats();
-  }
+        statFsHelper.resetStats();
+    }
 
 
     @Test
-  public void testShouldHandleExceptionOnExternalCacheCreate() {
+    public void testShouldHandleExceptionOnExternalCacheCreate() {
 
-    expectInternalSetup();
+        expectInternalSetup();
 
-    // Configure external storage to be present but to throw an exception while instantiating
-    // a new StatFs object for external storage.
-    when(mMockFileExternal.getAbsolutePath()).thenReturn(EXTERNAL_PATH);
-    when(mMockFileExternal.exists()).thenReturn(true);
-    PowerMockito.when(StatFsHelper.createStatFs(EXTERNAL_PATH))
-        .thenThrow(new IllegalArgumentException());
+        // Configure external storage to be present but to throw an exception while instantiating
+        // a new StatFs object for external storage.
+        when(mMockFileExternal.getAbsolutePath()).thenReturn(EXTERNAL_PATH);
+        when(mMockFileExternal.exists()).thenReturn(true);
+        PowerMockito.when(StatFsHelper.createStatFs(EXTERNAL_PATH))
+                    .thenThrow(new IllegalArgumentException());
 
-    StatFsHelper statFsHelper = new StatFsHelper();
+        StatFsHelper statFsHelper = new StatFsHelper();
 
-    long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
-    assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
+        long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
+        assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
 
-    freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
-    assertEquals(0, freeBytes);
-  }
+        freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
+        assertEquals(0, freeBytes);
+    }
 
-  @Test
-  public void testShouldHandleExceptionOnExternalCacheRestat() {
+    @Test
+    public void testShouldHandleExceptionOnExternalCacheRestat() {
 
-    expectInternalSetup();
-    expectExternalSetup();
-    doThrow(new IllegalArgumentException()).when(mMockStatFsExternal).restat(EXTERNAL_PATH);
+        expectInternalSetup();
+        expectExternalSetup();
+        doThrow(new IllegalArgumentException()).when(mMockStatFsExternal).restat(EXTERNAL_PATH);
 
-    StatFsHelper statFsHelper = new StatFsHelper();
-    statFsHelper.resetStats();
+        StatFsHelper statFsHelper = new StatFsHelper();
+        statFsHelper.resetStats();
 
-    long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
-    assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
+        long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
+        assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
 
-    freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
-    assertEquals(0, freeBytes);
+        freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
+        assertEquals(0, freeBytes);
 
-    verify(mMockStatFsInternal).restat(INTERNAL_PATH);
-  }
+        verify(mMockStatFsInternal).restat(INTERNAL_PATH);
+    }
 
-  @Test
-  public void testShouldHandleExternalStorageRemoved() {
+    @Test
+    public void testShouldHandleExternalStorageRemoved() {
 
-    expectInternalSetup();
-    expectExternalSetup();
+        expectInternalSetup();
+        expectExternalSetup();
 
-    // External dir is present on creation and missing on subsequent resetStatus() calls.
-    when(mMockFileExternal.exists()).thenReturn(true).thenReturn(false);
+        // External dir is present on creation and missing on subsequent resetStatus() calls.
+        when(mMockFileExternal.exists()).thenReturn(true).thenReturn(false);
 
-    StatFsHelper statFsHelper = new StatFsHelper();
-    statFsHelper.resetStats();
+        StatFsHelper statFsHelper = new StatFsHelper();
+        statFsHelper.resetStats();
 
-    long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
-    assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
+        long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
+        assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
 
-    freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
-    assertEquals(0, freeBytes);
+        freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
+        assertEquals(0, freeBytes);
 
-    verify(mMockStatFsInternal).restat(INTERNAL_PATH);
-  }
+        verify(mMockStatFsInternal).restat(INTERNAL_PATH);
+    }
 
-  @Test
-  public void testShouldHandleExternalStorageReinserted() {
+    @Test
+    public void testShouldHandleExternalStorageReinserted() {
 
-    expectInternalSetup();
-    expectExternalSetup();
+        expectInternalSetup();
+        expectExternalSetup();
 
-    // External dir is present on creation, missing on first resetStatus() call, and back on
-    // subsequent resetStatus() calls.
-    when(mMockFileExternal.exists()).thenReturn(true).thenReturn(false).thenReturn(true);
+        // External dir is present on creation, missing on first resetStatus() call, and back on
+        // subsequent resetStatus() calls.
+        when(mMockFileExternal.exists()).thenReturn(true).thenReturn(false).thenReturn(true);
 
-    StatFsHelper statFsHelper = new StatFsHelper();
-    statFsHelper.resetStats();
+        StatFsHelper statFsHelper = new StatFsHelper();
+        statFsHelper.resetStats();
 
-    long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
-    assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
+        long freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.INTERNAL);
+        assertEquals(INTERNAL_BLOCK_SIZE * INTERNAL_BLOCKS_FREE, freeBytes);
 
-    freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
-    assertEquals(0, freeBytes);
+        freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
+        assertEquals(0, freeBytes);
 
-    statFsHelper.resetStats();
+        statFsHelper.resetStats();
 
-    freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
-    assertEquals(EXTERNAL_BLOCK_SIZE * EXTERNAL_BLOCKS_FREE, freeBytes);
+        freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
+        assertEquals(EXTERNAL_BLOCK_SIZE * EXTERNAL_BLOCKS_FREE, freeBytes);
 
-    statFsHelper.resetStats();
+        statFsHelper.resetStats();
 
-    freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
-    assertEquals(EXTERNAL_BLOCK_SIZE * EXTERNAL_BLOCKS_FREE, freeBytes);
+        freeBytes = statFsHelper.getAvailableStorageSpace(StatFsHelper.StorageType.EXTERNAL);
+        assertEquals(EXTERNAL_BLOCK_SIZE * EXTERNAL_BLOCKS_FREE, freeBytes);
 
-    verify(mMockStatFsInternal, times(3)).restat(INTERNAL_PATH);
-    verify(mMockStatFsExternal).restat(EXTERNAL_PATH);
-  }
+        verify(mMockStatFsInternal, times(3)).restat(INTERNAL_PATH);
+        verify(mMockStatFsExternal).restat(EXTERNAL_PATH);
+    }
 }

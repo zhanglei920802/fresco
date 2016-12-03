@@ -1,8 +1,8 @@
 <LinearLayout
+    android:id="@+id/layout_root"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
@@ -14,75 +14,75 @@
     tools:context="com.facebook.samples.mediavariations.MainActivity"
     >
 
-  <TextView
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="@string/individual_variants"
-      />
-
-  <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="100dp"
-      android:orientation="horizontal"
-      >
-
-    <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/thumb_xs"
-        style="@style/thumb"
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/individual_variants"
         />
 
-    <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/thumb_s"
-        style="@style/thumb"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:orientation="horizontal"
+        >
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/thumb_xs"
+            style="@style/thumb"
+            />
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/thumb_s"
+            style="@style/thumb"
+            />
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/thumb_m"
+            style="@style/thumb"
+            />
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/thumb_l"
+            style="@style/thumb"
+            />
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/thumb_xl"
+            style="@style/thumb"
+            />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/media_variations"
         />
 
-    <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/thumb_m"
-        style="@style/thumb"
-        />
+    <com.facebook.samples.mediavariations.widget.ResizableFrameLayout
+        android:id="@+id/frame_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:minHeight="80dp"
+        android:minWidth="80dp"
+        >
 
-    <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/thumb_l"
-        style="@style/thumb"
-        />
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@+id/img_main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            fresco:actualImageScaleType="centerCrop"
+            fresco:failureImage="@color/red"
+            fresco:overlayImage="@drawable/resize_outline"
+            />
 
-    <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/thumb_xl"
-        style="@style/thumb"
-        />
-  </LinearLayout>
+        <View
+            android:id="@+id/btn_resize"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="bottom|right"
+            android:background="@drawable/resize_outline"
+            tools:ignore="RtlHardcoded"
+            />
 
-  <TextView
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:text="@string/media_variations"
-      />
-
-  <com.facebook.samples.mediavariations.widget.ResizableFrameLayout
-      android:id="@+id/frame_main"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:minHeight="80dp"
-      android:minWidth="80dp"
-      >
-
-      <com.facebook.drawee.view.SimpleDraweeView
-          android:id="@+id/img_main"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          fresco:actualImageScaleType="centerCrop"
-          fresco:failureImage="@color/red"
-          fresco:overlayImage="@drawable/resize_outline"
-      />
-
-      <View
-          android:id="@+id/btn_resize"
-          android:layout_width="40dp"
-          android:layout_height="40dp"
-          android:layout_gravity="bottom|right"
-          android:background="@drawable/resize_outline"
-          tools:ignore="RtlHardcoded"
-      />
-
-  </com.facebook.samples.mediavariations.widget.ResizableFrameLayout>
+    </com.facebook.samples.mediavariations.widget.ResizableFrameLayout>
 </LinearLayout>

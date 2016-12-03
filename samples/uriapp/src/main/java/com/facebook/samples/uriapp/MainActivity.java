@@ -27,47 +27,47 @@ import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 public class MainActivity extends Activity {
-  private SimpleDraweeView mSimpleDraweeView;
+    private SimpleDraweeView mSimpleDraweeView;
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 
-    mSimpleDraweeView = (SimpleDraweeView) findViewById(R.id.simple_drawee_view);
+        mSimpleDraweeView = (SimpleDraweeView) findViewById(R.id.simple_drawee_view);
 
-    final EditText editText = (EditText) findViewById(R.id.uri_edit_text);
-    editText.setOnEditorActionListener(
-        new TextView.OnEditorActionListener() {
-          @Override
-          public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            final boolean isEnterKeyDown = (actionId == EditorInfo.IME_NULL) &&
-                (event.getAction() == KeyEvent.ACTION_DOWN);
-            if (isEnterKeyDown || actionId == EditorInfo.IME_ACTION_DONE) {
-              updateImageUri(Uri.parse(v.getText().toString()));
+        final EditText editText = (EditText) findViewById(R.id.uri_edit_text);
+        editText.setOnEditorActionListener(
+                new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        final boolean isEnterKeyDown = (actionId == EditorInfo.IME_NULL) &&
+                                (event.getAction() == KeyEvent.ACTION_DOWN);
+                        if (isEnterKeyDown || actionId == EditorInfo.IME_ACTION_DONE) {
+                            updateImageUri(Uri.parse(v.getText().toString()));
+                        }
+                        return false;
+                    }
+                });
+        final Button clearButton = (Button) findViewById(R.id.clear_uri);
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editText.getText().clear();
             }
-            return false;
-          }
         });
-    final Button clearButton = (Button) findViewById(R.id.clear_uri);
-    clearButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        editText.getText().clear();
-      }
-    });
-  }
+    }
 
-  private void updateImageUri(Uri uri) {
-    DraweeController controller = Fresco.newDraweeControllerBuilder()
-            .setUri(uri)
-            .setAutoPlayAnimations(true)
-            .build();
-    mSimpleDraweeView.setController(controller);
+    private void updateImageUri(Uri uri) {
+        DraweeController controller = Fresco.newDraweeControllerBuilder()
+                                            .setUri(uri)
+                                            .setAutoPlayAnimations(true)
+                                            .build();
+        mSimpleDraweeView.setController(controller);
 
-    // Trigger GC to check in logs for any unclosed CloseableReferences
-    // DO NOT INCLUDE THIS IN YOUR OWN APPS: It is only intended for testing changes to the library
-    Runtime.getRuntime().gc();
-  }
+        // Trigger GC to check in logs for any unclosed CloseableReferences
+        // DO NOT INCLUDE THIS IN YOUR OWN APPS: It is only intended for testing changes to the library
+        Runtime.getRuntime().gc();
+    }
 }

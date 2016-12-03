@@ -9,44 +9,44 @@
 
 package com.facebook.imagepipeline.cache;
 
-import com.facebook.common.references.CloseableReference;
-
 import com.android.internal.util.Predicate;
+import com.facebook.common.references.CloseableReference;
 
 public class InstrumentedMemoryCache<K, V> implements MemoryCache<K, V> {
 
-  private final MemoryCache<K, V> mDelegate;
-  private final MemoryCacheTracker mTracker;
+    private final MemoryCache<K, V> mDelegate;
+    private final MemoryCacheTracker mTracker;
 
-  public InstrumentedMemoryCache(MemoryCache<K, V> delegate, MemoryCacheTracker tracker) {
-    mDelegate = delegate;
-    mTracker = tracker;
-  }
-
-  @Override
-  public CloseableReference<V> get(K key) {
-    CloseableReference<V> result = mDelegate.get(key);
-    if (result == null) {
-      mTracker.onCacheMiss();
-    } else {
-      mTracker.onCacheHit(key);
+    public InstrumentedMemoryCache(MemoryCache<K, V> delegate, MemoryCacheTracker tracker) {
+        mDelegate = delegate;
+        mTracker = tracker;
     }
-    return result;
-  }
 
-  @Override
-  public CloseableReference<V> cache(K key, CloseableReference<V> value) {
-    mTracker.onCachePut();
-    return mDelegate.cache(key, value);
-  }
+    @Override
+    public CloseableReference<V> get(K key) {
+        CloseableReference<V> result = mDelegate.get(key);
+        if (result == null) {
+            mTracker.onCacheMiss();
+        }
+        else {
+            mTracker.onCacheHit(key);
+        }
+        return result;
+    }
 
-  @Override
-  public int removeAll(Predicate<K> predicate) {
-    return mDelegate.removeAll(predicate);
-  }
+    @Override
+    public CloseableReference<V> cache(K key, CloseableReference<V> value) {
+        mTracker.onCachePut();
+        return mDelegate.cache(key, value);
+    }
 
-  @Override
-  public boolean contains(Predicate<K> predicate) {
-    return mDelegate.contains(predicate);
-  }
+    @Override
+    public int removeAll(Predicate<K> predicate) {
+        return mDelegate.removeAll(predicate);
+    }
+
+    @Override
+    public boolean contains(Predicate<K> predicate) {
+        return mDelegate.contains(predicate);
+    }
 }

@@ -13,43 +13,43 @@ package com.facebook.imagepipeline.memory;
  * Empty implementation of PoolStatsTracker that does not perform any tracking.
  */
 public class NoOpPoolStatsTracker implements PoolStatsTracker {
-  private static NoOpPoolStatsTracker sInstance = null;
+    private static NoOpPoolStatsTracker sInstance = null;
 
-  private NoOpPoolStatsTracker() {
-  }
-
-  public static synchronized NoOpPoolStatsTracker getInstance() {
-    if (sInstance == null) {
-      sInstance = new NoOpPoolStatsTracker();
+    private NoOpPoolStatsTracker() {
     }
-    return sInstance;
-  }
 
-  @Override
-  public void setBasePool(BasePool basePool) {
-  }
+    public static synchronized NoOpPoolStatsTracker getInstance() {
+        if (sInstance == null) {
+            sInstance = new NoOpPoolStatsTracker();
+        }
+        return sInstance;
+    }
 
-  @Override
-  public void onValueReuse(int bucketedSize) {
-  }
+    @Override
+    public void setBasePool(BasePool basePool) {
+    }
 
-  @Override
-  public void onSoftCapReached() {
-  }
+    @Override
+    public void onValueReuse(int bucketedSize) {
+    }
 
-  @Override
-  public void onHardCapReached() {
-  }
+    @Override
+    public void onSoftCapReached() {
+    }
 
-  @Override
-  public void onAlloc(int size) {
-  }
+    @Override
+    public void onHardCapReached() {
+    }
 
-  @Override
-  public void onFree(int sizeInBytes) {
-  }
+    @Override
+    public void onAlloc(int size) {
+    }
 
-  @Override
-  public void onValueRelease(int sizeInBytes) {
-  }
+    @Override
+    public void onFree(int sizeInBytes) {
+    }
+
+    @Override
+    public void onValueRelease(int sizeInBytes) {
+    }
 }

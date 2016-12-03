@@ -15,12 +15,13 @@ import android.graphics.Bitmap;
  */
 public abstract class CloseableBitmap extends CloseableImage {
 
-  /**
-   * Gets the underlying bitmap.
-   * Note: care must be taken because subclasses might be more sophisticated than that. For example,
-   * animated bitmap may have many frames and this method will only return the first one.
-   * @return the underlying bitmap
-   */
-  public abstract Bitmap getUnderlyingBitmap();
+    /**
+     * Gets the underlying bitmap.
+     * Note: care must be taken because subclasses might be more sophisticated than that. For example,
+     * animated bitmap may have many frames and this method will only return the first one.
+     *
+     * @return the underlying bitmap
+     */
+    public abstract Bitmap getUnderlyingBitmap();
 
 }

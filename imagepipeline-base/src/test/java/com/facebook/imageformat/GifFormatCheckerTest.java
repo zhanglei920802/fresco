@@ -28,6 +28,20 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 public class GifFormatCheckerTest {
 
+    private static List<String> getNames(int amount, String pathFormat) {
+        List<String> result = new ArrayList<>();
+        for (int i = 1; i <= amount; ++i) {
+            result.add(String.format(pathFormat, i));
+        }
+        return result;
+    }
+
+    private static InputStream getResourceStream(String name) throws IOException {
+        InputStream is = GifFormatCheckerTest.class.getResourceAsStream(name);
+        assertNotNull("failed to read resource: " + name, is);
+        return is;
+    }
+
     @Test
     public void testStaticGifs() throws Exception {
         singleAnimatedGifTest(getNames(5, "gifs/%d.gif"), false);
@@ -47,14 +61,14 @@ public class GifFormatCheckerTest {
             assertFalse(GifFormatChecker.circularBufferMatchesBytePattern(testBytes, i, testBytes));
         }
 
-        byte[] testInnerBytes = new byte[] {(byte) 0x01, (byte) 0x02};
+        byte[] testInnerBytes = new byte[]{(byte) 0x01, (byte) 0x02};
         assertTrue(GifFormatChecker.circularBufferMatchesBytePattern(testBytes, 1, testInnerBytes));
         for (int i = 2; i < testBytes.length; i++) {
             assertFalse(GifFormatChecker.circularBufferMatchesBytePattern(
                     testBytes, i, testInnerBytes));
         }
 
-        byte[] testCircularBytes = new byte[] {(byte) 0x04, (byte) 0x00};
+        byte[] testCircularBytes = new byte[]{(byte) 0x04, (byte) 0x00};
         assertTrue(GifFormatChecker.circularBufferMatchesBytePattern(
                 testBytes, 4, testCircularBytes));
         for (int i = 0; i < 4; i++) {
@@ -78,20 +92,6 @@ public class GifFormatCheckerTest {
                 resourceStream.close();
             }
         }
-    }
-
-    private static List<String> getNames(int amount, String pathFormat) {
-        List<String> result = new ArrayList<>();
-        for (int i = 1; i <= amount; ++i) {
-            result.add(String.format(pathFormat, i));
-        }
-        return result;
-    }
-
-    private static InputStream getResourceStream(String name) throws IOException {
-        InputStream is = GifFormatCheckerTest.class.getResourceAsStream(name);
-        assertNotNull("failed to read resource: " + name, is);
-        return is;
     }
 
 }

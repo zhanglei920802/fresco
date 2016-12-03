@@ -14,19 +14,19 @@ import org.junit.BeforeClass;
 
 /**
  * Base class for tests that indirectly use NativeMemoryChunk.
- *
+ * <p>
  * <p>These need to stub out the native code called from NMC's static initializer.
  */
 public class TestUsingNativeMemoryChunk {
 
-  @BeforeClass
-  public static void allowNativeStaticInitializers() {
-    SoLoaderShim.setHandler(
-        new SoLoaderShim.Handler() {
-          @Override
-          public void loadLibrary(String libraryName) {
-            // ignore it
-          }
-        });
-  }
+    @BeforeClass
+    public static void allowNativeStaticInitializers() {
+        SoLoaderShim.setHandler(
+                new SoLoaderShim.Handler() {
+                    @Override
+                    public void loadLibrary(String libraryName) {
+                        // ignore it
+                    }
+                });
+    }
 }

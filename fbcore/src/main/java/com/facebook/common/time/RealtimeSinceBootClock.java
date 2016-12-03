@@ -18,23 +18,24 @@ import com.facebook.common.internal.DoNotStrip;
  */
 @DoNotStrip
 public class RealtimeSinceBootClock implements MonotonicClock {
-  private static final RealtimeSinceBootClock INSTANCE = new RealtimeSinceBootClock();
+    private static final RealtimeSinceBootClock INSTANCE = new RealtimeSinceBootClock();
 
-  private RealtimeSinceBootClock() {
-  }
+    private RealtimeSinceBootClock() {
+    }
 
-  /**
-   * Returns a singleton instance of this clock.
-   * @return singleton instance
-   */
-  @DoNotStrip
-  public static RealtimeSinceBootClock get() {
-    return INSTANCE;
-  }
+    /**
+     * Returns a singleton instance of this clock.
+     *
+     * @return singleton instance
+     */
+    @DoNotStrip
+    public static RealtimeSinceBootClock get() {
+        return INSTANCE;
+    }
 
-  @Override
-  public long now() {
-    // Guaranteed to be monotonic according to documentation.
-    return android.os.SystemClock.elapsedRealtime/*sic*/();
-  }
+    @Override
+    public long now() {
+        // Guaranteed to be monotonic according to documentation.
+        return android.os.SystemClock.elapsedRealtime/*sic*/();
+    }
 }

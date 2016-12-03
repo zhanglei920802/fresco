@@ -1,144 +1,154 @@
 <LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:fresco="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:baselineAligned="false"
-  android:orientation="horizontal"
-  android:padding="@dimen/activity_image_grid_margin"
-  tools:context="com.facebook.samples.demo.MainActivity"
-  >
-
-  <LinearLayout
-    android:layout_width="0dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:orientation="vertical"
+    android:baselineAligned="false"
+    android:orientation="horizontal"
+    android:padding="@dimen/activity_image_grid_margin"
+    tools:context="com.facebook.samples.demo.MainActivity"
     >
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/baseline_jpeg"
-        style="@style/drawee"
-        />
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        >
 
-      <TextView
-        android:text="@string/label_baseline_jpeg"
-        style="@style/label"
-        />
-    </FrameLayout>
+        <FrameLayout style="@style/sample_layout">
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/progressive_jpeg"
-        style="@style/drawee"
-        />
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/baseline_jpeg"
+                style="@style/drawee"
+                />
 
-      <TextView
-        android:text="@string/label_progressive_jpeg"
-        style="@style/label"
-        />
-    </FrameLayout>
+            <TextView
+                style="@style/label"
+                android:text="@string/label_baseline_jpeg"
+                />
+        </FrameLayout>
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/animated_gif"
-        style="@style/drawee"
-        />
+        <FrameLayout style="@style/sample_layout">
 
-      <TextView
-        android:text="@string/label_animated_gif"
-        style="@style/label"
-        />
-    </FrameLayout>
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/progressive_jpeg"
+                style="@style/drawee"
+                />
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/data_webp"
-        style="@style/drawee"
-        />
+            <TextView
+                style="@style/label"
+                android:text="@string/label_progressive_jpeg"
+                />
+        </FrameLayout>
 
-      <TextView
-        android:text="@string/label_data_webp"
-        style="@style/label"
-        />
-    </FrameLayout>
+        <FrameLayout style="@style/sample_layout">
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/attr_image_url"
-        style="@style/drawee"
-        fresco:actualImageUri="http://frescolib.org/static/favicon.png"
-        />
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/animated_gif"
+                style="@style/drawee"
+                />
 
-      <TextView
-        android:text="@string/label_attr_image_uri"
-        style="@style/label"
-        />
-    </FrameLayout>
-  </LinearLayout>
+            <TextView
+                style="@style/label"
+                android:text="@string/label_animated_gif"
+                />
+        </FrameLayout>
 
-  <LinearLayout
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:orientation="vertical"
-    >
+        <FrameLayout style="@style/sample_layout">
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/static_webp"
-        style="@style/drawee"
-        />
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/data_webp"
+                style="@style/drawee"
+                />
 
-      <TextView
-        android:text="@string/label_static_webp"
-        style="@style/label"
-        />
-    </FrameLayout>
+            <TextView
+                style="@style/label"
+                android:text="@string/label_data_webp"
+                />
+        </FrameLayout>
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/alpha_webp"
-        style="@style/drawee"
-        />
+        <FrameLayout style="@style/sample_layout">
 
-      <TextView
-        android:text="@string/label_alpha_webp"
-        style="@style/label"
-        />
-    </FrameLayout>
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/attr_image_url"
+                style="@style/drawee"
+                fresco:actualImageUri="http://frescolib.org/static/favicon.png"
+                />
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/animated_webp"
-        style="@style/drawee"
-        />
+            <TextView
+                style="@style/label"
+                android:text="@string/label_attr_image_uri"
+                />
+        </FrameLayout>
+    </LinearLayout>
 
-      <TextView
-        android:text="@string/label_animated_webp"
-        style="@style/label"
-        />
-    </FrameLayout>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        >
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/one_loop_animated_webp"
-        style="@style/drawee"
-        />
+        <FrameLayout style="@style/sample_layout">
 
-      <TextView
-        android:text="@string/label_one_loop_animated_webp"
-        style="@style/label"
-        />
-    </FrameLayout>
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/static_webp"
+                style="@style/drawee"
+                />
 
-    <FrameLayout style="@style/sample_layout">
-      <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/attr_image_data"
-        style="@style/drawee"
-        fresco:actualImageUri="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEZ0l
+            <TextView
+                style="@style/label"
+                android:text="@string/label_static_webp"
+                />
+        </FrameLayout>
+
+        <FrameLayout style="@style/sample_layout">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/alpha_webp"
+                style="@style/drawee"
+                />
+
+            <TextView
+                style="@style/label"
+                android:text="@string/label_alpha_webp"
+                />
+        </FrameLayout>
+
+        <FrameLayout style="@style/sample_layout">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/animated_webp"
+                style="@style/drawee"
+                />
+
+            <TextView
+                style="@style/label"
+                android:text="@string/label_animated_webp"
+                />
+        </FrameLayout>
+
+        <FrameLayout style="@style/sample_layout">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/one_loop_animated_webp"
+                style="@style/drawee"
+                />
+
+            <TextView
+                style="@style/label"
+                android:text="@string/label_one_loop_animated_webp"
+                />
+        </FrameLayout>
+
+        <FrameLayout style="@style/sample_layout">
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/attr_image_data"
+                style="@style/drawee"
+                fresco:actualImageUri="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAEZ0l
         EQVR42u2bWUgVURjHzXZoxyyQqMhKbRdbsDBte7BsoaiwMkMyKoQi9fYSRA9hGq0PESRmD1kQZWELbWALQRFYUUFEaVC
         0WCZlmqbT/4tv4uM0c+cGLbM9/LnO3P+9nvPzzJlvGcM0TQvzssJ8AD4AH4APwAfgA/AB/HE1z+sYCZVAd6F4C280dBq
         6CkVZeBOgSqgcmmNLABjYNOgJpLHyg3iXQK+EN83E1w7KgeqF94itAGBAnaGt0FcxSFKugbcndEDxkWYbeKOgEwbew7Y
@@ -156,12 +166,12 @@
         6xVbpsCufEMEkpyiVW+rpNbkeACY3gOuATWLyVMaarrbH3QqgTKntbxGtsTovAJC3wfRg2aBbAch0OMbLACzb414D8Et
         73GsAssSTXwHP7AH8QONuMXnSCi8AoDhgqdIVauDWWbhXVoCsBVCvYJLrH5Y2qQcchHp54mlxJRCi0HeZpx6X51S4kh9
         sjPH/X8AH4APwAfgAfAA+AB+AU/Qd42W8mKN4nlcAAAAASUVORK5CYII="
-        />
+                />
 
-      <TextView
-        android:text="@string/label_attr_image_uri"
-        style="@style/label"
-        />
-    </FrameLayout>
-  </LinearLayout>
+            <TextView
+                style="@style/label"
+                android:text="@string/label_attr_image_uri"
+                />
+        </FrameLayout>
+    </LinearLayout>
 </LinearLayout>

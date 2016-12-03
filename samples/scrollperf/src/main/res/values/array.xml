@@ -127,7 +127,7 @@
         <item>8 threads for decoding</item>
     </array>
     <array name="decoding_thread_summaries">
-        <item>Number of processors: </item>
+        <item>Number of processors:</item>
         <item>Single Thread</item>
         <item>2 threads for decoding</item>
         <item>3 threads for decoding</item>

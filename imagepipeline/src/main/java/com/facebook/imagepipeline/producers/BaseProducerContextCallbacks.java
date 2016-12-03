@@ -14,19 +14,19 @@ package com.facebook.imagepipeline.producers;
  */
 public class BaseProducerContextCallbacks implements ProducerContextCallbacks {
 
-  @Override
-  public void onCancellationRequested() {
-  }
+    @Override
+    public void onCancellationRequested() {
+    }
 
-  @Override
-  public void onIsPrefetchChanged() {
-  }
+    @Override
+    public void onIsPrefetchChanged() {
+    }
 
-  @Override
-  public void onIsIntermediateResultExpectedChanged() {
-  }
+    @Override
+    public void onIsIntermediateResultExpectedChanged() {
+    }
 
-  @Override
-  public void onPriorityChanged() {
-  }
+    @Override
+    public void onPriorityChanged() {
+    }
 }

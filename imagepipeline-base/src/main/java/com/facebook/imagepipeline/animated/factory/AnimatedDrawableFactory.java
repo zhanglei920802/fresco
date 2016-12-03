@@ -19,13 +19,13 @@ import com.facebook.imagepipeline.image.CloseableImage;
  */
 public interface AnimatedDrawableFactory {
 
-  /**
-   * Creates an {@link AnimatedDrawable} based on an {@link AnimatedImage}.
-   *
-   * @param closeableImage the result of the code
-   * @return a newly constructed {@link Drawable}
-   */
-  Drawable create(CloseableImage closeableImage);
+    /**
+     * Creates an {@link AnimatedDrawable} based on an {@link AnimatedImage}.
+     *
+     * @param closeableImage the result of the code
+     * @return a newly constructed {@link Drawable}
+     */
+    Drawable create(CloseableImage closeableImage);
 
 
 }

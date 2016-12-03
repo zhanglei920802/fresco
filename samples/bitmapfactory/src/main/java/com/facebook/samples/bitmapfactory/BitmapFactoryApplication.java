@@ -21,10 +21,10 @@ import com.facebook.drawee.backends.pipeline.Fresco;
  */
 public class BitmapFactoryApplication extends Application {
 
-  @Override
-  public void onCreate() {
-    super.onCreate();
-    FLog.setMinimumLoggingLevel(FLog.VERBOSE);
-    Fresco.initialize(this);
-  }
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        FLog.setMinimumLoggingLevel(FLog.VERBOSE);
+        Fresco.initialize(this);
+    }
 }

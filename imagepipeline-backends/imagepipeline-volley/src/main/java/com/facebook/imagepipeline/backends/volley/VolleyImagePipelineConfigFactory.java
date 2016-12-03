@@ -10,6 +10,7 @@
 package com.facebook.imagepipeline.backends.volley;
 
 import android.content.Context;
+
 import com.android.volley.RequestQueue;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 
@@ -19,10 +20,10 @@ import com.facebook.imagepipeline.core.ImagePipelineConfig;
  */
 public class VolleyImagePipelineConfigFactory {
 
-  public static ImagePipelineConfig.Builder newBuilder(
-      Context context,
-      RequestQueue requestQueue) {
-    return ImagePipelineConfig.newBuilder(context)
-        .setNetworkFetcher(new VolleyNetworkFetcher(requestQueue));
-  }
+    public static ImagePipelineConfig.Builder newBuilder(
+            Context context,
+            RequestQueue requestQueue) {
+        return ImagePipelineConfig.newBuilder(context)
+                                  .setNetworkFetcher(new VolleyNetworkFetcher(requestQueue));
+    }
 }

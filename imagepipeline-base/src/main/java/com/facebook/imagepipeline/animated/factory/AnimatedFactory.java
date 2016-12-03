@@ -9,14 +9,14 @@
 
 package com.facebook.imagepipeline.animated.factory;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
 import android.content.Context;
+
+import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
 public interface AnimatedFactory {
 
-  AnimatedDrawableFactory getAnimatedDrawableFactory(Context context);
+    AnimatedDrawableFactory getAnimatedDrawableFactory(Context context);
 
-  AnimatedImageFactory getAnimatedImageFactory();
+    AnimatedImageFactory getAnimatedImageFactory();
 }

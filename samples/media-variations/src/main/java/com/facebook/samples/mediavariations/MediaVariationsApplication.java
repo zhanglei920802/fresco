@@ -25,22 +25,23 @@ import java.util.Set;
 
 public class MediaVariationsApplication extends Application {
 
-  @Override
-  public void onCreate() {
-    super.onCreate();
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
-    FLog.setMinimumLoggingLevel(FLog.VERBOSE);
-    Set<RequestListener> listeners = new HashSet<>();
-    listeners.add(new RequestLoggingListener());
-    ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this)
-        .setRequestListeners(listeners)
-        .experiment().setMediaVariationsIndexEnabled(new Supplier<Boolean>() {
-          @Override
-          public Boolean get() {
-            return true;
-          }
-        })
-        .build();
-    Fresco.initialize(this, config);
-  }
+        FLog.setMinimumLoggingLevel(FLog.VERBOSE);
+        Set<RequestListener> listeners = new HashSet<>();
+        listeners.add(new RequestLoggingListener());
+        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this)
+                                                        .setRequestListeners(listeners)
+                                                        .experiment()
+                                                        .setMediaVariationsIndexEnabled(new Supplier<Boolean>() {
+                                                            @Override
+                                                            public Boolean get() {
+                                                                return true;
+                                                            }
+                                                        })
+                                                        .build();
+        Fresco.initialize(this, config);
+    }
 }

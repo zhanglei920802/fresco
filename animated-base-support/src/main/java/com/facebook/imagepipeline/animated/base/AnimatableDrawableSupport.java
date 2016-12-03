@@ -18,27 +18,28 @@ import com.nineoldandroids.animation.ValueAnimator;
  */
 public interface AnimatableDrawableSupport extends Animatable {
 
-  /**
-   * An animator that will animate the drawable directly. The loop count and duration will
-   * be determined by metadata in the original image. Update listener is attached automatically.
-   *
-   * @return a new animator
-   */
-  ValueAnimator createValueAnimator();
+    /**
+     * An animator that will animate the drawable directly. The loop count and duration will
+     * be determined by metadata in the original image. Update listener is attached automatically.
+     *
+     * @return a new animator
+     */
+    ValueAnimator createValueAnimator();
 
-  /**
-   * An animator that will animate the drawable directly. The loop count will be set based on
-   * the specified duration. Update listener is attached automatically.
-   *
-   * @param maxDurationMs maximum duration animate
-   * @return a new animator
-   */
-  ValueAnimator createValueAnimator(int maxDurationMs);
+    /**
+     * An animator that will animate the drawable directly. The loop count will be set based on
+     * the specified duration. Update listener is attached automatically.
+     *
+     * @param maxDurationMs maximum duration animate
+     * @return a new animator
+     */
+    ValueAnimator createValueAnimator(int maxDurationMs);
 
-  /**
-   * Creates an animator update listener that will animate the drawable directly. This is useful
-   * when the drawable needs to be animated by an existing value animator.
-   * @return a new update listener
-   */
-  ValueAnimator.AnimatorUpdateListener createAnimatorUpdateListener();
+    /**
+     * Creates an animator update listener that will animate the drawable directly. This is useful
+     * when the drawable needs to be animated by an existing value animator.
+     *
+     * @return a new update listener
+     */
+    ValueAnimator.AnimatorUpdateListener createAnimatorUpdateListener();
 }

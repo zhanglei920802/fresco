@@ -9,27 +9,27 @@
 
 package com.facebook.drawee.interfaces;
 
-import javax.annotation.Nullable;
-
 import android.net.Uri;
+
+import javax.annotation.Nullable;
 
 /**
  * Interface for simple Drawee controller builders.
  */
 public interface SimpleDraweeControllerBuilder {
 
-  /** Sets the caller context. */
-  SimpleDraweeControllerBuilder setCallerContext(Object callerContext);
+    /** Sets the caller context. */
+    SimpleDraweeControllerBuilder setCallerContext(Object callerContext);
 
-  /** Sets the uri. */
-  SimpleDraweeControllerBuilder setUri(Uri uri);
+    /** Sets the uri. */
+    SimpleDraweeControllerBuilder setUri(Uri uri);
 
-  /** Sets the uri from a string. */
-  SimpleDraweeControllerBuilder setUri(@Nullable String uriString);
+    /** Sets the uri from a string. */
+    SimpleDraweeControllerBuilder setUri(@Nullable String uriString);
 
-  /** Sets the old controller to be reused if possible. */
-  SimpleDraweeControllerBuilder setOldController(@Nullable DraweeController oldController);
+    /** Sets the old controller to be reused if possible. */
+    SimpleDraweeControllerBuilder setOldController(@Nullable DraweeController oldController);
 
-  /** Builds the specified controller. */
-  DraweeController build();
+    /** Builds the specified controller. */
+    DraweeController build();
 }

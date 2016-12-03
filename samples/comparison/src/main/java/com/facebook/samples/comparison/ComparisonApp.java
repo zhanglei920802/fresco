@@ -22,19 +22,19 @@ import com.facebook.stetho.dumpapp.DumperPlugin;
 
 public class ComparisonApp extends Application {
 
-  @Override
-  public void onCreate() {
-    super.onCreate();
-    final Context context = this;
-    Stetho.initialize(Stetho.newInitializerBuilder(context)
-        .enableDumpapp(new DumperPluginsProvider() {
-          @Override
-          public Iterable<DumperPlugin> get() {
-            return new Stetho.DefaultDumperPluginsBuilder(context)
-                .provide(new FrescoStethoPlugin())
-                .finish();
-          }
-        })
-        .build());
-  }
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        final Context context = this;
+        Stetho.initialize(Stetho.newInitializerBuilder(context)
+                                .enableDumpapp(new DumperPluginsProvider() {
+                                    @Override
+                                    public Iterable<DumperPlugin> get() {
+                                        return new Stetho.DefaultDumperPluginsBuilder(context)
+                                                .provide(new FrescoStethoPlugin())
+                                                .finish();
+                                    }
+                                })
+                                .build());
+    }
 }

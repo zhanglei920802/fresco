@@ -9,87 +9,87 @@
 
 package com.facebook.imagepipeline.datasource;
 
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
-
+import com.facebook.common.references.CloseableReference;
 import com.facebook.datasource.AbstractDataSource;
 import com.facebook.datasource.DataSource;
-import com.facebook.common.references.CloseableReference;
+
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * A {@link DataSource} whose result may be set by a {@link #set(CloseableReference<T>)} or
  * {@link #setException(Throwable)} call. It may also be closed.
- *
+ * <p>
  * <p>This data source has no intermediate results - calling {@link #set(CloseableReference<T>)}
  * means that the data source is finished.
  */
 @ThreadSafe
 public final class SettableDataSource<T> extends AbstractDataSource<CloseableReference<T>> {
 
-  /**
-   * Creates a new {@code SettableDataSource}
-   */
-  public static <V> SettableDataSource<V> create() {
-    return new SettableDataSource<V>();
-  }
+    private SettableDataSource() {
+    }
 
-  private SettableDataSource() {
-  }
+    /**
+     * Creates a new {@code SettableDataSource}
+     */
+    public static <V> SettableDataSource<V> create() {
+        return new SettableDataSource<V>();
+    }
 
-  /**
-   * Sets the value of this data source.
-   *
-   * <p> This method will return {@code true} if the value was successfully set, or
-   * {@code false} if the data source has already been set, failed or closed.
-   *
-   * <p> Passed CloseableReference is cloned, caller of this method still owns passed reference
-   * after the method returns.
-   *
-   * @param valueRef closeable reference to the value the data source should hold.
-   * @return true if the value was successfully set.
-   */
-  public boolean set(@Nullable CloseableReference<T> valueRef) {
-    CloseableReference<T> clonedRef = CloseableReference.cloneOrNull(valueRef);
-    return super.setResult(clonedRef, /* isLast */ true);
-  }
+    /**
+     * Sets the value of this data source.
+     * <p>
+     * <p> This method will return {@code true} if the value was successfully set, or
+     * {@code false} if the data source has already been set, failed or closed.
+     * <p>
+     * <p> Passed CloseableReference is cloned, caller of this method still owns passed reference
+     * after the method returns.
+     *
+     * @param valueRef closeable reference to the value the data source should hold.
+     * @return true if the value was successfully set.
+     */
+    public boolean set(@Nullable CloseableReference<T> valueRef) {
+        CloseableReference<T> clonedRef = CloseableReference.cloneOrNull(valueRef);
+        return super.setResult(clonedRef, /* isLast */ true);
+    }
 
-  /**
-   * Sets the data source to having failed with the given exception.
-   *
-   * <p> This method will return {@code true} if the exception was successfully set, or
-   * {@code false} if the data source has already been set, failed or closed.
-   *
-   * @param throwable the exception the data source should hold.
-   * @return true if the exception was successfully set.
-   */
-  public boolean setException(Throwable throwable) {
-    return super.setFailure(throwable);
-  }
+    /**
+     * Sets the data source to having failed with the given exception.
+     * <p>
+     * <p> This method will return {@code true} if the exception was successfully set, or
+     * {@code false} if the data source has already been set, failed or closed.
+     *
+     * @param throwable the exception the data source should hold.
+     * @return true if the exception was successfully set.
+     */
+    public boolean setException(Throwable throwable) {
+        return super.setFailure(throwable);
+    }
 
-  /**
-   * Sets the progress.
-   *
-   * @param progress the progress in range [0, 1] to be set.
-   * @return true if the progress was successfully set.
-   */
-  @Override
-  public boolean setProgress(float progress) {
-    return super.setProgress(progress);
-  }
+    /**
+     * Sets the progress.
+     *
+     * @param progress the progress in range [0, 1] to be set.
+     * @return true if the progress was successfully set.
+     */
+    @Override
+    public boolean setProgress(float progress) {
+        return super.setProgress(progress);
+    }
 
-  /**
-   * Gets the result if any, null otherwise.
-   *
-   * <p> Value will be cloned and it's the caller's responsibility to close the returned value.
-   */
-  @Override
-  @Nullable
-  public CloseableReference<T> getResult() {
-    return CloseableReference.cloneOrNull(super.getResult());
-  }
+    /**
+     * Gets the result if any, null otherwise.
+     * <p>
+     * <p> Value will be cloned and it's the caller's responsibility to close the returned value.
+     */
+    @Override
+    @Nullable
+    public CloseableReference<T> getResult() {
+        return CloseableReference.cloneOrNull(super.getResult());
+    }
 
-  @Override
-  protected void closeResult(@Nullable CloseableReference<T> result) {
-    CloseableReference.closeSafely(result);
-  }
+    @Override
+    protected void closeResult(@Nullable CloseableReference<T> result) {
+        CloseableReference.closeSafely(result);
+    }
 }

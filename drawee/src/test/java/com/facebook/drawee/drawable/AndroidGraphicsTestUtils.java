@@ -19,25 +19,25 @@ import org.junit.Assert;
  */
 public class AndroidGraphicsTestUtils {
 
-  public static void assertEquals(Matrix expectedMatrix, Matrix actualMatrix) {
-    if (expectedMatrix == null) {
-      Assert.assertNull(actualMatrix);
-      return;
+    public static void assertEquals(Matrix expectedMatrix, Matrix actualMatrix) {
+        if (expectedMatrix == null) {
+            Assert.assertNull(actualMatrix);
+            return;
+        }
+        Assert.assertNotNull(actualMatrix);
+        String expected = expectedMatrix.toString();
+        String actual = actualMatrix.toString();
+        if (!actual.equals(expected)) {
+            Assert.fail(String.format("\nexpected %s \nbut was %s", expected, actual));
+        }
     }
-    Assert.assertNotNull(actualMatrix);
-    String expected = expectedMatrix.toString();
-    String actual = actualMatrix.toString();
-    if (!actual.equals(expected)) {
-      Assert.fail(String.format("\nexpected %s \nbut was %s", expected, actual));
-    }
-  }
 
-  public static void assertEquals(PointF expected, PointF actual, float delta) {
-    if (expected == null) {
-      Assert.assertNull(actual);
-      return;
+    public static void assertEquals(PointF expected, PointF actual, float delta) {
+        if (expected == null) {
+            Assert.assertNull(actual);
+            return;
+        }
+        Assert.assertEquals(expected.x, actual.x, delta);
+        Assert.assertEquals(expected.y, actual.y, delta);
     }
-    Assert.assertEquals(expected.x, actual.x, delta);
-    Assert.assertEquals(expected.y, actual.y, delta);
-  }
 }

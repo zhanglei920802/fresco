@@ -9,8 +9,6 @@
 
 package com.facebook.imagepipeline.producers;
 
-import java.io.InputStream;
-
 import android.util.Pair;
 
 import com.facebook.common.references.CloseableReference;
@@ -21,196 +19,210 @@ import com.facebook.imagepipeline.memory.PooledByteBuffer;
 import com.facebook.imageutils.BitmapUtil;
 import com.facebook.imageutils.JfifUtil;
 
-import org.junit.*;
-import org.junit.runner.*;
-import org.mockito.*;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.invocation.*;
-import org.mockito.stubbing.*;
-import org.powermock.api.mockito.*;
-import org.powermock.core.classloader.annotations.*;
-import org.powermock.modules.junit4.rule.*;
-import org.robolectric.*;
-import org.robolectric.annotation.*;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.rule.PowerMockRule;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-import static org.junit.Assert.*;
+import java.io.InputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*" })
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*"})
 @PrepareForTest({ImageFormatChecker.class, JfifUtil.class, BitmapUtil.class})
-@Config(manifest= Config.NONE)
+@Config(manifest = Config.NONE)
 public class AddImageTransformMetaDataProducerTest {
-  @Mock public Producer<EncodedImage> mInputProducer;
-  @Mock public Consumer<EncodedImage> mConsumer;
-  @Mock public ProducerContext mProducerContext;
-  @Mock public Exception mException;
+    @Mock
+    public Producer<EncodedImage> mInputProducer;
+    @Mock
+    public Consumer<EncodedImage> mConsumer;
+    @Mock
+    public ProducerContext mProducerContext;
+    @Mock
+    public Exception mException;
 
-  @Rule
-  public PowerMockRule rule = new PowerMockRule();
+    @Rule
+    public PowerMockRule rule = new PowerMockRule();
 
-  private AddImageTransformMetaDataProducer mAddMetaDataProducer;
-  private Consumer<EncodedImage> mAddMetaDataConsumer;
-  private CloseableReference<PooledByteBuffer> mIntermediateResultBufferRef;
-  private CloseableReference<PooledByteBuffer> mFinalResultBufferRef;
-  private EncodedImage mIntermediateResult;
-  private EncodedImage mFinalResult;
+    private AddImageTransformMetaDataProducer mAddMetaDataProducer;
+    private Consumer<EncodedImage> mAddMetaDataConsumer;
+    private CloseableReference<PooledByteBuffer> mIntermediateResultBufferRef;
+    private CloseableReference<PooledByteBuffer> mFinalResultBufferRef;
+    private EncodedImage mIntermediateResult;
+    private EncodedImage mFinalResult;
 
-  @Before
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
-    PowerMockito.mockStatic(ImageFormatChecker.class, JfifUtil.class, BitmapUtil.class);
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        PowerMockito.mockStatic(ImageFormatChecker.class, JfifUtil.class, BitmapUtil.class);
 
-    mAddMetaDataProducer = new AddImageTransformMetaDataProducer(mInputProducer);
+        mAddMetaDataProducer = new AddImageTransformMetaDataProducer(mInputProducer);
 
-    mIntermediateResultBufferRef = CloseableReference.of(mock(PooledByteBuffer.class));
-    mFinalResultBufferRef = CloseableReference.of(mock(PooledByteBuffer.class));
+        mIntermediateResultBufferRef = CloseableReference.of(mock(PooledByteBuffer.class));
+        mFinalResultBufferRef = CloseableReference.of(mock(PooledByteBuffer.class));
 
-    mIntermediateResult = new EncodedImage(mIntermediateResultBufferRef);
-    mFinalResult = new EncodedImage(mFinalResultBufferRef);
+        mIntermediateResult = new EncodedImage(mIntermediateResultBufferRef);
+        mFinalResult = new EncodedImage(mFinalResultBufferRef);
 
-    mAddMetaDataConsumer = null;
-    doAnswer(
-        new Answer() {
-          @Override
-          public Object answer(InvocationOnMock invocation) throws Throwable {
-            mAddMetaDataConsumer =
-                (Consumer<EncodedImage>) invocation.getArguments()[0];
-            return null;
-          }
-        }).when(mInputProducer).produceResults(any(Consumer.class), any(ProducerContext.class));
-    mAddMetaDataProducer.produceResults(mConsumer, mProducerContext);
-  }
+        mAddMetaDataConsumer = null;
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        mAddMetaDataConsumer =
+                                (Consumer<EncodedImage>) invocation.getArguments()[0];
+                        return null;
+                    }
+                }).when(mInputProducer).produceResults(any(Consumer.class), any(ProducerContext.class));
+        mAddMetaDataProducer.produceResults(mConsumer, mProducerContext);
+    }
 
-  @Test
-  public void testOnNewResultLastNotJpeg() {
-    when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
-        .thenReturn(DefaultImageFormats.WEBP_SIMPLE);
-    mAddMetaDataConsumer.onNewResult(mFinalResult, true);
-    ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
-    verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(true));
-    EncodedImage encodedImage = argumentCaptor.getValue();
-    assertTrue(EncodedImage.isValid(encodedImage));
-    assertEquals(DefaultImageFormats.WEBP_SIMPLE, encodedImage.getImageFormat());
-    assertEquals(0, encodedImage.getRotationAngle());
-    assertEquals(-1, encodedImage.getWidth());
-    assertEquals(-1, encodedImage.getHeight());
-  }
+    @Test
+    public void testOnNewResultLastNotJpeg() {
+        when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
+                .thenReturn(DefaultImageFormats.WEBP_SIMPLE);
+        mAddMetaDataConsumer.onNewResult(mFinalResult, true);
+        ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
+        verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(true));
+        EncodedImage encodedImage = argumentCaptor.getValue();
+        assertTrue(EncodedImage.isValid(encodedImage));
+        assertEquals(DefaultImageFormats.WEBP_SIMPLE, encodedImage.getImageFormat());
+        assertEquals(0, encodedImage.getRotationAngle());
+        assertEquals(-1, encodedImage.getWidth());
+        assertEquals(-1, encodedImage.getHeight());
+    }
 
-  @Test
-  public void testOnNewResultNotLastNotJpeg() {
-    when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
-        .thenReturn(DefaultImageFormats.WEBP_SIMPLE);
-    when(BitmapUtil.decodeDimensions(any(InputStream.class))).thenReturn(null);
-    mAddMetaDataConsumer.onNewResult(mIntermediateResult, false);
-    ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
-    verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(false));
-    EncodedImage encodedImage = argumentCaptor.getValue();
-    assertTrue(EncodedImage.isValid(encodedImage));
-    assertEquals(DefaultImageFormats.WEBP_SIMPLE, encodedImage.getImageFormat());
-    assertEquals(0, encodedImage.getRotationAngle());
-    assertEquals(-1, encodedImage.getWidth());
-    assertEquals(-1, encodedImage.getHeight());
-  }
+    @Test
+    public void testOnNewResultNotLastNotJpeg() {
+        when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
+                .thenReturn(DefaultImageFormats.WEBP_SIMPLE);
+        when(BitmapUtil.decodeDimensions(any(InputStream.class))).thenReturn(null);
+        mAddMetaDataConsumer.onNewResult(mIntermediateResult, false);
+        ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
+        verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(false));
+        EncodedImage encodedImage = argumentCaptor.getValue();
+        assertTrue(EncodedImage.isValid(encodedImage));
+        assertEquals(DefaultImageFormats.WEBP_SIMPLE, encodedImage.getImageFormat());
+        assertEquals(0, encodedImage.getRotationAngle());
+        assertEquals(-1, encodedImage.getWidth());
+        assertEquals(-1, encodedImage.getHeight());
+    }
 
-  @Test
-  public void testOnNewResultNotLast_DimensionsNotFound() {
-    int rotationAngle = 180;
-    int orientation = 1;
-    when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
-        .thenReturn(DefaultImageFormats.JPEG);
-    when(JfifUtil.getAutoRotateAngleFromOrientation(orientation)).thenReturn(rotationAngle);
-    when(JfifUtil.getOrientation(any(InputStream.class))).thenReturn(orientation);
-    when(BitmapUtil.decodeDimensions(any(InputStream.class))).thenReturn(null);
-    mAddMetaDataConsumer.onNewResult(mIntermediateResult, false);
-    ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
-    verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(false));
-    EncodedImage encodedImage = argumentCaptor.getValue();
-    assertTrue(EncodedImage.isValid(encodedImage));
-    assertEquals(-1, encodedImage.getRotationAngle());
-    assertEquals(-1, encodedImage.getWidth());
-    assertEquals(-1, encodedImage.getHeight());
-  }
+    @Test
+    public void testOnNewResultNotLast_DimensionsNotFound() {
+        int rotationAngle = 180;
+        int orientation = 1;
+        when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
+                .thenReturn(DefaultImageFormats.JPEG);
+        when(JfifUtil.getAutoRotateAngleFromOrientation(orientation)).thenReturn(rotationAngle);
+        when(JfifUtil.getOrientation(any(InputStream.class))).thenReturn(orientation);
+        when(BitmapUtil.decodeDimensions(any(InputStream.class))).thenReturn(null);
+        mAddMetaDataConsumer.onNewResult(mIntermediateResult, false);
+        ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
+        verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(false));
+        EncodedImage encodedImage = argumentCaptor.getValue();
+        assertTrue(EncodedImage.isValid(encodedImage));
+        assertEquals(-1, encodedImage.getRotationAngle());
+        assertEquals(-1, encodedImage.getWidth());
+        assertEquals(-1, encodedImage.getHeight());
+    }
 
-  @Test
-  public void testOnNewResultNotLast_RotationNotFound() {
-    when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
-        .thenReturn(DefaultImageFormats.JPEG);
-    when(JfifUtil.getOrientation(any(InputStream.class))).thenReturn(0);
-    mAddMetaDataConsumer.onNewResult(mIntermediateResult, false);
-    ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
-    verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(false));
-    EncodedImage encodedImage = argumentCaptor.getValue();
-    assertTrue(EncodedImage.isValid(encodedImage));
-    assertEquals(-1, encodedImage.getRotationAngle());
-    assertEquals(-1, encodedImage.getWidth());
-    assertEquals(-1, encodedImage.getHeight());
-  }
+    @Test
+    public void testOnNewResultNotLast_RotationNotFound() {
+        when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
+                .thenReturn(DefaultImageFormats.JPEG);
+        when(JfifUtil.getOrientation(any(InputStream.class))).thenReturn(0);
+        mAddMetaDataConsumer.onNewResult(mIntermediateResult, false);
+        ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
+        verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(false));
+        EncodedImage encodedImage = argumentCaptor.getValue();
+        assertTrue(EncodedImage.isValid(encodedImage));
+        assertEquals(-1, encodedImage.getRotationAngle());
+        assertEquals(-1, encodedImage.getWidth());
+        assertEquals(-1, encodedImage.getHeight());
+    }
 
-  @Test
-  public void testOnNewResultNotLastAndJpeg() {
-    int rotationAngle = 180;
-    int orientation = 1;
-    int width = 10;
-    int height = 20;
-    when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
-        .thenReturn(DefaultImageFormats.JPEG);
-    when(JfifUtil.getAutoRotateAngleFromOrientation(orientation)).thenReturn(rotationAngle);
-    when(JfifUtil.getOrientation(any(InputStream.class))).thenReturn(orientation);
-    when(BitmapUtil.decodeDimensions(any(InputStream.class))).thenReturn(new Pair(width, height));
-    mAddMetaDataConsumer.onNewResult(mFinalResult, true);
-    ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
-    verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(true));
-    EncodedImage encodedImage = argumentCaptor.getValue();
-    assertTrue(EncodedImage.isValid(encodedImage));
-    assertEquals(DefaultImageFormats.JPEG, encodedImage.getImageFormat());
-    assertEquals(rotationAngle, encodedImage.getRotationAngle());
-    assertEquals(width, encodedImage.getWidth());
-    assertEquals(height, encodedImage.getHeight());
-  }
+    @Test
+    public void testOnNewResultNotLastAndJpeg() {
+        int rotationAngle = 180;
+        int orientation = 1;
+        int width = 10;
+        int height = 20;
+        when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
+                .thenReturn(DefaultImageFormats.JPEG);
+        when(JfifUtil.getAutoRotateAngleFromOrientation(orientation)).thenReturn(rotationAngle);
+        when(JfifUtil.getOrientation(any(InputStream.class))).thenReturn(orientation);
+        when(BitmapUtil.decodeDimensions(any(InputStream.class))).thenReturn(new Pair(width, height));
+        mAddMetaDataConsumer.onNewResult(mFinalResult, true);
+        ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
+        verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(true));
+        EncodedImage encodedImage = argumentCaptor.getValue();
+        assertTrue(EncodedImage.isValid(encodedImage));
+        assertEquals(DefaultImageFormats.JPEG, encodedImage.getImageFormat());
+        assertEquals(rotationAngle, encodedImage.getRotationAngle());
+        assertEquals(width, encodedImage.getWidth());
+        assertEquals(height, encodedImage.getHeight());
+    }
 
-  @Test
-  public void testOnNewResultLastAndJpeg() {
-    int rotationAngle = 180;
-    int orientation = 1;
-    int width = 10;
-    int height = 20;
-    when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
-        .thenReturn(DefaultImageFormats.JPEG);
-    when(JfifUtil.getAutoRotateAngleFromOrientation(orientation)).thenReturn(rotationAngle);
-    when(JfifUtil.getOrientation(any(InputStream.class))).thenReturn(orientation);
-    when(BitmapUtil.decodeDimensions(any(InputStream.class))).thenReturn(new Pair(width, height));
-    mAddMetaDataConsumer.onNewResult(mFinalResult, true);
-    ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
-    verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(true));
-    EncodedImage encodedImage = argumentCaptor.getValue();
-    assertTrue(EncodedImage.isValid(encodedImage));
-    assertEquals(DefaultImageFormats.JPEG, encodedImage.getImageFormat());
-    assertEquals(rotationAngle, encodedImage.getRotationAngle());
-    assertEquals(width, encodedImage.getWidth());
-    assertEquals(height, encodedImage.getHeight());
-  }
+    @Test
+    public void testOnNewResultLastAndJpeg() {
+        int rotationAngle = 180;
+        int orientation = 1;
+        int width = 10;
+        int height = 20;
+        when(ImageFormatChecker.getImageFormat_WrapIOException(any(InputStream.class)))
+                .thenReturn(DefaultImageFormats.JPEG);
+        when(JfifUtil.getAutoRotateAngleFromOrientation(orientation)).thenReturn(rotationAngle);
+        when(JfifUtil.getOrientation(any(InputStream.class))).thenReturn(orientation);
+        when(BitmapUtil.decodeDimensions(any(InputStream.class))).thenReturn(new Pair(width, height));
+        mAddMetaDataConsumer.onNewResult(mFinalResult, true);
+        ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
+        verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(true));
+        EncodedImage encodedImage = argumentCaptor.getValue();
+        assertTrue(EncodedImage.isValid(encodedImage));
+        assertEquals(DefaultImageFormats.JPEG, encodedImage.getImageFormat());
+        assertEquals(rotationAngle, encodedImage.getRotationAngle());
+        assertEquals(width, encodedImage.getWidth());
+        assertEquals(height, encodedImage.getHeight());
+    }
 
-  @Test
-  public void testOnFailure() {
-    mAddMetaDataConsumer.onFailure(mException);
-    verify(mConsumer).onFailure(mException);
-  }
+    @Test
+    public void testOnFailure() {
+        mAddMetaDataConsumer.onFailure(mException);
+        verify(mConsumer).onFailure(mException);
+    }
 
-  @Test
-  public void testOnCancellation() {
-    mAddMetaDataConsumer.onCancellation();
-    verify(mConsumer).onCancellation();
-  }
+    @Test
+    public void testOnCancellation() {
+        mAddMetaDataConsumer.onCancellation();
+        verify(mConsumer).onCancellation();
+    }
 
-  @Test
-  public void testOnNullResult() {
-    mAddMetaDataConsumer.onNewResult(null, true);
-    ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
-    verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(true));
-    EncodedImage encodedImage = argumentCaptor.getValue();
-    assertEquals(encodedImage, null);
-  }
+    @Test
+    public void testOnNullResult() {
+        mAddMetaDataConsumer.onNewResult(null, true);
+        ArgumentCaptor<EncodedImage> argumentCaptor = ArgumentCaptor.forClass(EncodedImage.class);
+        verify(mConsumer).onNewResult(argumentCaptor.capture(), eq(true));
+        EncodedImage encodedImage = argumentCaptor.getValue();
+        assertEquals(encodedImage, null);
+    }
 }

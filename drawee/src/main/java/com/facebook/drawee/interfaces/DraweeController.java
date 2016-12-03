@@ -9,10 +9,10 @@
 
 package com.facebook.drawee.interfaces;
 
-import javax.annotation.Nullable;
-
 import android.graphics.drawable.Animatable;
 import android.view.MotionEvent;
+
+import javax.annotation.Nullable;
 
 /**
  * Interface that represents a Drawee controller used by a DraweeView.
@@ -21,49 +21,52 @@ import android.view.MotionEvent;
  */
 public interface DraweeController {
 
-  /** Gets the hierarchy. */
-  @Nullable
-  DraweeHierarchy getHierarchy();
+    /** Gets the hierarchy. */
+    @Nullable
+    DraweeHierarchy getHierarchy();
 
-  /** Sets a new hierarchy. */
-  void setHierarchy(@Nullable DraweeHierarchy hierarchy);
+    /** Sets a new hierarchy. */
+    void setHierarchy(@Nullable DraweeHierarchy hierarchy);
 
-  /**
-   * Called when the view containing the hierarchy is attached to a window
-   * (either temporarily or permanently).
-   */
-  void onAttach();
+    /**
+     * Called when the view containing the hierarchy is attached to a window
+     * (either temporarily or permanently).
+     */
+    void onAttach();
 
-  /**
-   * Called when the view containing the hierarchy is detached from a window
-   * (either temporarily or permanently).
-   */
-  void onDetach();
+    /**
+     * Called when the view containing the hierarchy is detached from a window
+     * (either temporarily or permanently).
+     */
+    void onDetach();
 
-  /**
-   * An optional hint whether the view containing the hierarchy is currently within the visible
-   * viewport or not.
-   */
-  void onViewportVisibilityHint(boolean isVisibleInViewportHint);
+    /**
+     * An optional hint whether the view containing the hierarchy is currently within the visible
+     * viewport or not.
+     */
+    void onViewportVisibilityHint(boolean isVisibleInViewportHint);
 
-  /**
-   * Called when the view containing the hierarchy receives a touch event.
-   * @return true if the event was handled by the controller, false otherwise
-   */
-  boolean onTouchEvent(MotionEvent event);
+    /**
+     * Called when the view containing the hierarchy receives a touch event.
+     *
+     * @return true if the event was handled by the controller, false otherwise
+     */
+    boolean onTouchEvent(MotionEvent event);
 
-  /**
-   * For an animated image, returns an Animatable that lets clients control the animation.
-   * @return animatable, or null if the image is not animated or not loaded yet
-   */
-  Animatable getAnimatable();
+    /**
+     * For an animated image, returns an Animatable that lets clients control the animation.
+     *
+     * @return animatable, or null if the image is not animated or not loaded yet
+     */
+    Animatable getAnimatable();
 
-  /** Sets the accessibility content description. */
-  void setContentDescription(String contentDescription);
+    /**
+     * Gets the accessibility content description.
+     *
+     * @return content description, or null if the image has no content description
+     */
+    String getContentDescription();
 
-  /**
-   * Gets the accessibility content description.
-   * @return content description, or null if the image has no content description
-   */
-  String getContentDescription();
+    /** Sets the accessibility content description. */
+    void setContentDescription(String contentDescription);
 }

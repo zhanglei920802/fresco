@@ -16,16 +16,18 @@ package com.facebook.samples.scrollperf.util;
  */
 public final class TimeWaster {
 
-  /**
-   * A not efficient calculation of the fibonacci sequence
-   * @param n The position for the fibonacci sequence
-   * @return The n-th fibonacci number
-   */
-  public static long Fib(int n) {
-    if (n < 2) {
-      return n;
-    } else {
-      return Fib(n - 1) + Fib(n - 2);
+    /**
+     * A not efficient calculation of the fibonacci sequence
+     *
+     * @param n The position for the fibonacci sequence
+     * @return The n-th fibonacci number
+     */
+    public static long Fib(int n) {
+        if (n < 2) {
+            return n;
+        }
+        else {
+            return Fib(n - 1) + Fib(n - 2);
+        }
     }
-  }
 }

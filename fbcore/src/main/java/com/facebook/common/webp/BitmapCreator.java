@@ -16,16 +16,16 @@ import android.graphics.Bitmap;
  */
 public interface BitmapCreator {
 
-  /**
-   * This creates a Bitmap with will be then wrapped with a CloseableReference
-   *
-   * @param width The width of the image
-   * @param height The height of the image
-   * @param bitmapConfig The Config object to use
-   * @return The Bitmap
-   */
-  Bitmap createNakedBitmap(
-      int width,
-      int height,
-      Bitmap.Config bitmapConfig);
+    /**
+     * This creates a Bitmap with will be then wrapped with a CloseableReference
+     *
+     * @param width        The width of the image
+     * @param height       The height of the image
+     * @param bitmapConfig The Config object to use
+     * @return The Bitmap
+     */
+    Bitmap createNakedBitmap(
+            int width,
+            int height,
+            Bitmap.Config bitmapConfig);
 }

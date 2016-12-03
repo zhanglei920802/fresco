@@ -26,34 +26,34 @@ package com.facebook.datasource;
  * </code>
  * </pre>
  */
-public abstract class BaseBooleanSubscriber implements DataSubscriber<Boolean>{
-  @Override
-  public void onNewResult(DataSource<Boolean> dataSource) {
-    try {
-      onNewResultImpl(dataSource.getResult());
-    } finally {
-      dataSource.close();
+public abstract class BaseBooleanSubscriber implements DataSubscriber<Boolean> {
+    @Override
+    public void onNewResult(DataSource<Boolean> dataSource) {
+        try {
+            onNewResultImpl(dataSource.getResult());
+        } finally {
+            dataSource.close();
+        }
     }
-  }
 
-  @Override
-  public void onFailure(DataSource<Boolean> dataSource) {
-    try {
-      onFailureImpl(dataSource);
-    } finally {
-      dataSource.close();
+    @Override
+    public void onFailure(DataSource<Boolean> dataSource) {
+        try {
+            onFailureImpl(dataSource);
+        } finally {
+            dataSource.close();
+        }
     }
-  }
 
-  @Override
-  public void onCancellation(DataSource<Boolean> dataSource) {
-  }
+    @Override
+    public void onCancellation(DataSource<Boolean> dataSource) {
+    }
 
-  @Override
-  public void onProgressUpdate(DataSource<Boolean> dataSource) {
-  }
+    @Override
+    public void onProgressUpdate(DataSource<Boolean> dataSource) {
+    }
 
-  protected abstract void onNewResultImpl(boolean isFoundInDisk);
+    protected abstract void onNewResultImpl(boolean isFoundInDisk);
 
-  protected abstract void onFailureImpl(DataSource<Boolean> dataSource);
+    protected abstract void onFailureImpl(DataSource<Boolean> dataSource);
 }

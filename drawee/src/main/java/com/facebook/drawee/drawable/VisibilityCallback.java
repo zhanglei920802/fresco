@@ -14,15 +14,15 @@ package com.facebook.drawee.drawable;
  */
 public interface VisibilityCallback {
 
-  /**
-   * Called when the drawable's visibility changes.
-   *
-   * @param visible whether or not the drawable is visible
-   */
-  void onVisibilityChange(boolean visible);
+    /**
+     * Called when the drawable's visibility changes.
+     *
+     * @param visible whether or not the drawable is visible
+     */
+    void onVisibilityChange(boolean visible);
 
-  /**
-   * Called when the drawable gets drawn.
-   */
-  void onDraw();
+    /**
+     * Called when the drawable gets drawn.
+     */
+    void onDraw();
 }

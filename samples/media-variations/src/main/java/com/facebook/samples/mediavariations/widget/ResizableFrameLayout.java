@@ -21,74 +21,74 @@ import android.widget.FrameLayout;
 
 public class ResizableFrameLayout extends FrameLayout {
 
-  private View mCornerIndicator;
-  private boolean mResizing;
-  private float mLastX;
-  private float mLastY;
-  private int mMaximumWidth;
-  private int mMaximumHeight;
+    private View mCornerIndicator;
+    private boolean mResizing;
+    private float mLastX;
+    private float mLastY;
+    private int mMaximumWidth;
+    private int mMaximumHeight;
 
-  public ResizableFrameLayout(Context context) {
-    super(context);
-  }
-
-  public ResizableFrameLayout(Context context, AttributeSet attrs) {
-    super(context, attrs);
-  }
-
-  public ResizableFrameLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-  }
-
-  public void init(View cornerIndicator) {
-    mCornerIndicator = cornerIndicator;
-
-    mMaximumWidth = getWidth();
-    mMaximumHeight = getHeight();
-  }
-
-  @Override
-  public boolean onInterceptTouchEvent(MotionEvent event) {
-    if (event.getAction() == MotionEvent.ACTION_DOWN &&
-        event.getX() >= mCornerIndicator.getX() &&
-        event.getY() >= mCornerIndicator.getY()) {
-      ViewGroup.LayoutParams layoutParams = getLayoutParams();
-      layoutParams.width = getWidth();
-      layoutParams.height = getHeight();
-      setLayoutParams(layoutParams);
-      mResizing = true;
-      return true;
+    public ResizableFrameLayout(Context context) {
+        super(context);
     }
 
-    return false;
-  }
-
-  @Override
-  public boolean onTouchEvent(MotionEvent event) {
-    if (!mResizing) {
-      return false;
+    public ResizableFrameLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
     }
 
-    switch (event.getAction()) {
-      case MotionEvent.ACTION_MOVE:
-        ViewGroup.LayoutParams layoutParams = getLayoutParams();
-
-        layoutParams.width += event.getX() - mLastX;
-        layoutParams.width =
-            Math.max(Math.min(layoutParams.width, mMaximumWidth), getMinimumWidth());
-
-        layoutParams.height += event.getY() - mLastY;
-        layoutParams.height =
-            Math.max(Math.min(layoutParams.height, mMaximumHeight), getMinimumHeight());
-        setLayoutParams(layoutParams);
+    public ResizableFrameLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
-    mLastX = Math.max(
-        Math.min(event.getX(), mMaximumWidth),
-        getMinimumWidth() - mCornerIndicator.getWidth());
-    mLastY = Math.max(
-        Math.min(event.getY(), mMaximumHeight),
-        getMinimumHeight() - mCornerIndicator.getHeight());
-    return true;
-  }
+    public void init(View cornerIndicator) {
+        mCornerIndicator = cornerIndicator;
+
+        mMaximumWidth = getWidth();
+        mMaximumHeight = getHeight();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN &&
+                event.getX() >= mCornerIndicator.getX() &&
+                event.getY() >= mCornerIndicator.getY()) {
+            ViewGroup.LayoutParams layoutParams = getLayoutParams();
+            layoutParams.width = getWidth();
+            layoutParams.height = getHeight();
+            setLayoutParams(layoutParams);
+            mResizing = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (!mResizing) {
+            return false;
+        }
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_MOVE:
+                ViewGroup.LayoutParams layoutParams = getLayoutParams();
+
+                layoutParams.width += event.getX() - mLastX;
+                layoutParams.width =
+                        Math.max(Math.min(layoutParams.width, mMaximumWidth), getMinimumWidth());
+
+                layoutParams.height += event.getY() - mLastY;
+                layoutParams.height =
+                        Math.max(Math.min(layoutParams.height, mMaximumHeight), getMinimumHeight());
+                setLayoutParams(layoutParams);
+        }
+
+        mLastX = Math.max(
+                Math.min(event.getX(), mMaximumWidth),
+                getMinimumWidth() - mCornerIndicator.getWidth());
+        mLastY = Math.max(
+                Math.min(event.getY(), mMaximumHeight),
+                getMinimumHeight() - mCornerIndicator.getHeight());
+        return true;
+    }
 }

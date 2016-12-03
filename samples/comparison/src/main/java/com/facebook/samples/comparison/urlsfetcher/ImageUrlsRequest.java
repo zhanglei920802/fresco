@@ -21,19 +21,19 @@ import java.util.Map;
  * resizing options.
  */
 public class ImageUrlsRequest {
-  final private String mEndpointUrl;
-  Map<ImageFormat, ImageSize> mRequestedImageFormats;
+    final private String mEndpointUrl;
+    Map<ImageFormat, ImageSize> mRequestedImageFormats;
 
-  ImageUrlsRequest(final String endpointUrl, Map<ImageFormat, ImageSize> requestedTypes) {
-    mEndpointUrl = Preconditions.checkNotNull(endpointUrl);
-    mRequestedImageFormats = Preconditions.checkNotNull(requestedTypes);
-  }
+    ImageUrlsRequest(final String endpointUrl, Map<ImageFormat, ImageSize> requestedTypes) {
+        mEndpointUrl = Preconditions.checkNotNull(endpointUrl);
+        mRequestedImageFormats = Preconditions.checkNotNull(requestedTypes);
+    }
 
-  public String getEndpointUrl() {
-    return mEndpointUrl;
-  }
+    public String getEndpointUrl() {
+        return mEndpointUrl;
+    }
 
-  public ImageSize getImageSize(ImageFormat imageFormat) {
-    return mRequestedImageFormats.get(imageFormat);
-  }
+    public ImageSize getImageSize(ImageFormat imageFormat) {
+        return mRequestedImageFormats.get(imageFormat);
+    }
 }

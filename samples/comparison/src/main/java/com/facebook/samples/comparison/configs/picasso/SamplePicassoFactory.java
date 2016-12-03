@@ -14,26 +14,25 @@ package com.facebook.samples.comparison.configs.picasso;
 
 import android.content.Context;
 
-import com.squareup.picasso.LruCache;
-import com.jakewharton.picasso.OkHttp3Downloader;
-import com.squareup.picasso.Picasso;
-
 import com.facebook.samples.comparison.configs.ConfigConstants;
+import com.jakewharton.picasso.OkHttp3Downloader;
+import com.squareup.picasso.LruCache;
+import com.squareup.picasso.Picasso;
 
 /**
  * Provides instance of Picasso with common configuration for the sample app
  */
 public class SamplePicassoFactory {
 
-  private static Picasso sPicasso;
+    private static Picasso sPicasso;
 
-  public static Picasso getPicasso(Context context) {
-    if (sPicasso == null) {
-        sPicasso = new Picasso.Builder(context)
-            .downloader(new OkHttp3Downloader(context, ConfigConstants.MAX_DISK_CACHE_SIZE))
-            .memoryCache(new LruCache(ConfigConstants.MAX_MEMORY_CACHE_SIZE))
-            .build();
+    public static Picasso getPicasso(Context context) {
+        if (sPicasso == null) {
+            sPicasso = new Picasso.Builder(context)
+                    .downloader(new OkHttp3Downloader(context, ConfigConstants.MAX_DISK_CACHE_SIZE))
+                    .memoryCache(new LruCache(ConfigConstants.MAX_MEMORY_CACHE_SIZE))
+                    .build();
+        }
+        return sPicasso;
     }
-    return sPicasso;
-  }
 }

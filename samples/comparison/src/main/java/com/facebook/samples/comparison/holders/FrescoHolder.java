@@ -29,31 +29,32 @@ import com.facebook.samples.comparison.instrumentation.PerfListener;
  */
 public class FrescoHolder extends BaseViewHolder<InstrumentedDraweeView> {
 
-  public FrescoHolder(
-      Context context, View parentView,
-      InstrumentedDraweeView intrumentedDraweeView, PerfListener perfListener) {
-    super(context, parentView, intrumentedDraweeView, perfListener);
-  }
-
-  @Override
-  protected void onBind(String uriString) {
-    Uri uri = Uri.parse(uriString);
-    ImageRequestBuilder imageRequestBuilder =
-        ImageRequestBuilder.newBuilderWithSource(uri);
-    if (UriUtil.isNetworkUri(uri)) {
-      imageRequestBuilder.setProgressiveRenderingEnabled(true);
-    } else {
-      imageRequestBuilder.setResizeOptions(new ResizeOptions(
-          mImageView.getLayoutParams().width,
-          mImageView.getLayoutParams().height));
+    public FrescoHolder(
+            Context context, View parentView,
+            InstrumentedDraweeView intrumentedDraweeView, PerfListener perfListener) {
+        super(context, parentView, intrumentedDraweeView, perfListener);
     }
-    DraweeController draweeController = Fresco.newDraweeControllerBuilder()
-        .setImageRequest(imageRequestBuilder.build())
-        .setOldController(mImageView.getController())
-        .setControllerListener(mImageView.getListener())
-        .setAutoPlayAnimations(true)
-        .build();
-    mImageView.setController(draweeController);
-  }
+
+    @Override
+    protected void onBind(String uriString) {
+        Uri uri = Uri.parse(uriString);
+        ImageRequestBuilder imageRequestBuilder =
+                ImageRequestBuilder.newBuilderWithSource(uri);
+        if (UriUtil.isNetworkUri(uri)) {
+            imageRequestBuilder.setProgressiveRenderingEnabled(true);
+        }
+        else {
+            imageRequestBuilder.setResizeOptions(new ResizeOptions(
+                    mImageView.getLayoutParams().width,
+                    mImageView.getLayoutParams().height));
+        }
+        DraweeController draweeController = Fresco.newDraweeControllerBuilder()
+                                                  .setImageRequest(imageRequestBuilder.build())
+                                                  .setOldController(mImageView.getController())
+                                                  .setControllerListener(mImageView.getListener())
+                                                  .setAutoPlayAnimations(true)
+                                                  .build();
+        mImageView.setController(draweeController);
+    }
 
 }

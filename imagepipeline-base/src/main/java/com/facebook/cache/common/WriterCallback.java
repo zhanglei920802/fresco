@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
-* Callback that writes to an {@link OutputStream}.
-*/
+ * Callback that writes to an {@link OutputStream}.
+ */
 public interface WriterCallback {
-  void write(OutputStream os) throws IOException;
+    void write(OutputStream os) throws IOException;
 }

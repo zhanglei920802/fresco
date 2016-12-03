@@ -27,28 +27,28 @@ import com.facebook.samples.comparison.instrumentation.PerfListener;
  */
 public class VolleyAdapter extends ImageListAdapter {
 
-  private final ImageLoader mImageLoader;
+    private final ImageLoader mImageLoader;
 
-  public VolleyAdapter(
-      Context context,
-      PerfListener perfListener) {
-    super(context, perfListener);
-    mImageLoader = SampleVolleyFactory.getImageLoader(context);
-  }
+    public VolleyAdapter(
+            Context context,
+            PerfListener perfListener) {
+        super(context, perfListener);
+        mImageLoader = SampleVolleyFactory.getImageLoader(context);
+    }
 
-  @Override
-  public VolleyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    InstrumentedNetworkImageView view = new InstrumentedNetworkImageView(getContext());
-    view.setDefaultImageResId(R.color.placeholder);
-    view.setErrorImageResId(R.color.error);
-    return new VolleyHolder(
-        getContext(), mImageLoader, parent,
-        view, getPerfListener());
-  }
+    @Override
+    public VolleyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        InstrumentedNetworkImageView view = new InstrumentedNetworkImageView(getContext());
+        view.setDefaultImageResId(R.color.placeholder);
+        view.setErrorImageResId(R.color.error);
+        return new VolleyHolder(
+                getContext(), mImageLoader, parent,
+                view, getPerfListener());
+    }
 
-  @Override
-  public void shutDown() {
-    super.clear();
-    SampleVolleyFactory.getMemoryCache().clear();
-  }
+    @Override
+    public void shutDown() {
+        super.clear();
+        SampleVolleyFactory.getMemoryCache().clear();
+    }
 }

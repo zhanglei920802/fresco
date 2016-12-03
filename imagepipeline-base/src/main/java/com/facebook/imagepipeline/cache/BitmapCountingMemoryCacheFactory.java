@@ -16,32 +16,32 @@ import com.facebook.imagepipeline.bitmaps.PlatformBitmapFactory;
 import com.facebook.imagepipeline.image.CloseableImage;
 
 public class BitmapCountingMemoryCacheFactory {
-  public static CountingMemoryCache<CacheKey, CloseableImage> get(
-     Supplier<MemoryCacheParams> bitmapMemoryCacheParamsSupplier,
-     MemoryTrimmableRegistry memoryTrimmableRegistry,
-     PlatformBitmapFactory platformBitmapFactory,
-     boolean isExternalCreatedBitmapLogEnabled) {
+    public static CountingMemoryCache<CacheKey, CloseableImage> get(
+            Supplier<MemoryCacheParams> bitmapMemoryCacheParamsSupplier,
+            MemoryTrimmableRegistry memoryTrimmableRegistry,
+            PlatformBitmapFactory platformBitmapFactory,
+            boolean isExternalCreatedBitmapLogEnabled) {
 
-    ValueDescriptor<CloseableImage> valueDescriptor =
-        new ValueDescriptor<CloseableImage>() {
-          @Override
-          public int getSizeInBytes(CloseableImage value) {
-            return value.getSizeInBytes();
-          }
-        };
+        ValueDescriptor<CloseableImage> valueDescriptor =
+                new ValueDescriptor<CloseableImage>() {
+                    @Override
+                    public int getSizeInBytes(CloseableImage value) {
+                        return value.getSizeInBytes();
+                    }
+                };
 
-    CountingMemoryCache.CacheTrimStrategy trimStrategy = new BitmapMemoryCacheTrimStrategy();
+        CountingMemoryCache.CacheTrimStrategy trimStrategy = new BitmapMemoryCacheTrimStrategy();
 
-    CountingMemoryCache<CacheKey, CloseableImage> countingCache =
-        new CountingMemoryCache<>(
-            valueDescriptor,
-            trimStrategy,
-            bitmapMemoryCacheParamsSupplier,
-            platformBitmapFactory,
-            isExternalCreatedBitmapLogEnabled);
+        CountingMemoryCache<CacheKey, CloseableImage> countingCache =
+                new CountingMemoryCache<>(
+                        valueDescriptor,
+                        trimStrategy,
+                        bitmapMemoryCacheParamsSupplier,
+                        platformBitmapFactory,
+                        isExternalCreatedBitmapLogEnabled);
 
-     memoryTrimmableRegistry.registerMemoryTrimmable(countingCache);
+        memoryTrimmableRegistry.registerMemoryTrimmable(countingCache);
 
-    return countingCache;
-  }
+        return countingCache;
+    }
 }

@@ -12,5 +12,5 @@ package com.facebook.cache.disk;
  * Provides an instance of eviction comparator
  */
 public interface EntryEvictionComparatorSupplier {
-  EntryEvictionComparator get();
+    EntryEvictionComparator get();
 }

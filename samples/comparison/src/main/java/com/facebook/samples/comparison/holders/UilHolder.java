@@ -17,7 +17,6 @@ import android.view.View;
 
 import com.facebook.samples.comparison.instrumentation.InstrumentedImageView;
 import com.facebook.samples.comparison.instrumentation.PerfListener;
-
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 /**
@@ -25,17 +24,17 @@ import com.nostra13.universalimageloader.core.ImageLoader;
  */
 public class UilHolder extends BaseViewHolder<InstrumentedImageView> {
 
-  private final ImageLoader mImageLoader;
+    private final ImageLoader mImageLoader;
 
-  public UilHolder(
-      Context context, ImageLoader imageLoader, View layoutView,
-      InstrumentedImageView view, PerfListener perfListener) {
-    super(context, layoutView, view, perfListener);
-    this.mImageLoader = imageLoader;
-  }
+    public UilHolder(
+            Context context, ImageLoader imageLoader, View layoutView,
+            InstrumentedImageView view, PerfListener perfListener) {
+        super(context, layoutView, view, perfListener);
+        this.mImageLoader = imageLoader;
+    }
 
-  @Override
-  protected void onBind(String uri) {
-    mImageLoader.displayImage(uri, mImageView);
-  }
+    @Override
+    protected void onBind(String uri) {
+        mImageLoader.displayImage(uri, mImageView);
+    }
 }

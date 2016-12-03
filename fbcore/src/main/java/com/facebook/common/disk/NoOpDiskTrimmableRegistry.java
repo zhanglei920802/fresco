@@ -13,23 +13,23 @@ package com.facebook.common.disk;
  * Implementation of {@link DiskTrimmableRegistry} that does not do anything.
  */
 public class NoOpDiskTrimmableRegistry implements DiskTrimmableRegistry {
-  private static NoOpDiskTrimmableRegistry sInstance = null;
+    private static NoOpDiskTrimmableRegistry sInstance = null;
 
-  private NoOpDiskTrimmableRegistry() {
-  }
-
-  public static synchronized NoOpDiskTrimmableRegistry getInstance() {
-    if (sInstance == null) {
-      sInstance = new NoOpDiskTrimmableRegistry();
+    private NoOpDiskTrimmableRegistry() {
     }
-    return sInstance;
-  }
 
-  @Override
-  public void registerDiskTrimmable(DiskTrimmable trimmable) {
-  }
+    public static synchronized NoOpDiskTrimmableRegistry getInstance() {
+        if (sInstance == null) {
+            sInstance = new NoOpDiskTrimmableRegistry();
+        }
+        return sInstance;
+    }
 
-  @Override
-  public void unregisterDiskTrimmable(DiskTrimmable trimmable) {
-  }
+    @Override
+    public void registerDiskTrimmable(DiskTrimmable trimmable) {
+    }
+
+    @Override
+    public void unregisterDiskTrimmable(DiskTrimmable trimmable) {
+    }
 }

@@ -14,10 +14,10 @@ package com.facebook.drawee.drawable;
  */
 public interface VisibilityAwareDrawable {
 
-  /**
-   * Sets a visibility callback.
-   *
-   * @param visibilityCallback the visibility callback to be set
-   */
-  void setVisibilityCallback(VisibilityCallback visibilityCallback);
+    /**
+     * Sets a visibility callback.
+     *
+     * @param visibilityCallback the visibility callback to be set
+     */
+    void setVisibilityCallback(VisibilityCallback visibilityCallback);
 }

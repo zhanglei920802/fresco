@@ -16,50 +16,51 @@ import android.os.SystemClock;
  */
 class RollingStat {
 
-  private static final int WINDOWS = 60;
+    private static final int WINDOWS = 60;
 
-  private final short[] mStat;
+    private final short[] mStat;
 
-  public RollingStat() {
-    mStat = new short[WINDOWS];
-  }
-
-  void incrementStats(int toAdd) {
-    long nowMs = SystemClock.uptimeMillis();
-    long nowSeconds = nowMs / 1000;
-    int statsIndex = (int) (nowSeconds % WINDOWS);
-    int marker = (int) ((nowSeconds / WINDOWS) & 0xff);
-
-    short bucketData = mStat[statsIndex];
-    int prevCount = bucketData & 0xff;
-    int prevMarker = (bucketData >> 8) & 0xff;
-
-    int newCount;
-    if (marker != prevMarker) {
-      newCount = toAdd;
-    } else {
-      newCount = prevCount + toAdd;
+    public RollingStat() {
+        mStat = new short[WINDOWS];
     }
 
-    int newData = (marker << 8) | newCount;
-    mStat[statsIndex] = (short) newData;
-  }
+    void incrementStats(int toAdd) {
+        long nowMs = SystemClock.uptimeMillis();
+        long nowSeconds = nowMs / 1000;
+        int statsIndex = (int) (nowSeconds % WINDOWS);
+        int marker = (int) ((nowSeconds / WINDOWS) & 0xff);
 
-  int getSum(int previousSeconds) {
-    long nowMs = SystemClock.uptimeMillis();
-    long nowSeconds = nowMs / 1000;
-    int statsIndexStart = (int) ((nowSeconds - previousSeconds) % WINDOWS);
-    int currentMarker = (int) ((nowSeconds / WINDOWS) & 0xff);
+        short bucketData = mStat[statsIndex];
+        int prevCount = bucketData & 0xff;
+        int prevMarker = (bucketData >> 8) & 0xff;
 
-    int sum = 0;
-    for (int i = 0; i < previousSeconds; i++) {
-      short bucketData = mStat[(statsIndexStart + i) % WINDOWS];
-      int count = bucketData & 0xff;
-      int marker = (bucketData >> 8) & 0xff;
-      if (marker == currentMarker) {
-        sum += count;
-      }
+        int newCount;
+        if (marker != prevMarker) {
+            newCount = toAdd;
+        }
+        else {
+            newCount = prevCount + toAdd;
+        }
+
+        int newData = (marker << 8) | newCount;
+        mStat[statsIndex] = (short) newData;
     }
-    return sum;
-  }
+
+    int getSum(int previousSeconds) {
+        long nowMs = SystemClock.uptimeMillis();
+        long nowSeconds = nowMs / 1000;
+        int statsIndexStart = (int) ((nowSeconds - previousSeconds) % WINDOWS);
+        int currentMarker = (int) ((nowSeconds / WINDOWS) & 0xff);
+
+        int sum = 0;
+        for (int i = 0; i < previousSeconds; i++) {
+            short bucketData = mStat[(statsIndexStart + i) % WINDOWS];
+            int count = bucketData & 0xff;
+            int marker = (bucketData >> 8) & 0xff;
+            if (marker == currentMarker) {
+                sum += count;
+            }
+        }
+        return sum;
+    }
 }

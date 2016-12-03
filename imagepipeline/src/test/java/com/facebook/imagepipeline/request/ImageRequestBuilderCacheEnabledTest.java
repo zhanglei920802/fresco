@@ -8,58 +8,57 @@
  */
 package com.facebook.imagepipeline.request;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import android.net.Uri;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.ParameterizedRobolectricTestRunner;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.Assert.assertEquals;
 
 @RunWith(ParameterizedRobolectricTestRunner.class)
 public class ImageRequestBuilderCacheEnabledTest {
 
-  @ParameterizedRobolectricTestRunner.Parameters(name = "URI of scheme \"{0}://\"")
-  public static Collection<Object[]> data() {
-    return Arrays.asList(
-        new Object[][]{
-            {"asset", false},
-            {"content", false},
-            {"data", false},
-            {"file", false},
-            {"http", true},
-            {"https", true},
-            {"res", false},
-        });
-  }
+    private final String mUriScheme;
+    private final boolean mExpectedDefaultDiskCacheEnabled;
+    public ImageRequestBuilderCacheEnabledTest(
+            String uriScheme,
+            Boolean expectedDefaultDiskCacheEnabled) {
+        mUriScheme = uriScheme;
+        mExpectedDefaultDiskCacheEnabled = expectedDefaultDiskCacheEnabled;
+    }
 
-  private final String mUriScheme;
-  private final boolean mExpectedDefaultDiskCacheEnabled;
+    @ParameterizedRobolectricTestRunner.Parameters(name = "URI of scheme \"{0}://\"")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(
+                new Object[][]{
+                        {"asset", false},
+                        {"content", false},
+                        {"data", false},
+                        {"file", false},
+                        {"http", true},
+                        {"https", true},
+                        {"res", false},
+                });
+    }
 
-  public ImageRequestBuilderCacheEnabledTest(
-      String uriScheme,
-      Boolean expectedDefaultDiskCacheEnabled) {
-    mUriScheme = uriScheme;
-    mExpectedDefaultDiskCacheEnabled = expectedDefaultDiskCacheEnabled;
-  }
+    @Test
+    public void testIsDiskCacheEnabledByDefault() throws Exception {
+        ImageRequestBuilder imageRequestBuilder = createBuilder();
+        assertEquals(mExpectedDefaultDiskCacheEnabled, imageRequestBuilder.isDiskCacheEnabled());
+    }
 
-  @Test
-  public void testIsDiskCacheEnabledByDefault() throws Exception {
-    ImageRequestBuilder imageRequestBuilder = createBuilder();
-    assertEquals(mExpectedDefaultDiskCacheEnabled, imageRequestBuilder.isDiskCacheEnabled());
-  }
+    @Test
+    public void testIsDiskCacheDisabledIfRequested() throws Exception {
+        ImageRequestBuilder imageRequestBuilder = createBuilder();
+        imageRequestBuilder.disableDiskCache();
+        assertEquals(false, imageRequestBuilder.isDiskCacheEnabled());
+    }
 
-  @Test
-  public void testIsDiskCacheDisabledIfRequested() throws Exception {
-    ImageRequestBuilder imageRequestBuilder = createBuilder();
-    imageRequestBuilder.disableDiskCache();
-    assertEquals(false, imageRequestBuilder.isDiskCacheEnabled());
-  }
-
-  private ImageRequestBuilder createBuilder() {
-    return ImageRequestBuilder.newBuilderWithSource(Uri.parse(mUriScheme + "://request"));
-  }
+    private ImageRequestBuilder createBuilder() {
+        return ImageRequestBuilder.newBuilderWithSource(Uri.parse(mUriScheme + "://request"));
+    }
 }

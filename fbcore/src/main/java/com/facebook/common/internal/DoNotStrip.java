@@ -17,10 +17,10 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 /**
  * Add this annotation to a class, method, or field to instruct Proguard to not strip it out.
- *
+ * <p>
  * This is useful for methods called via reflection that could appear as unused to Proguard.
  */
-@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR})
 @Retention(CLASS)
 public @interface DoNotStrip {
 }

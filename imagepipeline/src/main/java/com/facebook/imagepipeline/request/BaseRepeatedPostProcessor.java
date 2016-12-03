@@ -10,22 +10,22 @@
 package com.facebook.imagepipeline.request;
 
 public abstract class BaseRepeatedPostProcessor extends BasePostprocessor
-    implements RepeatedPostprocessor {
-  private RepeatedPostprocessorRunner mCallback;
+        implements RepeatedPostprocessor {
+    private RepeatedPostprocessorRunner mCallback;
 
-  @Override
-  public synchronized void setCallback(RepeatedPostprocessorRunner runner) {
-    mCallback = runner;
-  }
-
-  private synchronized RepeatedPostprocessorRunner getCallback() {
-    return mCallback;
-  }
-
-  public void update() {
-    RepeatedPostprocessorRunner callback = getCallback();
-    if (callback != null) {
-      callback.update();
+    private synchronized RepeatedPostprocessorRunner getCallback() {
+        return mCallback;
     }
-  }
+
+    @Override
+    public synchronized void setCallback(RepeatedPostprocessorRunner runner) {
+        mCallback = runner;
+    }
+
+    public void update() {
+        RepeatedPostprocessorRunner callback = getCallback();
+        if (callback != null) {
+            callback.update();
+        }
+    }
 }

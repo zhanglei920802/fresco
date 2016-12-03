@@ -17,12 +17,12 @@ import com.facebook.cache.disk.DynamicDefaultDiskStorage;
  */
 public class DynamicDefaultDiskStorageFactory implements DiskStorageFactory {
 
-  @Override
-  public DiskStorage get(DiskCacheConfig diskCacheConfig) {
-    return new DynamicDefaultDiskStorage(
-        diskCacheConfig.getVersion(),
-        diskCacheConfig.getBaseDirectoryPathSupplier(),
-        diskCacheConfig.getBaseDirectoryName(),
-        diskCacheConfig.getCacheErrorLogger());
-  }
+    @Override
+    public DiskStorage get(DiskCacheConfig diskCacheConfig) {
+        return new DynamicDefaultDiskStorage(
+                diskCacheConfig.getVersion(),
+                diskCacheConfig.getBaseDirectoryPathSupplier(),
+                diskCacheConfig.getBaseDirectoryName(),
+                diskCacheConfig.getCacheErrorLogger());
+    }
 }

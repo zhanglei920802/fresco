@@ -22,50 +22,48 @@ import com.facebook.samples.scrollperf.data.SimpleAdapter;
  */
 public class LocalResourceSimpleAdapter implements SimpleAdapter<Uri> {
 
-  private Uri[] mUris;
+    private final String[] mSrcArray;
+    private final boolean mLazy;
+    private Uri[] mUris;
 
-  private final String[] mSrcArray;
-
-  private final boolean mLazy;
-
-  public static LocalResourceSimpleAdapter getLazyAdapter(
-      final Context context,
-      @ArrayRes int arrayId) {
-    return new LocalResourceSimpleAdapter(context, arrayId, true);
-  }
-
-  public static LocalResourceSimpleAdapter getEagerAdapter(
-      final Context context,
-      @ArrayRes int arrayId) {
-    return new LocalResourceSimpleAdapter(context, arrayId, false);
-  }
-
-  private LocalResourceSimpleAdapter(final Context context, @ArrayRes int arrayId, boolean lazy) {
-    mSrcArray = context.getResources().getStringArray(arrayId);
-    mLazy = lazy;
-    mUris = new Uri[mSrcArray.length];
-    if (!lazy) {
-      for (int i = 0; i < mSrcArray.length; i++) {
-        mUris[i] = Uri.parse(mSrcArray[i]);
-      }
+    private LocalResourceSimpleAdapter(final Context context, @ArrayRes int arrayId, boolean lazy) {
+        mSrcArray = context.getResources().getStringArray(arrayId);
+        mLazy = lazy;
+        mUris = new Uri[mSrcArray.length];
+        if (!lazy) {
+            for (int i = 0; i < mSrcArray.length; i++) {
+                mUris[i] = Uri.parse(mSrcArray[i]);
+            }
+        }
     }
-  }
 
-  @Override
-  public int getSize() {
-    return mSrcArray.length;
-  }
-
-  @Override
-  public Uri get(int position) {
-    if (mLazy && mUris[position] == null) {
-      mUris[position] = Uri.parse(mSrcArray[position]);
+    public static LocalResourceSimpleAdapter getLazyAdapter(
+            final Context context,
+            @ArrayRes int arrayId) {
+        return new LocalResourceSimpleAdapter(context, arrayId, true);
     }
-    return mUris[position];
-  }
 
-  @Override
-  public boolean isLazy() {
-    return mLazy;
-  }
+    public static LocalResourceSimpleAdapter getEagerAdapter(
+            final Context context,
+            @ArrayRes int arrayId) {
+        return new LocalResourceSimpleAdapter(context, arrayId, false);
+    }
+
+    @Override
+    public int getSize() {
+        return mSrcArray.length;
+    }
+
+    @Override
+    public Uri get(int position) {
+        if (mLazy && mUris[position] == null) {
+            mUris[position] = Uri.parse(mSrcArray[position]);
+        }
+        return mUris[position];
+    }
+
+    @Override
+    public boolean isLazy() {
+        return mLazy;
+    }
 }

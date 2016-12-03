@@ -27,35 +27,35 @@ import java.io.File;
  * Creates singletons of relevant volley classes
  */
 public class SampleVolleyFactory {
-  private static final String VOLLEY_CACHE_DIR = "volley";
+    private static final String VOLLEY_CACHE_DIR = "volley";
 
-  private static ImageLoader sImageLoader;
-  private static RequestQueue sRequestQueue;
-  private static VolleyMemoryCache sMemoryCache;
+    private static ImageLoader sImageLoader;
+    private static RequestQueue sRequestQueue;
+    private static VolleyMemoryCache sMemoryCache;
 
-  public static RequestQueue getRequestQueue(Context context) {
-    if (sRequestQueue == null) {
-      File cacheDir = new File(context.getCacheDir(), VOLLEY_CACHE_DIR);
-      sRequestQueue = new RequestQueue(
-          new DiskBasedCache(cacheDir, ConfigConstants.MAX_DISK_CACHE_SIZE),
-          new BasicNetwork(new HurlStack()));
-      sRequestQueue.start();
+    public static RequestQueue getRequestQueue(Context context) {
+        if (sRequestQueue == null) {
+            File cacheDir = new File(context.getCacheDir(), VOLLEY_CACHE_DIR);
+            sRequestQueue = new RequestQueue(
+                    new DiskBasedCache(cacheDir, ConfigConstants.MAX_DISK_CACHE_SIZE),
+                    new BasicNetwork(new HurlStack()));
+            sRequestQueue.start();
+        }
+        return sRequestQueue;
     }
-    return sRequestQueue;
-  }
 
 
-  public static VolleyMemoryCache getMemoryCache() {
-    if (sMemoryCache == null) {
-      sMemoryCache = new VolleyMemoryCache(ConfigConstants.MAX_MEMORY_CACHE_SIZE);
+    public static VolleyMemoryCache getMemoryCache() {
+        if (sMemoryCache == null) {
+            sMemoryCache = new VolleyMemoryCache(ConfigConstants.MAX_MEMORY_CACHE_SIZE);
+        }
+        return sMemoryCache;
     }
-    return sMemoryCache;
-  }
 
-  public static ImageLoader getImageLoader(Context context) {
-    if (sImageLoader == null) {
-      sImageLoader = new ImageLoader(getRequestQueue(context), getMemoryCache());
+    public static ImageLoader getImageLoader(Context context) {
+        if (sImageLoader == null) {
+            sImageLoader = new ImageLoader(getRequestQueue(context), getMemoryCache());
+        }
+        return sImageLoader;
     }
-    return sImageLoader;
-  }
 }

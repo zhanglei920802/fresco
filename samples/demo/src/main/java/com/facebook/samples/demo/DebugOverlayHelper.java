@@ -26,43 +26,43 @@ import android.support.v7.app.AppCompatActivity;
 
 public class DebugOverlayHelper {
 
-  private static final String FRESCO_DEBUG_PREFS = "fresco_debug_prefs";
-  private static final String FRESCO_DEBUG_PREF_OVERLAY_ENABLED = "debug_overlay_enabled";
+    private static final String FRESCO_DEBUG_PREFS = "fresco_debug_prefs";
+    private static final String FRESCO_DEBUG_PREF_OVERLAY_ENABLED = "debug_overlay_enabled";
 
-  public static boolean isDebugOverlayEnabled(Context context) {
-    return context.getSharedPreferences(FRESCO_DEBUG_PREFS, Context.MODE_PRIVATE)
-        .getBoolean(FRESCO_DEBUG_PREF_OVERLAY_ENABLED, false);
-  }
-
-  public static void toggleDebugOverlayEnabled(Context context) {
-    SharedPreferences sharedPreferences =
-        context.getSharedPreferences(FRESCO_DEBUG_PREFS, Context.MODE_PRIVATE);
-    sharedPreferences
-        .edit()
-        .putBoolean(
-            FRESCO_DEBUG_PREF_OVERLAY_ENABLED,
-            !sharedPreferences.getBoolean(FRESCO_DEBUG_PREF_OVERLAY_ENABLED, false))
-        .apply();
-  }
-
-  public static void showRestartDialogFragment(AppCompatActivity activity) {
-    new RestartDialogFragment().show(activity.getSupportFragmentManager(), "debug_restart");
-  }
-
-  public static class RestartDialogFragment extends DialogFragment {
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-      // Use the Builder class for convenient dialog construction
-      AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-      builder.setMessage(R.string.debug_overlay_restart)
-          .setPositiveButton(R.string.kill_app, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-              System.exit(0);
-            }
-          })
-      .setNegativeButton(R.string.later, null);
-      return builder.create();
+    public static boolean isDebugOverlayEnabled(Context context) {
+        return context.getSharedPreferences(FRESCO_DEBUG_PREFS, Context.MODE_PRIVATE)
+                      .getBoolean(FRESCO_DEBUG_PREF_OVERLAY_ENABLED, false);
     }
-  }
+
+    public static void toggleDebugOverlayEnabled(Context context) {
+        SharedPreferences sharedPreferences =
+                context.getSharedPreferences(FRESCO_DEBUG_PREFS, Context.MODE_PRIVATE);
+        sharedPreferences
+                .edit()
+                .putBoolean(
+                        FRESCO_DEBUG_PREF_OVERLAY_ENABLED,
+                        !sharedPreferences.getBoolean(FRESCO_DEBUG_PREF_OVERLAY_ENABLED, false))
+                .apply();
+    }
+
+    public static void showRestartDialogFragment(AppCompatActivity activity) {
+        new RestartDialogFragment().show(activity.getSupportFragmentManager(), "debug_restart");
+    }
+
+    public static class RestartDialogFragment extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage(R.string.debug_overlay_restart)
+                   .setPositiveButton(R.string.kill_app, new DialogInterface.OnClickListener() {
+                       @Override
+                       public void onClick(DialogInterface dialog, int which) {
+                           System.exit(0);
+                       }
+                   })
+                   .setNegativeButton(R.string.later, null);
+            return builder.create();
+        }
+    }
 }

@@ -17,14 +17,14 @@ import com.facebook.imagepipeline.animated.base.AnimatedDrawableOptions;
  */
 public interface AnimatedDrawableCachingBackendImplProvider {
 
-  /**
-   * Creates a new {@link AnimatedDrawableCachingBackendImpl}.
-   *
-   * @param animatedDrawableBackend the backend to delegate to
-   * @param options the options for the drawable
-   * @return a new {@link AnimatedDrawableCachingBackendImpl}
-   */
-  AnimatedDrawableCachingBackendImpl get(
-      AnimatedDrawableBackend animatedDrawableBackend,
-      AnimatedDrawableOptions options);
+    /**
+     * Creates a new {@link AnimatedDrawableCachingBackendImpl}.
+     *
+     * @param animatedDrawableBackend the backend to delegate to
+     * @param options                 the options for the drawable
+     * @return a new {@link AnimatedDrawableCachingBackendImpl}
+     */
+    AnimatedDrawableCachingBackendImpl get(
+            AnimatedDrawableBackend animatedDrawableBackend,
+            AnimatedDrawableOptions options);
 }

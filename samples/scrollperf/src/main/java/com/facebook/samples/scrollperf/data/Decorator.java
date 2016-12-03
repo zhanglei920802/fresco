@@ -16,12 +16,12 @@ package com.facebook.samples.scrollperf.data;
  */
 public interface Decorator<E> {
 
-  /**
-   * We use this to decorate an object E
-   *
-   * @param decoratee The SimpleAdapter to decorate
-   * @param position  The position of the object to decorate
-   * @return The decorated object
-   */
-  E decorate(SimpleAdapter<E> decoratee, int position);
+    /**
+     * We use this to decorate an object E
+     *
+     * @param decoratee The SimpleAdapter to decorate
+     * @param position  The position of the object to decorate
+     * @return The decorated object
+     */
+    E decorate(SimpleAdapter<E> decoratee, int position);
 }

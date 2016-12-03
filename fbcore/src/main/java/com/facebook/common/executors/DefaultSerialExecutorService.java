@@ -16,21 +16,22 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Default implementation of {@link SerialExecutorService} that wraps an existing {@link Executor}.
  */
 public class DefaultSerialExecutorService extends ConstrainedExecutorService
-    implements SerialExecutorService {
+        implements SerialExecutorService {
 
-  public DefaultSerialExecutorService(Executor executor) {
-    // SerialExecutorService is just a ConstrainedExecutorService with a concurrency limit
-    // of one and an unbounded work queue.
-    super("SerialExecutor", 1, executor, new LinkedBlockingQueue<Runnable>());
-  }
+    public DefaultSerialExecutorService(Executor executor) {
+        // SerialExecutorService is just a ConstrainedExecutorService with a concurrency limit
+        // of one and an unbounded work queue.
+        super("SerialExecutor", 1, executor, new LinkedBlockingQueue<Runnable>());
+    }
 
-  /**
-   * Synchronized override of {@link ConstrainedExecutorService#execute(Runnable)} to
-   * ensure that view of memory is consistent between different threads executing tasks serially.
-   * @param runnable The task to be executed.
-   */
-  @Override
-  public synchronized void execute(Runnable runnable) {
-    super.execute(runnable);
-  }
+    /**
+     * Synchronized override of {@link ConstrainedExecutorService#execute(Runnable)} to
+     * ensure that view of memory is consistent between different threads executing tasks serially.
+     *
+     * @param runnable The task to be executed.
+     */
+    @Override
+    public synchronized void execute(Runnable runnable) {
+        super.execute(runnable);
+    }
 }

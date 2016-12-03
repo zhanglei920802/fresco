@@ -14,17 +14,17 @@ package com.facebook.common.time;
  */
 public class SystemClock implements Clock {
 
-  private static final SystemClock INSTANCE = new SystemClock();
+    private static final SystemClock INSTANCE = new SystemClock();
 
-  private SystemClock() {
-  }
+    private SystemClock() {
+    }
 
-  public static SystemClock get() {
-    return INSTANCE;
-  }
+    public static SystemClock get() {
+        return INSTANCE;
+    }
 
-  @Override
-  public long now() {
-    return System.currentTimeMillis();
-  }
+    @Override
+    public long now() {
+        return System.currentTimeMillis();
+    }
 }

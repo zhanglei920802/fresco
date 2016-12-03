@@ -23,29 +23,29 @@ import java.util.concurrent.Executor;
  */
 public class VolleyDraweeControllerFactory {
 
-  private Resources mResources;
-  private DeferredReleaser mDeferredReleaser;
-  private Executor mUiThreadExecutor;
+    private Resources mResources;
+    private DeferredReleaser mDeferredReleaser;
+    private Executor mUiThreadExecutor;
 
-  public VolleyDraweeControllerFactory(
-      Resources resources,
-      DeferredReleaser deferredReleaser,
-      Executor uiThreadExecutor) {
-    mResources = resources;
-    mDeferredReleaser = deferredReleaser;
-    mUiThreadExecutor = uiThreadExecutor;
-  }
+    public VolleyDraweeControllerFactory(
+            Resources resources,
+            DeferredReleaser deferredReleaser,
+            Executor uiThreadExecutor) {
+        mResources = resources;
+        mDeferredReleaser = deferredReleaser;
+        mUiThreadExecutor = uiThreadExecutor;
+    }
 
-  public VolleyDraweeController newController(
-      Supplier<DataSource<Bitmap>> dataSourceSupplier,
-      String id,
-      Object callerContext) {
-    return new VolleyDraweeController(
-        mResources,
-        mDeferredReleaser,
-        mUiThreadExecutor,
-        dataSourceSupplier,
-        id,
-        callerContext);
-  }
+    public VolleyDraweeController newController(
+            Supplier<DataSource<Bitmap>> dataSourceSupplier,
+            String id,
+            Object callerContext) {
+        return new VolleyDraweeController(
+                mResources,
+                mDeferredReleaser,
+                mUiThreadExecutor,
+                dataSourceSupplier,
+                id,
+                callerContext);
+    }
 }

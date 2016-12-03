@@ -9,9 +9,9 @@
 
 package com.facebook.imagepipeline.animated.impl;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
 import com.facebook.imagepipeline.animated.util.AnimatedDrawableUtil;
+
+import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * A simple data structure for tracking what to keep cached.
@@ -19,31 +19,31 @@ import com.facebook.imagepipeline.animated.util.AnimatedDrawableUtil;
 @NotThreadSafe
 class WhatToKeepCachedArray {
 
-  private final boolean[] mData;
+    private final boolean[] mData;
 
-  WhatToKeepCachedArray(int size) {
-    mData = new boolean[size];
-  }
-
-  boolean get(int index) {
-    return mData[index];
-  }
-
-  void setAll(boolean value) {
-    for (int i = 0; i < mData.length; i++) {
-      mData[i] = value;
+    WhatToKeepCachedArray(int size) {
+        mData = new boolean[size];
     }
-  }
 
-  void removeOutsideRange(int start, int end) {
-    for (int i = 0; i < mData.length; i++) {
-      if (AnimatedDrawableUtil.isOutsideRange(start, end, i)) {
-        mData[i] = false;
-      }
+    boolean get(int index) {
+        return mData[index];
     }
-  }
 
-  void set(int index, boolean value) {
-    mData[index] = value;
-  }
+    void setAll(boolean value) {
+        for (int i = 0; i < mData.length; i++) {
+            mData[i] = value;
+        }
+    }
+
+    void removeOutsideRange(int start, int end) {
+        for (int i = 0; i < mData.length; i++) {
+            if (AnimatedDrawableUtil.isOutsideRange(start, end, i)) {
+                mData[i] = false;
+            }
+        }
+    }
+
+    void set(int index, boolean value) {
+        mData[index] = value;
+    }
 }

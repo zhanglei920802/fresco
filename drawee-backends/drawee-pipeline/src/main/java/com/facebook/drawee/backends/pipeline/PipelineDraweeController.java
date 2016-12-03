@@ -44,225 +44,225 @@ import javax.annotation.Nullable;
  * source is automatically obtained and closed based on attach / detach calls.
  */
 public class PipelineDraweeController
-    extends AbstractDraweeController<CloseableReference<CloseableImage>, ImageInfo> {
+        extends AbstractDraweeController<CloseableReference<CloseableImage>, ImageInfo> {
 
-  private static final Class<?> TAG = PipelineDraweeController.class;
+    private static final Class<?> TAG = PipelineDraweeController.class;
 
-  // Components
-  private final Resources mResources;
-  private final AnimatedDrawableFactory mAnimatedDrawableFactory;
-  @Nullable
-  private final ImmutableList<DrawableFactory> mDrawableFactories;
+    // Components
+    private final Resources mResources;
+    private final AnimatedDrawableFactory mAnimatedDrawableFactory;
+    @Nullable
+    private final ImmutableList<DrawableFactory> mDrawableFactories;
+    private final DrawableFactory mDefaultDrawableFactory = new DrawableFactory() {
 
-  private @Nullable MemoryCache<CacheKey, CloseableImage> mMemoryCache;
+        @Override
+        public boolean supportsImageType(CloseableImage image) {
+            return true;
+        }
 
-  private CacheKey mCacheKey;
+        @Override
+        public Drawable createDrawable(CloseableImage closeableImage) {
+            if (closeableImage instanceof CloseableStaticBitmap) {
+                CloseableStaticBitmap closeableStaticBitmap = (CloseableStaticBitmap) closeableImage;
+                Drawable bitmapDrawable = new BitmapDrawable(
+                        mResources,
+                        closeableStaticBitmap.getUnderlyingBitmap());
+                if (closeableStaticBitmap.getRotationAngle() == 0 ||
+                        closeableStaticBitmap.getRotationAngle() == EncodedImage.UNKNOWN_ROTATION_ANGLE) {
+                    return bitmapDrawable;
+                }
+                else {
+                    return new OrientedDrawable(bitmapDrawable, closeableStaticBitmap.getRotationAngle());
+                }
+            }
+            else if (mAnimatedDrawableFactory != null) {
+                return mAnimatedDrawableFactory.create(closeableImage);
+            }
+            return null;
+        }
+    };
+    private
+    @Nullable
+    MemoryCache<CacheKey, CloseableImage> mMemoryCache;
+    private CacheKey mCacheKey;
+    // Constant state (non-final because controllers can be reused)
+    private Supplier<DataSource<CloseableReference<CloseableImage>>> mDataSourceSupplier;
+    private boolean mDrawDebugOverlay;
 
-  // Constant state (non-final because controllers can be reused)
-  private Supplier<DataSource<CloseableReference<CloseableImage>>> mDataSourceSupplier;
+    public PipelineDraweeController(
+            Resources resources,
+            DeferredReleaser deferredReleaser,
+            AnimatedDrawableFactory animatedDrawableFactory,
+            Executor uiThreadExecutor,
+            MemoryCache<CacheKey, CloseableImage> memoryCache,
+            Supplier<DataSource<CloseableReference<CloseableImage>>> dataSourceSupplier,
+            String id,
+            CacheKey cacheKey,
+            Object callerContext) {
+        this(
+                resources,
+                deferredReleaser,
+                animatedDrawableFactory,
+                uiThreadExecutor,
+                memoryCache,
+                dataSourceSupplier,
+                id,
+                cacheKey,
+                callerContext,
+                null);
+    }
 
-  private boolean mDrawDebugOverlay;
+    public PipelineDraweeController(
+            Resources resources,
+            DeferredReleaser deferredReleaser,
+            AnimatedDrawableFactory animatedDrawableFactory,
+            Executor uiThreadExecutor,
+            MemoryCache<CacheKey, CloseableImage> memoryCache,
+            Supplier<DataSource<CloseableReference<CloseableImage>>> dataSourceSupplier,
+            String id,
+            CacheKey cacheKey,
+            Object callerContext,
+            @Nullable ImmutableList<DrawableFactory> drawableFactories) {
+        super(deferredReleaser, uiThreadExecutor, id, callerContext);
+        mResources = resources;
+        mAnimatedDrawableFactory = animatedDrawableFactory;
+        mMemoryCache = memoryCache;
+        mCacheKey = cacheKey;
+        mDrawableFactories = drawableFactories;
+        init(dataSourceSupplier);
+    }
 
-  private final DrawableFactory mDefaultDrawableFactory = new DrawableFactory() {
+    /**
+     * Initializes this controller with the new data source supplier, id and caller context. This
+     * allows for reusing of the existing controller instead of instantiating a new one. This method
+     * should be called when the controller is in detached state.
+     *
+     * @param dataSourceSupplier data source supplier
+     * @param id                 unique id for this controller
+     * @param callerContext      tag and context for this controller
+     */
+    public void initialize(
+            Supplier<DataSource<CloseableReference<CloseableImage>>> dataSourceSupplier,
+            String id,
+            CacheKey cacheKey,
+            Object callerContext) {
+        super.initialize(id, callerContext);
+        init(dataSourceSupplier);
+        mCacheKey = cacheKey;
+    }
+
+    public void setDrawDebugOverlay(boolean drawDebugOverlay) {
+        mDrawDebugOverlay = drawDebugOverlay;
+    }
+
+    private void init(Supplier<DataSource<CloseableReference<CloseableImage>>> dataSourceSupplier) {
+        mDataSourceSupplier = dataSourceSupplier;
+
+        maybeUpdateDebugOverlay(null);
+    }
+
+    protected Resources getResources() {
+        return mResources;
+    }
 
     @Override
-    public boolean supportsImageType(CloseableImage image) {
-      return true;
+    protected DataSource<CloseableReference<CloseableImage>> getDataSource() {
+        if (FLog.isLoggable(FLog.VERBOSE)) {
+            FLog.v(TAG, "controller %x: getDataSource", System.identityHashCode(this));
+        }
+        return mDataSourceSupplier.get();
     }
 
     @Override
-    public Drawable createDrawable(CloseableImage closeableImage) {
-      if (closeableImage instanceof CloseableStaticBitmap) {
-        CloseableStaticBitmap closeableStaticBitmap = (CloseableStaticBitmap) closeableImage;
-        Drawable bitmapDrawable = new BitmapDrawable(
-            mResources,
-            closeableStaticBitmap.getUnderlyingBitmap());
-        if (closeableStaticBitmap.getRotationAngle() == 0 ||
-            closeableStaticBitmap.getRotationAngle() == EncodedImage.UNKNOWN_ROTATION_ANGLE) {
-          return bitmapDrawable;
-        } else {
-          return new OrientedDrawable(bitmapDrawable, closeableStaticBitmap.getRotationAngle());
+    protected Drawable createDrawable(CloseableReference<CloseableImage> image) {
+        Preconditions.checkState(CloseableReference.isValid(image));
+        CloseableImage closeableImage = image.get();
+
+        maybeUpdateDebugOverlay(closeableImage);
+
+        if (mDrawableFactories != null) {
+            for (DrawableFactory factory : mDrawableFactories) {
+                if (factory.supportsImageType(closeableImage)) {
+                    Drawable drawable = factory.createDrawable(closeableImage);
+                    if (drawable != null) {
+                        return drawable;
+                    }
+                }
+            }
         }
-      } else if (mAnimatedDrawableFactory != null) {
-        return mAnimatedDrawableFactory.create(closeableImage);
-      }
-      return null;
-    }
-  };
 
-  public PipelineDraweeController(
-          Resources resources,
-          DeferredReleaser deferredReleaser,
-          AnimatedDrawableFactory animatedDrawableFactory,
-          Executor uiThreadExecutor,
-          MemoryCache<CacheKey, CloseableImage> memoryCache,
-          Supplier<DataSource<CloseableReference<CloseableImage>>> dataSourceSupplier,
-          String id,
-          CacheKey cacheKey,
-          Object callerContext) {
-    this(
-        resources,
-        deferredReleaser,
-        animatedDrawableFactory,
-        uiThreadExecutor,
-        memoryCache,
-        dataSourceSupplier,
-        id,
-        cacheKey,
-        callerContext,
-        null);
-  }
-
-  public PipelineDraweeController(
-      Resources resources,
-      DeferredReleaser deferredReleaser,
-      AnimatedDrawableFactory animatedDrawableFactory,
-      Executor uiThreadExecutor,
-      MemoryCache<CacheKey, CloseableImage> memoryCache,
-      Supplier<DataSource<CloseableReference<CloseableImage>>> dataSourceSupplier,
-      String id,
-      CacheKey cacheKey,
-      Object callerContext,
-      @Nullable ImmutableList<DrawableFactory> drawableFactories) {
-    super(deferredReleaser, uiThreadExecutor, id, callerContext);
-    mResources = resources;
-    mAnimatedDrawableFactory = animatedDrawableFactory;
-    mMemoryCache = memoryCache;
-    mCacheKey = cacheKey;
-    mDrawableFactories = drawableFactories;
-    init(dataSourceSupplier);
-  }
-
-  /**
-   * Initializes this controller with the new data source supplier, id and caller context. This
-   * allows for reusing of the existing controller instead of instantiating a new one. This method
-   * should be called when the controller is in detached state.
-   *
-   * @param dataSourceSupplier data source supplier
-   * @param id unique id for this controller
-   * @param callerContext tag and context for this controller
-   */
-  public void initialize(
-      Supplier<DataSource<CloseableReference<CloseableImage>>> dataSourceSupplier,
-      String id,
-      CacheKey cacheKey,
-      Object callerContext) {
-    super.initialize(id, callerContext);
-    init(dataSourceSupplier);
-    mCacheKey = cacheKey;
-  }
-
-  public void setDrawDebugOverlay(boolean drawDebugOverlay) {
-    mDrawDebugOverlay = drawDebugOverlay;
-  }
-
-  private void init(Supplier<DataSource<CloseableReference<CloseableImage>>> dataSourceSupplier) {
-    mDataSourceSupplier = dataSourceSupplier;
-
-    maybeUpdateDebugOverlay(null);
-  }
-
-  protected Resources getResources() {
-    return mResources;
-  }
-
-  @Override
-  protected DataSource<CloseableReference<CloseableImage>> getDataSource() {
-    if (FLog.isLoggable(FLog.VERBOSE)) {
-      FLog.v(TAG, "controller %x: getDataSource", System.identityHashCode(this));
-    }
-    return mDataSourceSupplier.get();
-  }
-
-  @Override
-  protected Drawable createDrawable(CloseableReference<CloseableImage> image) {
-    Preconditions.checkState(CloseableReference.isValid(image));
-    CloseableImage closeableImage = image.get();
-
-    maybeUpdateDebugOverlay(closeableImage);
-
-    if (mDrawableFactories != null) {
-      for (DrawableFactory factory : mDrawableFactories) {
-        if (factory.supportsImageType(closeableImage)) {
-          Drawable drawable = factory.createDrawable(closeableImage);
-          if (drawable != null) {
-            return drawable;
-          }
+        Drawable defaultDrawable = mDefaultDrawableFactory.createDrawable(closeableImage);
+        if (defaultDrawable != null) {
+            return defaultDrawable;
         }
-      }
+        throw new UnsupportedOperationException("Unrecognized image class: " + closeableImage);
     }
 
-    Drawable defaultDrawable = mDefaultDrawableFactory.createDrawable(closeableImage);
-    if (defaultDrawable != null) {
-      return defaultDrawable;
+    private void maybeUpdateDebugOverlay(@Nullable CloseableImage image) {
+        if (!mDrawDebugOverlay) {
+            return;
+        }
+        Drawable controllerOverlay = getControllerOverlay();
+        if (controllerOverlay == null) {
+            controllerOverlay = new DebugControllerOverlayDrawable();
+            setControllerOverlay(controllerOverlay);
+        }
+        if (controllerOverlay instanceof DebugControllerOverlayDrawable) {
+            DebugControllerOverlayDrawable debugOverlay =
+                    (DebugControllerOverlayDrawable) controllerOverlay;
+            debugOverlay.setControllerId(getId());
+            if (image != null) {
+                debugOverlay.setDimensions(image.getWidth(), image.getHeight());
+                debugOverlay.setImageSize(image.getSizeInBytes());
+            }
+            else {
+                debugOverlay.reset();
+            }
+        }
     }
-    throw new UnsupportedOperationException("Unrecognized image class: " + closeableImage);
-  }
 
-  private void maybeUpdateDebugOverlay(@Nullable CloseableImage image) {
-    if (!mDrawDebugOverlay) {
-      return;
+    @Override
+    protected ImageInfo getImageInfo(CloseableReference<CloseableImage> image) {
+        Preconditions.checkState(CloseableReference.isValid(image));
+        return image.get();
     }
-    Drawable controllerOverlay = getControllerOverlay();
-    if (controllerOverlay == null) {
-      controllerOverlay = new DebugControllerOverlayDrawable();
-      setControllerOverlay(controllerOverlay);
+
+    @Override
+    protected int getImageHash(@Nullable CloseableReference<CloseableImage> image) {
+        return (image != null) ? image.getValueHash() : 0;
     }
-    if (controllerOverlay instanceof DebugControllerOverlayDrawable) {
-      DebugControllerOverlayDrawable debugOverlay =
-          (DebugControllerOverlayDrawable) controllerOverlay;
-      debugOverlay.setControllerId(getId());
-      if (image != null) {
-        debugOverlay.setDimensions(image.getWidth(), image.getHeight());
-        debugOverlay.setImageSize(image.getSizeInBytes());
-      } else {
-        debugOverlay.reset();
-      }
+
+    @Override
+    protected void releaseImage(@Nullable CloseableReference<CloseableImage> image) {
+        CloseableReference.closeSafely(image);
     }
-  }
 
-  @Override
-  protected ImageInfo getImageInfo(CloseableReference<CloseableImage> image) {
-    Preconditions.checkState(CloseableReference.isValid(image));
-    return image.get();
-  }
-
-  @Override
-  protected int getImageHash(@Nullable CloseableReference<CloseableImage> image) {
-    return (image != null) ? image.getValueHash() : 0;
-  }
-
-  @Override
-  protected void releaseImage(@Nullable CloseableReference<CloseableImage> image) {
-    CloseableReference.closeSafely(image);
-  }
-
-  @Override
-  protected void releaseDrawable(@Nullable Drawable drawable) {
-    if (drawable instanceof DrawableWithCaches) {
-      ((DrawableWithCaches) drawable).dropCaches();
+    @Override
+    protected void releaseDrawable(@Nullable Drawable drawable) {
+        if (drawable instanceof DrawableWithCaches) {
+            ((DrawableWithCaches) drawable).dropCaches();
+        }
     }
-  }
 
-  @Override
-  protected CloseableReference<CloseableImage> getCachedImage() {
-    if (mMemoryCache == null || mCacheKey == null) {
-      return null;
+    @Override
+    protected CloseableReference<CloseableImage> getCachedImage() {
+        if (mMemoryCache == null || mCacheKey == null) {
+            return null;
+        }
+        // We get the CacheKey
+        CloseableReference<CloseableImage> closeableImage = mMemoryCache.get(mCacheKey);
+        if (closeableImage != null && !closeableImage.get().getQualityInfo().isOfFullQuality()) {
+            closeableImage.close();
+            return null;
+        }
+        return closeableImage;
     }
-    // We get the CacheKey
-    CloseableReference<CloseableImage> closeableImage = mMemoryCache.get(mCacheKey);
-    if (closeableImage != null && !closeableImage.get().getQualityInfo().isOfFullQuality()) {
-      closeableImage.close();
-      return null;
-    }
-    return closeableImage;
-  }
 
-  @Override
-  public String toString() {
-    return Objects.toStringHelper(this)
-        .add("super", super.toString())
-        .add("dataSourceSupplier", mDataSourceSupplier)
-        .toString();
-  }
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                      .add("super", super.toString())
+                      .add("dataSourceSupplier", mDataSourceSupplier)
+                      .toString();
+    }
 }

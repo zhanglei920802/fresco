@@ -9,12 +9,12 @@
 
 package com.facebook.common.webp;
 
-import java.io.FileDescriptor;
-import java.io.InputStream;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+
+import java.io.FileDescriptor;
+import java.io.InputStream;
 
 /**
  * Interface for a bitmap factory that can decode WebP images even on versions of Android that
@@ -24,52 +24,52 @@ import android.graphics.Rect;
  */
 public interface WebpBitmapFactory {
 
-  /**
-   * We listen to events in Webp direct decoding
-   */
-  interface WebpErrorLogger {
+    /**
+     * Register the given listener as observer of error
+     *
+     * @param logger The WebpErrorLogger in order to observe webp errors
+     */
+    void setWebpErrorLogger(WebpErrorLogger logger);
 
     /**
-     * Invoked to notify the logger about an error
+     * Set the object which should create the bg Bitmap
      *
-     * @param message The message to log
-     * @param extra Extra message if any
+     * @param bitmapCreator The BitmapCreator implementation
      */
-    void onWebpErrorLog(String message, String extra);
-  }
+    void setBitmapCreator(final BitmapCreator bitmapCreator);
 
-  /**
-   * Register the given listener as observer of error
-   *
-   * @param logger The WebpErrorLogger in order to observe webp errors
-   */
-  void setWebpErrorLogger(WebpErrorLogger logger);
+    Bitmap decodeFileDescriptor(
+            FileDescriptor fd,
+            Rect outPadding,
+            BitmapFactory.Options opts);
 
-  /**
-   * Set the object which should create the bg Bitmap
-   *
-   * @param bitmapCreator The BitmapCreator implementation
-   */
-  void setBitmapCreator(final BitmapCreator bitmapCreator);
+    Bitmap decodeStream(
+            InputStream inputStream,
+            Rect outPadding,
+            BitmapFactory.Options opts);
 
-  Bitmap decodeFileDescriptor(
-      FileDescriptor fd,
-      Rect outPadding,
-      BitmapFactory.Options opts);
+    Bitmap decodeFile(
+            String pathName,
+            BitmapFactory.Options opts);
 
-  Bitmap decodeStream(
-      InputStream inputStream,
-      Rect outPadding,
-      BitmapFactory.Options opts);
+    Bitmap decodeByteArray(
+            byte[] array,
+            int offset,
+            int length,
+            BitmapFactory.Options opts);
 
-  Bitmap decodeFile(
-      String pathName,
-      BitmapFactory.Options opts);
+    /**
+     * We listen to events in Webp direct decoding
+     */
+    interface WebpErrorLogger {
 
-  Bitmap decodeByteArray(
-      byte[] array,
-      int offset,
-      int length,
-      BitmapFactory.Options opts);
+        /**
+         * Invoked to notify the logger about an error
+         *
+         * @param message The message to log
+         * @param extra   Extra message if any
+         */
+        void onWebpErrorLog(String message, String extra);
+    }
 
 }

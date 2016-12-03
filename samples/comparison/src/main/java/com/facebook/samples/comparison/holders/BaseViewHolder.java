@@ -26,52 +26,52 @@ import com.facebook.samples.comparison.instrumentation.PerfListener;
  * The base ViewHolder with instrumentation
  */
 public abstract class BaseViewHolder<V extends View & Instrumented>
-    extends RecyclerView.ViewHolder {
+        extends RecyclerView.ViewHolder {
 
-  private final PerfListener mPerfListener;
-  private final View mParentView;
-  protected final V mImageView;
-  private Context mContext;
+    protected final V mImageView;
+    private final PerfListener mPerfListener;
+    private final View mParentView;
+    private Context mContext;
 
-  public BaseViewHolder(
-      Context context,
-      View parentView,
-      V imageView,
-      PerfListener perfListener) {
-    super(imageView);
-    this.mContext = context;
-    this.mPerfListener = perfListener;
-    this.mParentView = parentView;
-    this.mImageView = imageView;
-    if (mParentView != null) {
-      int size = calcDesiredSize(mParentView.getWidth(), mParentView.getHeight());
-      updateViewLayoutParams(mImageView, size, size);
+    public BaseViewHolder(
+            Context context,
+            View parentView,
+            V imageView,
+            PerfListener perfListener) {
+        super(imageView);
+        this.mContext = context;
+        this.mPerfListener = perfListener;
+        this.mParentView = parentView;
+        this.mImageView = imageView;
+        if (mParentView != null) {
+            int size = calcDesiredSize(mParentView.getWidth(), mParentView.getHeight());
+            updateViewLayoutParams(mImageView, size, size);
+        }
     }
-  }
 
-  public void bind(String model) {
-    mImageView.initInstrumentation(model.toString(), mPerfListener);
-    onBind(model);
-  }
-
-  /**
-   * Load an image of the specified uri into the view, asynchronously.
-   */
-  protected abstract void onBind(String uri);
-
-  protected Context getContext() {
-    return mContext;
-  }
-
-  private void updateViewLayoutParams(View view, int width, int height) {
-    ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-    if (layoutParams == null || layoutParams.height != width || layoutParams.width != height) {
-      layoutParams = new AbsListView.LayoutParams(width, height);
-      view.setLayoutParams(layoutParams);
+    public void bind(String model) {
+        mImageView.initInstrumentation(model.toString(), mPerfListener);
+        onBind(model);
     }
-  }
 
-  private int calcDesiredSize(int parentWidth, int parentHeight) {
-    return MainActivity.calcDesiredSize(mContext, parentWidth, parentHeight);
-  }
+    /**
+     * Load an image of the specified uri into the view, asynchronously.
+     */
+    protected abstract void onBind(String uri);
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    private void updateViewLayoutParams(View view, int width, int height) {
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        if (layoutParams == null || layoutParams.height != width || layoutParams.width != height) {
+            layoutParams = new AbsListView.LayoutParams(width, height);
+            view.setLayoutParams(layoutParams);
+        }
+    }
+
+    private int calcDesiredSize(int parentWidth, int parentHeight) {
+        return MainActivity.calcDesiredSize(mContext, parentWidth, parentHeight);
+    }
 }

@@ -18,19 +18,20 @@ import com.facebook.common.references.ResourceReleaser;
  */
 public class SimpleBitmapReleaser implements ResourceReleaser<Bitmap> {
 
-  private static SimpleBitmapReleaser sInstance;
+    private static SimpleBitmapReleaser sInstance;
 
-  public static SimpleBitmapReleaser getInstance() {
-    if (sInstance == null) {
-      sInstance = new SimpleBitmapReleaser();
+    private SimpleBitmapReleaser() {
     }
-    return sInstance;
-  }
 
-  private SimpleBitmapReleaser() {}
+    public static SimpleBitmapReleaser getInstance() {
+        if (sInstance == null) {
+            sInstance = new SimpleBitmapReleaser();
+        }
+        return sInstance;
+    }
 
-  @Override
-  public void release(Bitmap value) {
-    value.recycle();
-  }
+    @Override
+    public void release(Bitmap value) {
+        value.recycle();
+    }
 }

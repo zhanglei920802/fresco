@@ -21,12 +21,12 @@ import com.facebook.samples.scrollperf.data.SimpleAdapter;
  */
 public enum DistinctUriDecorator implements Decorator<Uri> {
 
-  SINGLETON;
+    SINGLETON;
 
-  @Override
-  public Uri decorate(SimpleAdapter<Uri> decoratee, int position) {
-    final int pos = position % decoratee.getSize();
-    final Uri srcUri = decoratee.get(position);
-    return Uri.parse(srcUri.toString() + "?param=" + pos);
-  }
+    @Override
+    public Uri decorate(SimpleAdapter<Uri> decoratee, int position) {
+        final int pos = position % decoratee.getSize();
+        final Uri srcUri = decoratee.get(position);
+        return Uri.parse(srcUri.toString() + "?param=" + pos);
+    }
 }

@@ -9,11 +9,11 @@
 
 package com.facebook.imagepipeline.cache;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.facebook.cache.common.CacheKey;
 import com.facebook.imagepipeline.image.EncodedImage;
 import com.facebook.imagepipeline.request.ImageRequest;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import bolts.Task;
 
@@ -22,44 +22,46 @@ import bolts.Task;
  * is requested by the image request.
  */
 public class SmallCacheIfRequestedDiskCachePolicy
-    implements DiskCachePolicy {
+        implements DiskCachePolicy {
 
-  private final BufferedDiskCache mDefaultBufferedDiskCache;
-  private final BufferedDiskCache mSmallImageBufferedDiskCache;
-  private final CacheKeyFactory mCacheKeyFactory;
+    private final BufferedDiskCache mDefaultBufferedDiskCache;
+    private final BufferedDiskCache mSmallImageBufferedDiskCache;
+    private final CacheKeyFactory mCacheKeyFactory;
 
-  public SmallCacheIfRequestedDiskCachePolicy(
-      BufferedDiskCache defaultBufferedDiskCache,
-      BufferedDiskCache smallImageBufferedDiskCache, CacheKeyFactory cacheKeyFactory) {
-    mDefaultBufferedDiskCache = defaultBufferedDiskCache;
-    mSmallImageBufferedDiskCache = smallImageBufferedDiskCache;
-    mCacheKeyFactory = cacheKeyFactory;
-  }
-
-  @Override
-  public Task<EncodedImage> createAndStartCacheReadTask(
-      ImageRequest imageRequest,
-      Object callerContext,
-      AtomicBoolean isCancelled) {
-    final CacheKey cacheKey = mCacheKeyFactory.getEncodedCacheKey(imageRequest, callerContext);
-    if (imageRequest.getCacheChoice() == ImageRequest.CacheChoice.SMALL) {
-      return mSmallImageBufferedDiskCache.get(cacheKey, isCancelled);
-    } else {
-      return mDefaultBufferedDiskCache.get(cacheKey, isCancelled);
+    public SmallCacheIfRequestedDiskCachePolicy(
+            BufferedDiskCache defaultBufferedDiskCache,
+            BufferedDiskCache smallImageBufferedDiskCache, CacheKeyFactory cacheKeyFactory) {
+        mDefaultBufferedDiskCache = defaultBufferedDiskCache;
+        mSmallImageBufferedDiskCache = smallImageBufferedDiskCache;
+        mCacheKeyFactory = cacheKeyFactory;
     }
-  }
 
-  @Override
-  public void writeToCache(
-      EncodedImage newResult,
-      ImageRequest imageRequest,
-      Object callerContext) {
-    final CacheKey cacheKey = mCacheKeyFactory.getEncodedCacheKey(imageRequest, callerContext);
-
-    if (imageRequest.getCacheChoice() == ImageRequest.CacheChoice.SMALL) {
-      mSmallImageBufferedDiskCache.put(cacheKey, newResult);
-    } else {
-      mDefaultBufferedDiskCache.put(cacheKey, newResult);
+    @Override
+    public Task<EncodedImage> createAndStartCacheReadTask(
+            ImageRequest imageRequest,
+            Object callerContext,
+            AtomicBoolean isCancelled) {
+        final CacheKey cacheKey = mCacheKeyFactory.getEncodedCacheKey(imageRequest, callerContext);
+        if (imageRequest.getCacheChoice() == ImageRequest.CacheChoice.SMALL) {
+            return mSmallImageBufferedDiskCache.get(cacheKey, isCancelled);
+        }
+        else {
+            return mDefaultBufferedDiskCache.get(cacheKey, isCancelled);
+        }
     }
-  }
+
+    @Override
+    public void writeToCache(
+            EncodedImage newResult,
+            ImageRequest imageRequest,
+            Object callerContext) {
+        final CacheKey cacheKey = mCacheKeyFactory.getEncodedCacheKey(imageRequest, callerContext);
+
+        if (imageRequest.getCacheChoice() == ImageRequest.CacheChoice.SMALL) {
+            mSmallImageBufferedDiskCache.put(cacheKey, newResult);
+        }
+        else {
+            mDefaultBufferedDiskCache.put(cacheKey, newResult);
+        }
+    }
 }

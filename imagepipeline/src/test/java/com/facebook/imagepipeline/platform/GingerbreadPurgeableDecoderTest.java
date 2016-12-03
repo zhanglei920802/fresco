@@ -9,12 +9,9 @@
 
 package com.facebook.imagepipeline.platform;
 
-import java.io.FileDescriptor;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.os.Build;
 
 import com.facebook.common.references.CloseableReference;
 import com.facebook.common.references.ResourceReleaser;
@@ -30,13 +27,13 @@ import com.facebook.imagepipeline.testing.TrivialPooledByteBuffer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareOnlyThisForTest;
 import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricTestRunner;
 
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareOnlyThisForTest;
-import org.robolectric.annotation.Config;
+import java.io.FileDescriptor;
 
 import static org.junit.Assume.assumeNotNull;
 import static org.mockito.Matchers.any;
@@ -49,73 +46,71 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
  */
 @RunWith(RobolectricTestRunner.class)
 @PrepareOnlyThisForTest({
-    BitmapCounterProvider.class,
-    BitmapFactory.class,
-    Bitmaps.class})
-@PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*" })
+        BitmapCounterProvider.class,
+        BitmapFactory.class,
+        Bitmaps.class})
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*"})
 public class GingerbreadPurgeableDecoderTest {
 
-  protected static final Bitmap.Config DEFAULT_BITMAP_CONFIG = Bitmap.Config.ARGB_8888;
+    protected static final Bitmap.Config DEFAULT_BITMAP_CONFIG = Bitmap.Config.ARGB_8888;
 //  protected FlexByteArrayPool mFlexByteArrayPool;
+    protected static final int IMAGE_SIZE = 5;
+    protected static final int LENGTH = 10;
+    protected static final long POINTER = 1000L;
+    protected static final int MAX_BITMAP_COUNT = 2;
+    protected static final int MAX_BITMAP_SIZE =
+            MAX_BITMAP_COUNT * MockBitmapFactory.DEFAULT_BITMAP_SIZE;
 
-  @Rule
-  public PowerMockRule rule = new PowerMockRule();
+    static {
+        SoLoaderShim.setInTestMode();
+    }
 
-  static {
-    SoLoaderShim.setInTestMode();
-  }
+    @Rule
+    public PowerMockRule rule = new PowerMockRule();
+    protected GingerbreadPurgeableDecoder mGingerbreadPurgeableDecoder;
+    protected CloseableReference<PooledByteBuffer> mByteBufferRef;
+    protected EncodedImage mEncodedImage;
+    protected byte[] mInputBuf;
+    protected byte[] mDecodeBuf;
+    protected CloseableReference<byte[]> mDecodeBufRef;
+    protected Bitmap mBitmap;
+    protected BitmapCounter mBitmapCounter;
 
-  protected static final int IMAGE_SIZE = 5;
-  protected static final int LENGTH = 10;
-  protected static final long POINTER = 1000L;
-  protected static final int MAX_BITMAP_COUNT = 2;
-  protected static final int MAX_BITMAP_SIZE =
-      MAX_BITMAP_COUNT * MockBitmapFactory.DEFAULT_BITMAP_SIZE;
+    @Before
+    public void setUp() {
 
-  protected GingerbreadPurgeableDecoder mGingerbreadPurgeableDecoder;
-  protected CloseableReference<PooledByteBuffer> mByteBufferRef;
-  protected EncodedImage mEncodedImage;
-  protected byte[] mInputBuf;
-  protected byte[] mDecodeBuf;
-  protected CloseableReference<byte[]> mDecodeBufRef;
-  protected Bitmap mBitmap;
-  protected BitmapCounter mBitmapCounter;
+        mBitmap = MockBitmapFactory.create();
+        mBitmapCounter = new BitmapCounter(MAX_BITMAP_COUNT, MAX_BITMAP_SIZE);
 
-  @Before
-  public void setUp() {
+        mockStatic(BitmapCounterProvider.class);
+        when(BitmapCounterProvider.get()).thenReturn(mBitmapCounter);
 
-    mBitmap = MockBitmapFactory.create();
-    mBitmapCounter = new BitmapCounter(MAX_BITMAP_COUNT, MAX_BITMAP_SIZE);
+        mockStatic(BitmapFactory.class);
+        when(BitmapFactory.decodeFileDescriptor(
+                any(FileDescriptor.class),
+                any(Rect.class),
+                any(BitmapFactory.Options.class)))
+                .thenReturn(mBitmap);
 
-    mockStatic(BitmapCounterProvider.class);
-    when(BitmapCounterProvider.get()).thenReturn(mBitmapCounter);
+        mInputBuf = new byte[LENGTH];
+        PooledByteBuffer input = new TrivialPooledByteBuffer(mInputBuf, POINTER);
+        mByteBufferRef = CloseableReference.of(input);
+        mEncodedImage = new EncodedImage(mByteBufferRef);
 
-    mockStatic(BitmapFactory.class);
-    when(BitmapFactory.decodeFileDescriptor(
-            any(FileDescriptor.class),
-            any(Rect.class),
-            any(BitmapFactory.Options.class)))
-        .thenReturn(mBitmap);
+        mDecodeBuf = new byte[LENGTH + 2];
+        mDecodeBufRef = CloseableReference.of(mDecodeBuf, mock(ResourceReleaser.class));
 
-    mInputBuf = new byte[LENGTH];
-    PooledByteBuffer input = new TrivialPooledByteBuffer(mInputBuf, POINTER);
-    mByteBufferRef = CloseableReference.of(input);
-    mEncodedImage = new EncodedImage(mByteBufferRef);
+        mockStatic(Bitmaps.class);
+        mGingerbreadPurgeableDecoder = new GingerbreadPurgeableDecoder();
+    }
 
-    mDecodeBuf = new byte[LENGTH + 2];
-    mDecodeBufRef = CloseableReference.of(mDecodeBuf, mock(ResourceReleaser.class));
+    @Test
+    public void testDecode_Jpeg_Detailed() {
+        assumeNotNull(mGingerbreadPurgeableDecoder);
+    }
 
-    mockStatic(Bitmaps.class);
-    mGingerbreadPurgeableDecoder = new GingerbreadPurgeableDecoder();
-  }
-
-  @Test
-  public void testDecode_Jpeg_Detailed() {
-    assumeNotNull(mGingerbreadPurgeableDecoder);
-  }
-
-  @Test
-  public void testDecodeJpeg_incomplete() {
-    assumeNotNull(mGingerbreadPurgeableDecoder);
-  }
+    @Test
+    public void testDecodeJpeg_incomplete() {
+        assumeNotNull(mGingerbreadPurgeableDecoder);
+    }
 }

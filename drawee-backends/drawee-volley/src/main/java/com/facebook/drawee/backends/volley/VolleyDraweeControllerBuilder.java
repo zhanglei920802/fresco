@@ -27,64 +27,65 @@ import java.util.Set;
  * <p/> See {@link AbstractDraweeControllerBuilder} for more details.
  */
 public class VolleyDraweeControllerBuilder extends AbstractDraweeControllerBuilder<
-    VolleyDraweeControllerBuilder,
-    Uri,
-    Bitmap,
-    Bitmap> {
+        VolleyDraweeControllerBuilder,
+        Uri,
+        Bitmap,
+        Bitmap> {
 
-  private final ImageLoader mImageLoader;
-  private final VolleyDraweeControllerFactory mVolleyDraweeControllerFactory;
+    private final ImageLoader mImageLoader;
+    private final VolleyDraweeControllerFactory mVolleyDraweeControllerFactory;
 
-  public VolleyDraweeControllerBuilder(
-      Context context,
-      ImageLoader imageLoader,
-      VolleyDraweeControllerFactory volleyDraweeControllerFactory,
-      Set<ControllerListener> boundControllerListeners) {
-    super(context, boundControllerListeners);
-    mImageLoader = imageLoader;
-    mVolleyDraweeControllerFactory = volleyDraweeControllerFactory;
-  }
-
-  @Override
-  protected VolleyDraweeController obtainController() {
-    DraweeController oldController = getOldController();
-    VolleyDraweeController controller;
-    if (oldController instanceof VolleyDraweeController) {
-      controller = (VolleyDraweeController) oldController;
-      controller.initialize(
-          obtainDataSourceSupplier(),
-          generateUniqueControllerId(),
-          getCallerContext());
-    } else {
-      controller = mVolleyDraweeControllerFactory.newController(
-          obtainDataSourceSupplier(),
-          generateUniqueControllerId(),
-          getCallerContext());
+    public VolleyDraweeControllerBuilder(
+            Context context,
+            ImageLoader imageLoader,
+            VolleyDraweeControllerFactory volleyDraweeControllerFactory,
+            Set<ControllerListener> boundControllerListeners) {
+        super(context, boundControllerListeners);
+        mImageLoader = imageLoader;
+        mVolleyDraweeControllerFactory = volleyDraweeControllerFactory;
     }
-    return controller;
-  }
 
-  @Override
-  protected DataSource<Bitmap> getDataSourceForRequest(
-      final Uri imageRequest,
-      final Object callerContext,
-      final CacheLevel cacheLevel) {
-    return new VolleyDataSource(mImageLoader, imageRequest, cacheLevel);
-  }
+    @Override
+    protected VolleyDraweeController obtainController() {
+        DraweeController oldController = getOldController();
+        VolleyDraweeController controller;
+        if (oldController instanceof VolleyDraweeController) {
+            controller = (VolleyDraweeController) oldController;
+            controller.initialize(
+                    obtainDataSourceSupplier(),
+                    generateUniqueControllerId(),
+                    getCallerContext());
+        }
+        else {
+            controller = mVolleyDraweeControllerFactory.newController(
+                    obtainDataSourceSupplier(),
+                    generateUniqueControllerId(),
+                    getCallerContext());
+        }
+        return controller;
+    }
 
-  @Override
-  public VolleyDraweeControllerBuilder setUri(Uri uri) {
-    return setImageRequest(uri);
-  }
+    @Override
+    protected DataSource<Bitmap> getDataSourceForRequest(
+            final Uri imageRequest,
+            final Object callerContext,
+            final CacheLevel cacheLevel) {
+        return new VolleyDataSource(mImageLoader, imageRequest, cacheLevel);
+    }
 
-  @Override
-  public VolleyDraweeControllerBuilder setUri(String uriString) {
-    Preconditions.checkNotNull(uriString);
-    return setImageRequest(Uri.parse(uriString));
-  }
+    @Override
+    public VolleyDraweeControllerBuilder setUri(Uri uri) {
+        return setImageRequest(uri);
+    }
 
-  @Override
-  protected VolleyDraweeControllerBuilder getThis() {
-    return this;
-  }
+    @Override
+    public VolleyDraweeControllerBuilder setUri(String uriString) {
+        Preconditions.checkNotNull(uriString);
+        return setImageRequest(Uri.parse(uriString));
+    }
+
+    @Override
+    protected VolleyDraweeControllerBuilder getThis() {
+        return this;
+    }
 }

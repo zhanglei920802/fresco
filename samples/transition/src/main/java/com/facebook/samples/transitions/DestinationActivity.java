@@ -21,17 +21,17 @@ import com.facebook.drawee.view.SimpleDraweeView;
 
 public class DestinationActivity extends Activity {
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.drawee_destination);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.drawee_destination);
 
-    SimpleDraweeView simpleDraweeView = (SimpleDraweeView) findViewById(R.id.image);
-    simpleDraweeView.setImageURI("res:/" + R.drawable.test_image);
+        SimpleDraweeView simpleDraweeView = (SimpleDraweeView) findViewById(R.id.image);
+        simpleDraweeView.setImageURI("res:/" + R.drawable.test_image);
 
-    getWindow().setSharedElementEnterTransition(DraweeTransition.createTransitionSet(
-            ScalingUtils.ScaleType.CENTER_CROP, ScalingUtils.ScaleType.FIT_CENTER));
-    getWindow().setSharedElementReturnTransition(DraweeTransition.createTransitionSet(
-            ScalingUtils.ScaleType.FIT_CENTER, ScalingUtils.ScaleType.CENTER_CROP));
-  }
+        getWindow().setSharedElementEnterTransition(DraweeTransition.createTransitionSet(
+                ScalingUtils.ScaleType.CENTER_CROP, ScalingUtils.ScaleType.FIT_CENTER));
+        getWindow().setSharedElementReturnTransition(DraweeTransition.createTransitionSet(
+                ScalingUtils.ScaleType.FIT_CENTER, ScalingUtils.ScaleType.CENTER_CROP));
+    }
 }

@@ -16,9 +16,10 @@ import android.graphics.drawable.Drawable;
  */
 public interface CloneableDrawable {
 
-  /**
-   * Creates a copy of the drawable.
-   * @return the drawable copy
-   */
-  Drawable cloneDrawable();
+    /**
+     * Creates a copy of the drawable.
+     *
+     * @return the drawable copy
+     */
+    Drawable cloneDrawable();
 }

@@ -14,15 +14,15 @@ package com.facebook.common.time;
  */
 public interface Clock {
 
-  /**
-   * The maximum time.
-   */
-  long MAX_TIME = Long.MAX_VALUE;
+    /**
+     * The maximum time.
+     */
+    long MAX_TIME = Long.MAX_VALUE;
 
-  /**
-   * Gets the current time in milliseconds.
-   *
-   * @return the current time in milliseconds.
-   */
-  long now();
+    /**
+     * Gets the current time in milliseconds.
+     *
+     * @return the current time in milliseconds.
+     */
+    long now();
 }

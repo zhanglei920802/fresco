@@ -29,32 +29,32 @@ import com.facebook.samples.comparison.instrumentation.PerfListener;
  */
 public class VolleyDraweeAdapter extends ImageListAdapter {
 
-  public VolleyDraweeAdapter(
-      Context context,
-      PerfListener perfListener) {
-    super(context, perfListener);
-    final VolleyDraweeControllerBuilderSupplier supplier =
-        new VolleyDraweeControllerBuilderSupplier(
-            context,
-            SampleVolleyFactory.getImageLoader(context));
-    InstrumentedDraweeView.initialize(supplier);
-  }
+    public VolleyDraweeAdapter(
+            Context context,
+            PerfListener perfListener) {
+        super(context, perfListener);
+        final VolleyDraweeControllerBuilderSupplier supplier =
+                new VolleyDraweeControllerBuilderSupplier(
+                        context,
+                        SampleVolleyFactory.getImageLoader(context));
+        InstrumentedDraweeView.initialize(supplier);
+    }
 
-  @Override
-  public VolleyDraweeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    GenericDraweeHierarchy gdh = new GenericDraweeHierarchyBuilder(getContext().getResources())
-        .setPlaceholderImage(Drawables.sPlaceholderDrawable)
-        .setFailureImage(Drawables.sErrorDrawable)
-        .build();
-    InstrumentedDraweeView view = new InstrumentedDraweeView(getContext());
-    view.setHierarchy(gdh);
-    return new VolleyDraweeHolder(getContext(), parent, view, getPerfListener());
-  }
+    @Override
+    public VolleyDraweeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        GenericDraweeHierarchy gdh = new GenericDraweeHierarchyBuilder(getContext().getResources())
+                .setPlaceholderImage(Drawables.sPlaceholderDrawable)
+                .setFailureImage(Drawables.sErrorDrawable)
+                .build();
+        InstrumentedDraweeView view = new InstrumentedDraweeView(getContext());
+        view.setHierarchy(gdh);
+        return new VolleyDraweeHolder(getContext(), parent, view, getPerfListener());
+    }
 
-  @Override
-  public void shutDown() {
-    super.clear();
-    InstrumentedDraweeView.shutDown();
-    SampleVolleyFactory.getMemoryCache().clear();
-  }
+    @Override
+    public void shutDown() {
+        super.clear();
+        InstrumentedDraweeView.shutDown();
+        SampleVolleyFactory.getMemoryCache().clear();
+    }
 }

@@ -12,11 +12,12 @@ import com.facebook.imagepipeline.animated.base.AnimatedImage;
 
 public interface AnimatedImageDecoder {
 
-  /**
-   * Factory method to create the AnimatedImage from the
-   * @param nativePtr The native pointer
-   * @param sizeInBytes The size in byte to allocate
-   * @return The AnimatedImage allocation
-   */
-  AnimatedImage decode(long nativePtr, int sizeInBytes);
+    /**
+     * Factory method to create the AnimatedImage from the
+     *
+     * @param nativePtr   The native pointer
+     * @param sizeInBytes The size in byte to allocate
+     * @return The AnimatedImage allocation
+     */
+    AnimatedImage decode(long nativePtr, int sizeInBytes);
 }

@@ -13,30 +13,30 @@ import android.net.Uri;
 
 /**
  * Strongly typed cache key to be used instead of {@link Object}.
- *
+ * <p>
  * <p> {@link #toString}, {@link #equals} and {@link #hashCode} methods must be implemented.
  */
 public interface CacheKey {
 
-  /** This is useful for instrumentation and debugging purposes. */
-  String toString();
+    /** This is useful for instrumentation and debugging purposes. */
+    String toString();
 
-  /** This method must be implemented, otherwise the cache keys will be be compared by reference. */
-  boolean equals(Object o);
+    /** This method must be implemented, otherwise the cache keys will be be compared by reference. */
+    boolean equals(Object o);
 
-  /** This method must be implemented with accordance to the {@link #equals} method. */
-  int hashCode();
+    /** This method must be implemented with accordance to the {@link #equals} method. */
+    int hashCode();
 
-  /**
-   * Returns true if this key was constructed from this {@link Uri}.
-   *
-   * Used for cases like deleting all keys for a given uri.
-   */
-  boolean containsUri(Uri uri);
+    /**
+     * Returns true if this key was constructed from this {@link Uri}.
+     * <p>
+     * Used for cases like deleting all keys for a given uri.
+     */
+    boolean containsUri(Uri uri);
 
-  /**
-   * Returns a string representation of the URI at the heart of the cache key. In cases of multiple
-   * keys being contained, the first is returned.
-   */
-  String getUriString();
+    /**
+     * Returns a string representation of the URI at the heart of the cache key. In cases of multiple
+     * keys being contained, the first is returned.
+     */
+    String getUriString();
 }

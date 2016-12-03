@@ -17,31 +17,31 @@ import com.facebook.imagepipeline.memory.PooledByteBuffer;
 
 public class EncodedCountingMemoryCacheFactory {
 
-  public static CountingMemoryCache<CacheKey, PooledByteBuffer> get(
-       Supplier<MemoryCacheParams> encodedMemoryCacheParamsSupplier,
-       MemoryTrimmableRegistry memoryTrimmableRegistry,
-       PlatformBitmapFactory platformBitmapFactory) {
+    public static CountingMemoryCache<CacheKey, PooledByteBuffer> get(
+            Supplier<MemoryCacheParams> encodedMemoryCacheParamsSupplier,
+            MemoryTrimmableRegistry memoryTrimmableRegistry,
+            PlatformBitmapFactory platformBitmapFactory) {
 
-    ValueDescriptor<PooledByteBuffer> valueDescriptor =
-        new ValueDescriptor<PooledByteBuffer>() {
-          @Override
-          public int getSizeInBytes(PooledByteBuffer value) {
-            return value.size();
-          }
-        };
+        ValueDescriptor<PooledByteBuffer> valueDescriptor =
+                new ValueDescriptor<PooledByteBuffer>() {
+                    @Override
+                    public int getSizeInBytes(PooledByteBuffer value) {
+                        return value.size();
+                    }
+                };
 
-    CountingMemoryCache.CacheTrimStrategy trimStrategy = new NativeMemoryCacheTrimStrategy();
+        CountingMemoryCache.CacheTrimStrategy trimStrategy = new NativeMemoryCacheTrimStrategy();
 
-    CountingMemoryCache<CacheKey, PooledByteBuffer> countingCache =
-        new CountingMemoryCache<>(
-            valueDescriptor,
-            trimStrategy,
-            encodedMemoryCacheParamsSupplier,
-            platformBitmapFactory,
-            false);
+        CountingMemoryCache<CacheKey, PooledByteBuffer> countingCache =
+                new CountingMemoryCache<>(
+                        valueDescriptor,
+                        trimStrategy,
+                        encodedMemoryCacheParamsSupplier,
+                        platformBitmapFactory,
+                        false);
 
-    memoryTrimmableRegistry.registerMemoryTrimmable(countingCache);
+        memoryTrimmableRegistry.registerMemoryTrimmable(countingCache);
 
-    return countingCache;
-  }
+        return countingCache;
+    }
 }

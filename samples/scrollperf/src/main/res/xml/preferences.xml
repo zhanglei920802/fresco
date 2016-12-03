@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:app="http://schemas.android.com/apk/res-auto"
     >
     <PreferenceCategory
         android:key="key_preferences_source_group"
@@ -32,9 +31,9 @@
             android:title="@string/title_preferences_rounded_corners_enabled"
             />
         <CheckBoxPreference
+            android:dependency="rounded_corners"
             android:key="rounded_as_circle"
             android:title="@string/title_preferences_rounded_as_circle_enabled"
-            android:dependency="rounded_corners"
             />
     </PreferenceCategory>
     <PreferenceCategory
@@ -80,22 +79,22 @@
             android:key="decoding_thread_key"
             android:title="@string/title_decoding_thread_count"
             />
-      <CheckBoxPreference
-          android:key="auto_size_override"
-          android:title="@string/title_auto_size_override"
-      />
-      <com.facebook.samples.scrollperf.preferences.SizePreferences
-          android:title="@string/title_overriden_size_width"
-          android:defaultValue="65"
-          android:dependency="auto_size_override"
-          android:key="width_size_key"
-      />
-      <com.facebook.samples.scrollperf.preferences.SizePreferences
-          android:title="@string/title_overriden_size_height"
-          android:defaultValue="@integer/default_size_value"
-          android:dependency="auto_size_override"
-          android:key="height_size_key"
-      />
+        <CheckBoxPreference
+            android:key="auto_size_override"
+            android:title="@string/title_auto_size_override"
+            />
+        <com.facebook.samples.scrollperf.preferences.SizePreferences
+            android:defaultValue="65"
+            android:dependency="auto_size_override"
+            android:key="width_size_key"
+            android:title="@string/title_overriden_size_width"
+            />
+        <com.facebook.samples.scrollperf.preferences.SizePreferences
+            android:defaultValue="@integer/default_size_value"
+            android:dependency="auto_size_override"
+            android:key="height_size_key"
+            android:title="@string/title_overriden_size_height"
+            />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="key_preferences_scale_type_group"
@@ -138,11 +137,11 @@
         <CheckBoxPreference
             android:key="webp_support_key"
             android:title="@string/title_webp_support"
-        />
+            />
         <CheckBoxPreference
             android:key="decode_cancellation_key"
             android:title="@string/title_decode_cancellation"
-        />
+            />
         <CheckBoxPreference
             android:key="auto_rotate"
             android:title="@string/title_auto_rotate"

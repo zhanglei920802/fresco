@@ -5,8 +5,8 @@ project.group = GROUP
 version = VERSION_NAME
 
 apply plugin: 'de.undercouch.download'
-import de.undercouch.gradle.tasks.download.Download
 
+import de.undercouch.gradle.tasks.download.Download
 import org.apache.tools.ant.taskdefs.condition.Os
 
 dependencies {
@@ -63,7 +63,7 @@ task unpackLibjpeg(dependsOn: downloadLibjpeg, type: Copy) {
 task copyLibjpeg(dependsOn: unpackLibjpeg, type: Copy) {
     from "${unpackLibjpeg.destinationDir}/libjpeg-turbo-1.5.0"
     from 'src/main/jni/third-party/libjpeg-turbo-1.5.x'
-    include('**/*.c', '**/*.h','**/*.S', '**/*.asm', '**/*.inc', '*.mk')
+    include('**/*.c', '**/*.h', '**/*.S', '**/*.asm', '**/*.inc', '*.mk')
     into "${mergeDir}/libjpeg-turbo-1.5.x"
 }
 
@@ -120,23 +120,23 @@ def makeNdkTasks(String name, Object[] deps) {
         inputs.file("src/main/jni/$name")
         outputs.dir("$buildDir/$name")
         commandLine getNdkBuildFullPath(),
-            'NDK_PROJECT_PATH=null',
-            'NDK_APPLICATION_MK=../Application.mk',
-            'NDK_OUT=' + temporaryDir,
-            "NDK_LIBS_OUT=$buildDir/$name",
-            '-C', file("src/main/jni/$name").absolutePath,
-            '--jobs', Runtime.getRuntime().availableProcessors()
+                'NDK_PROJECT_PATH=null',
+                'NDK_APPLICATION_MK=../Application.mk',
+                'NDK_OUT=' + temporaryDir,
+                "NDK_LIBS_OUT=$buildDir/$name",
+                '-C', file("src/main/jni/$name").absolutePath,
+                '--jobs', Runtime.getRuntime().availableProcessors()
     }
 
     task "ndk_clean_$name"(type: Exec) {
         ignoreExitValue true
         commandLine getNdkBuildFullPath(),
-            'NDK_PROJECT_PATH=null',
-            'NDK_APPLICATION_MK=../Application.mk',
-            'NDK_OUT=' + temporaryDir,
-            "NDK_LIBS_OUT=$buildDir/$name",
-            '-C', file("src/main/jni/$name").absolutePath,
-            'clean'
+                'NDK_PROJECT_PATH=null',
+                'NDK_APPLICATION_MK=../Application.mk',
+                'NDK_OUT=' + temporaryDir,
+                "NDK_LIBS_OUT=$buildDir/$name",
+                '-C', file("src/main/jni/$name").absolutePath,
+                'clean'
     }
 
     tasks.withType(JavaCompile) {
@@ -148,9 +148,9 @@ def makeNdkTasks(String name, Object[] deps) {
 
 android {
     def ndkLibs = [
-        ['bitmaps', []],
-        ['imagepipeline', [copyLibjpeg]],
-        ['memchunk', []]]
+            ['bitmaps', []],
+            ['imagepipeline', [copyLibjpeg]],
+            ['memchunk', []]]
 
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdkVersion rootProject.ext.compileSdkVersion

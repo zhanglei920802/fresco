@@ -20,18 +20,18 @@ import java.util.WeakHashMap;
  */
 public class MemoryUiTrimmableRegistry {
 
-  private static final Set<MemoryUiTrimmable> sUiTrimmables =
-      Collections.newSetFromMap(new WeakHashMap<MemoryUiTrimmable, Boolean>());
+    private static final Set<MemoryUiTrimmable> sUiTrimmables =
+            Collections.newSetFromMap(new WeakHashMap<MemoryUiTrimmable, Boolean>());
 
-  public static void registerUiTrimmable(MemoryUiTrimmable uiTrimmable) {
-    sUiTrimmables.add(uiTrimmable);
-  }
+    public static void registerUiTrimmable(MemoryUiTrimmable uiTrimmable) {
+        sUiTrimmables.add(uiTrimmable);
+    }
 
-  public static Iterable<MemoryUiTrimmable> iterable() {
-    return sUiTrimmables;
-  }
+    public static Iterable<MemoryUiTrimmable> iterable() {
+        return sUiTrimmables;
+    }
 
-  // There is no unregister! The trimmables are stored in a weak-hash set,
-  // so the GC will take care of that.
+    // There is no unregister! The trimmables are stored in a weak-hash set,
+    // so the GC will take care of that.
 
 }

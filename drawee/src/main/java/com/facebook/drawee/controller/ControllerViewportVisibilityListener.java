@@ -16,19 +16,19 @@ package com.facebook.drawee.controller;
  */
 public interface ControllerViewportVisibilityListener {
 
-  /**
-   * Called after a client has given the {@link AbstractDraweeController} a hint that the view
-   * became visible in the viewport.
-   *
-   * @param id controller id
-   */
-  void onDraweeViewportEntry(String id);
+    /**
+     * Called after a client has given the {@link AbstractDraweeController} a hint that the view
+     * became visible in the viewport.
+     *
+     * @param id controller id
+     */
+    void onDraweeViewportEntry(String id);
 
-  /**
-   * Called after a client has given the {@link AbstractDraweeController} a hint that the view
-   * is no longer visible in the viewport.
-   *
-   * @param id controller id
-   */
-  void onDraweeViewportExit(String id);
+    /**
+     * Called after a client has given the {@link AbstractDraweeController} a hint that the view
+     * is no longer visible in the viewport.
+     *
+     * @param id controller id
+     */
+    void onDraweeViewportExit(String id);
 }

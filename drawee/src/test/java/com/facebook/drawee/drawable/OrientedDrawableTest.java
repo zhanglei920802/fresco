@@ -31,92 +31,92 @@ import static org.mockito.Mockito.verify;
 @RunWith(RobolectricTestRunner.class)
 public class OrientedDrawableTest {
 
-  private Drawable mDrawable;
-  private Canvas mCanvas;
-  private Rect mBounds;
+    private Drawable mDrawable;
+    private Canvas mCanvas;
+    private Rect mBounds;
 
-  @Before
-  public void setUp() {
-    mDrawable = mock(Drawable.class);
-    mCanvas = mock(Canvas.class);
-    mBounds = mock(Rect.class);
+    @Before
+    public void setUp() {
+        mDrawable = mock(Drawable.class);
+        mCanvas = mock(Canvas.class);
+        mBounds = mock(Rect.class);
 
-    // Change the bounds so that they will be different from the Drawable initial bounds and
-    // setBounds calls onBoundsChange.
-    mBounds.left = 100;
-    mBounds.top = 100;
-    mBounds.right = 500;
-    mBounds.bottom = 500;
-  }
-
-  @Test
-  public void testCreation_invalidAngle() {
-    try {
-      new OrientedDrawable(mDrawable, 20);
-      fail();
-    } catch (IllegalArgumentException e) {
-      // Do nothing, expected.
+        // Change the bounds so that they will be different from the Drawable initial bounds and
+        // setBounds calls onBoundsChange.
+        mBounds.left = 100;
+        mBounds.top = 100;
+        mBounds.right = 500;
+        mBounds.bottom = 500;
     }
-  }
 
-  @Test
-  public void testCreation_zeroDegrees() {
-    OrientedDrawable drawable = new OrientedDrawable(mDrawable, 0);
-    drawable.setBounds(mBounds);
-    drawable.draw(mCanvas);
-    assertTrue(drawable.mRotationMatrix.isIdentity());
-    verify(mDrawable).setBounds(new Rect(mBounds));
-  }
+    @Test
+    public void testCreation_invalidAngle() {
+        try {
+            new OrientedDrawable(mDrawable, 20);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Do nothing, expected.
+        }
+    }
 
-  @Test
-  public void testCreation_nintyDegrees() {
-    OrientedDrawable drawable = new OrientedDrawable(mDrawable, 90);
-    drawable.setBounds(mBounds);
-    drawable.draw(mCanvas);
+    @Test
+    public void testCreation_zeroDegrees() {
+        OrientedDrawable drawable = new OrientedDrawable(mDrawable, 0);
+        drawable.setBounds(mBounds);
+        drawable.draw(mCanvas);
+        assertTrue(drawable.mRotationMatrix.isIdentity());
+        verify(mDrawable).setBounds(new Rect(mBounds));
+    }
 
-    Matrix expectedMatrix = new Matrix();
-    expectedMatrix.setRotate(90, drawable.getBounds().centerX(), drawable.getBounds().centerY());
-    assertFalse(drawable.mRotationMatrix.isIdentity());
-    AndroidGraphicsTestUtils.assertEquals(expectedMatrix, drawable.mRotationMatrix);
-    verifySetBounds(expectedMatrix);
-  }
+    @Test
+    public void testCreation_nintyDegrees() {
+        OrientedDrawable drawable = new OrientedDrawable(mDrawable, 90);
+        drawable.setBounds(mBounds);
+        drawable.draw(mCanvas);
 
-  @Test
-  public void testCreation_hundredAndEightyDegrees() {
-    OrientedDrawable drawable = new OrientedDrawable(mDrawable, 180);
-    drawable.setBounds(mBounds);
-    drawable.draw(mCanvas);
+        Matrix expectedMatrix = new Matrix();
+        expectedMatrix.setRotate(90, drawable.getBounds().centerX(), drawable.getBounds().centerY());
+        assertFalse(drawable.mRotationMatrix.isIdentity());
+        AndroidGraphicsTestUtils.assertEquals(expectedMatrix, drawable.mRotationMatrix);
+        verifySetBounds(expectedMatrix);
+    }
 
-    Matrix expectedMatrix = new Matrix();
-    expectedMatrix.setRotate(180, drawable.getBounds().centerX(), drawable.getBounds().centerY());
-    assertFalse(drawable.mRotationMatrix.isIdentity());
-    AndroidGraphicsTestUtils.assertEquals(expectedMatrix, drawable.mRotationMatrix);
-    verifySetBounds(expectedMatrix);
-  }
+    @Test
+    public void testCreation_hundredAndEightyDegrees() {
+        OrientedDrawable drawable = new OrientedDrawable(mDrawable, 180);
+        drawable.setBounds(mBounds);
+        drawable.draw(mCanvas);
 
-  @Test
-  public void testCreation_twoHundredAndSeventyDegrees() {
-    OrientedDrawable drawable = new OrientedDrawable(mDrawable, 270);
-    drawable.setBounds(mBounds);
-    drawable.draw(mCanvas);
+        Matrix expectedMatrix = new Matrix();
+        expectedMatrix.setRotate(180, drawable.getBounds().centerX(), drawable.getBounds().centerY());
+        assertFalse(drawable.mRotationMatrix.isIdentity());
+        AndroidGraphicsTestUtils.assertEquals(expectedMatrix, drawable.mRotationMatrix);
+        verifySetBounds(expectedMatrix);
+    }
 
-    Matrix expectedMatrix = new Matrix();
-    expectedMatrix.setRotate(270, drawable.getBounds().centerX(), drawable.getBounds().centerY());
-    assertFalse(drawable.mRotationMatrix.isIdentity());
-    AndroidGraphicsTestUtils.assertEquals(expectedMatrix, drawable.mRotationMatrix);
-    verifySetBounds(expectedMatrix);
-  }
+    @Test
+    public void testCreation_twoHundredAndSeventyDegrees() {
+        OrientedDrawable drawable = new OrientedDrawable(mDrawable, 270);
+        drawable.setBounds(mBounds);
+        drawable.draw(mCanvas);
 
-  private void verifySetBounds(Matrix rotationMatrix) {
-    RectF expectedBounds = new RectF(mBounds);
-    Matrix inverse = new Matrix();
-    rotationMatrix.invert(inverse);
-    inverse.mapRect(expectedBounds);
-    verify(mDrawable).setBounds(
-        (int) expectedBounds.left,
-        (int) expectedBounds.top,
-        (int) expectedBounds.right,
-        (int) expectedBounds.bottom);
-  }
+        Matrix expectedMatrix = new Matrix();
+        expectedMatrix.setRotate(270, drawable.getBounds().centerX(), drawable.getBounds().centerY());
+        assertFalse(drawable.mRotationMatrix.isIdentity());
+        AndroidGraphicsTestUtils.assertEquals(expectedMatrix, drawable.mRotationMatrix);
+        verifySetBounds(expectedMatrix);
+    }
+
+    private void verifySetBounds(Matrix rotationMatrix) {
+        RectF expectedBounds = new RectF(mBounds);
+        Matrix inverse = new Matrix();
+        rotationMatrix.invert(inverse);
+        inverse.mapRect(expectedBounds);
+        verify(mDrawable).setBounds(
+                (int) expectedBounds.left,
+                (int) expectedBounds.top,
+                (int) expectedBounds.right,
+                (int) expectedBounds.bottom);
+    }
 
 }

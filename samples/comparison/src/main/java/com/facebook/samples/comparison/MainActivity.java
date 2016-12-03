@@ -58,407 +58,410 @@ import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity {
 
-  private static final String TAG = "FrescoSample";
+    // These need to be in sync with {@link R.array.image_loaders}
+    public static final int FRESCO_INDEX = 1;
+    public static final int FRESCO_OKHTTP_INDEX = 2;
+    public static final int GLIDE_INDEX = 3;
+    public static final int PICASSO_INDEX = 4;
+    public static final int UIL_INDEX = 5;
+    public static final int VOLLEY_INDEX = 6;
+    public static final int AQUERY_INDEX = 7;
+    // These need to be in sync with {@link R.array.image_sources}
+    public static final int NETWORK_INDEX = 1;
+    public static final int LOCAL_INDEX = 2;
+    private static final String TAG = "FrescoSample";
+    private static final int COLS_NUMBER = 3;
 
-  // These need to be in sync with {@link R.array.image_loaders}
-  public static final int FRESCO_INDEX = 1;
-  public static final int FRESCO_OKHTTP_INDEX = 2;
-  public static final int GLIDE_INDEX = 3;
-  public static final int PICASSO_INDEX = 4;
-  public static final int UIL_INDEX = 5;
-  public static final int VOLLEY_INDEX = 6;
-  public static final int AQUERY_INDEX = 7;
+    private static final long STATS_CLOCK_INTERVAL_MS = 1000;
+    private static final int DEFAULT_MESSAGE_SIZE = 1024;
+    private static final int BYTES_IN_MEGABYTE = 1024 * 1024;
 
-  // These need to be in sync with {@link R.array.image_sources}
-  public static final int NETWORK_INDEX = 1;
-  public static final int LOCAL_INDEX = 2;
+    private static final String EXTRA_ALLOW_ANIMATIONS = "allow_animations";
+    private static final String EXTRA_USE_DRAWEE = "use_drawee";
+    private static final String EXTRA_CURRENT_ADAPTER_INDEX = "current_adapter_index";
+    private static final String EXTRA_CURRENT_SOURCE_ADAPTER_INDEX = "current_source_adapter_index";
 
-  private static final int COLS_NUMBER = 3;
+    private Handler mHandler;
+    private Runnable mStatsClockTickRunnable;
 
-  private static final long STATS_CLOCK_INTERVAL_MS = 1000;
-  private static final int DEFAULT_MESSAGE_SIZE = 1024;
-  private static final int BYTES_IN_MEGABYTE = 1024 * 1024;
+    private TextView mStatsDisplay;
+    private Spinner mLoaderSelect;
+    private Spinner mSourceSelect;
 
-  private static final String EXTRA_ALLOW_ANIMATIONS = "allow_animations";
-  private static final String EXTRA_USE_DRAWEE = "use_drawee";
-  private static final String EXTRA_CURRENT_ADAPTER_INDEX = "current_adapter_index";
-  private static final String EXTRA_CURRENT_SOURCE_ADAPTER_INDEX = "current_source_adapter_index";
+    private boolean mUseDrawee;
+    private boolean mAllowAnimations;
+    private int mCurrentLoaderAdapterIndex;
+    private int mCurrentSourceAdapterIndex;
 
-  private Handler mHandler;
-  private Runnable mStatsClockTickRunnable;
+    private ImageListAdapter mCurrentAdapter;
+    private RecyclerView mRecyclerView;
 
-  private TextView mStatsDisplay;
-  private Spinner mLoaderSelect;
-  private Spinner mSourceSelect;
+    private PerfListener mPerfListener;
 
-  private boolean mUseDrawee;
-  private boolean mAllowAnimations;
-  private int mCurrentLoaderAdapterIndex;
-  private int mCurrentSourceAdapterIndex;
+    private List<String> mImageUrls = new ArrayList<>();
 
-  private ImageListAdapter mCurrentAdapter;
-  private RecyclerView mRecyclerView;
+    private boolean mUrlsLocal = false;
 
-  private PerfListener mPerfListener;
-
-  private List<String> mImageUrls = new ArrayList<>();
-
-  private boolean mUrlsLocal = false;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-    mRecyclerView = (RecyclerView) findViewById(R.id.image_grid);
-    mRecyclerView.setLayoutManager(new GridLayoutManager(this, COLS_NUMBER));
-
-    FLog.setMinimumLoggingLevel(FLog.WARN);
-    Drawables.init(getResources());
-
-    mPerfListener = new PerfListener();
-    mAllowAnimations = true;
-    mUseDrawee = true;
-    mCurrentLoaderAdapterIndex = 0;
-    mCurrentSourceAdapterIndex = 0;
-    if (savedInstanceState != null) {
-      mAllowAnimations = savedInstanceState.getBoolean(EXTRA_ALLOW_ANIMATIONS);
-      mUseDrawee = savedInstanceState.getBoolean(EXTRA_USE_DRAWEE);
-      mCurrentLoaderAdapterIndex = savedInstanceState.getInt(EXTRA_CURRENT_ADAPTER_INDEX);
-      mCurrentSourceAdapterIndex = savedInstanceState.getInt(EXTRA_CURRENT_SOURCE_ADAPTER_INDEX);
+    public static int calcDesiredSize(Context context, int parentWidth, int parentHeight) {
+        int orientation = context.getResources().getConfiguration().orientation;
+        int desiredSize = (orientation == Configuration.ORIENTATION_LANDSCAPE) ?
+                parentHeight / 2 : parentHeight / 3;
+        return Math.min(desiredSize, parentWidth);
     }
 
-    mHandler = new Handler(Looper.getMainLooper());
-    mStatsClockTickRunnable = new Runnable() {
-      @Override
-      public void run() {
+    private static void appendSize(StringBuilder sb, long bytes) {
+        String value = String.format(Locale.getDefault(), "%.1f MB", (float) bytes / BYTES_IN_MEGABYTE);
+        sb.append(value);
+    }
+
+    private static void appendTime(StringBuilder sb, String prefix, long timeMs, String suffix) {
+        appendValue(sb, prefix, timeMs + " ms", suffix);
+    }
+
+    private static void appendNumber(StringBuilder sb, String prefix, long number, String suffix) {
+        appendValue(sb, prefix, number + "", suffix);
+    }
+
+    private static void appendValue(StringBuilder sb, String prefix, String value, String suffix) {
+        sb.append(prefix).append(value).append(suffix);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        mRecyclerView = (RecyclerView) findViewById(R.id.image_grid);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, COLS_NUMBER));
+
+        FLog.setMinimumLoggingLevel(FLog.WARN);
+        Drawables.init(getResources());
+
+        mPerfListener = new PerfListener();
+        mAllowAnimations = true;
+        mUseDrawee = true;
+        mCurrentLoaderAdapterIndex = 0;
+        mCurrentSourceAdapterIndex = 0;
+        if (savedInstanceState != null) {
+            mAllowAnimations = savedInstanceState.getBoolean(EXTRA_ALLOW_ANIMATIONS);
+            mUseDrawee = savedInstanceState.getBoolean(EXTRA_USE_DRAWEE);
+            mCurrentLoaderAdapterIndex = savedInstanceState.getInt(EXTRA_CURRENT_ADAPTER_INDEX);
+            mCurrentSourceAdapterIndex = savedInstanceState.getInt(EXTRA_CURRENT_SOURCE_ADAPTER_INDEX);
+        }
+
+        mHandler = new Handler(Looper.getMainLooper());
+        mStatsClockTickRunnable = new Runnable() {
+            @Override
+            public void run() {
+                updateStats();
+                scheduleNextStatsClockTick();
+            }
+        };
+
+        mCurrentAdapter = null;
+
+        mStatsDisplay = (TextView) findViewById(R.id.stats_display);
+        mLoaderSelect = (Spinner) findViewById(R.id.loader_select);
+        mLoaderSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setLoaderAdapter(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        mLoaderSelect.setSelection(mCurrentLoaderAdapterIndex);
+
+        mSourceSelect = (Spinner) findViewById(R.id.source_select);
+        mSourceSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setSourceAdapter(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        mSourceSelect.setSelection(mCurrentSourceAdapterIndex);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(EXTRA_ALLOW_ANIMATIONS, mAllowAnimations);
+        outState.putBoolean(EXTRA_USE_DRAWEE, mUseDrawee);
+        outState.putInt(EXTRA_CURRENT_ADAPTER_INDEX, mCurrentLoaderAdapterIndex);
+        outState.putInt(EXTRA_CURRENT_SOURCE_ADAPTER_INDEX, mCurrentSourceAdapterIndex);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.allow_animations).setChecked(mAllowAnimations);
+        menu.findItem(R.id.use_drawee).setChecked(mUseDrawee);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.allow_animations) {
+            setAllowAnimations(!item.isChecked());
+            return true;
+        }
+
+        if (id == R.id.use_drawee) {
+            setUseDrawee(!item.isChecked());
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         updateStats();
         scheduleNextStatsClockTick();
-      }
-    };
-
-    mCurrentAdapter = null;
-
-    mStatsDisplay = (TextView) findViewById(R.id.stats_display);
-    mLoaderSelect = (Spinner) findViewById(R.id.loader_select);
-    mLoaderSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-          @Override
-          public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            setLoaderAdapter(position);
-          }
-
-          @Override
-          public void onNothingSelected(AdapterView<?> parent) {
-          }
-        });
-    mLoaderSelect.setSelection(mCurrentLoaderAdapterIndex);
-
-    mSourceSelect = (Spinner) findViewById(R.id.source_select);
-    mSourceSelect.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-          @Override
-          public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            setSourceAdapter(position);
-          }
-
-          @Override
-          public void onNothingSelected(AdapterView<?> parent) {
-          }
-        });
-    mSourceSelect.setSelection(mCurrentSourceAdapterIndex);
-  }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-    outState.putBoolean(EXTRA_ALLOW_ANIMATIONS, mAllowAnimations);
-    outState.putBoolean(EXTRA_USE_DRAWEE, mUseDrawee);
-    outState.putInt(EXTRA_CURRENT_ADAPTER_INDEX, mCurrentLoaderAdapterIndex);
-    outState.putInt(EXTRA_CURRENT_SOURCE_ADAPTER_INDEX, mCurrentSourceAdapterIndex);
-  }
-
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.menu_main, menu);
-    return true;
-  }
-
-  @Override
-  public boolean onPrepareOptionsMenu(Menu menu) {
-    menu.findItem(R.id.allow_animations).setChecked(mAllowAnimations);
-    menu.findItem(R.id.use_drawee).setChecked(mUseDrawee);
-    return super.onPrepareOptionsMenu(menu);
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    int id = item.getItemId();
-
-    if (id == R.id.allow_animations) {
-      setAllowAnimations(!item.isChecked());
-      return true;
     }
 
-    if (id == R.id.use_drawee) {
-      setUseDrawee(!item.isChecked());
-      return true;
+    protected void onStop() {
+        super.onStop();
+        cancelNextStatsClockTick();
     }
 
-    return super.onOptionsItemSelected(item);
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-    updateStats();
-    scheduleNextStatsClockTick();
-  }
-
-  protected void onStop() {
-    super.onStop();
-    cancelNextStatsClockTick();
-  }
-
-  @VisibleForTesting
-  public void setAllowAnimations(boolean allowAnimations) {
-    mAllowAnimations = allowAnimations;
-    supportInvalidateOptionsMenu();
-    updateAdapter(null);
-    loadUrls();
-  }
-
-  @VisibleForTesting
-  public void setUseDrawee(boolean useDrawee) {
-    mUseDrawee = useDrawee;
-    supportInvalidateOptionsMenu();
-    setLoaderAdapter(mCurrentLoaderAdapterIndex);
-    setSourceAdapter(mCurrentSourceAdapterIndex);
-  }
-
-  private void resetAdapter() {
-    if (mCurrentAdapter != null) {
-      mCurrentAdapter.shutDown();
-      mCurrentAdapter = null;
-      System.gc();
-    }
-  }
-
-  private void setLoaderAdapter(int index) {
-    FLog.v(TAG, "onImageLoaderSelect: %d", index);
-    resetAdapter();
-    mCurrentLoaderAdapterIndex = index;
-    mPerfListener = new PerfListener();
-    switch (index) {
-      case FRESCO_INDEX:
-      case FRESCO_OKHTTP_INDEX:
-        mCurrentAdapter = new FrescoAdapter(
-            this,
-            mPerfListener,
-            index == FRESCO_INDEX ?
-                ImagePipelineConfigFactory.getImagePipelineConfig(this) :
-                ImagePipelineConfigFactory.getOkHttpImagePipelineConfig(this));
-        break;
-      case GLIDE_INDEX:
-        mCurrentAdapter = new GlideAdapter(this, mPerfListener);
-        break;
-      case PICASSO_INDEX:
-        mCurrentAdapter = new PicassoAdapter(this, mPerfListener);
-        break;
-      case UIL_INDEX:
-        mCurrentAdapter = new UilAdapter(this, mPerfListener);
-        break;
-      case VOLLEY_INDEX:
-        mCurrentAdapter = mUseDrawee ?
-            new VolleyDraweeAdapter(this, mPerfListener) :
-            new VolleyAdapter(this, mPerfListener);
-        break;
-      case AQUERY_INDEX:
-        mCurrentAdapter = new AQueryAdapter(this, mPerfListener);
-        break;
-      default:
-        mCurrentAdapter = null;
-        return;
-    }
-    mRecyclerView.setAdapter(mCurrentAdapter);
-
-    updateAdapter(mImageUrls);
-
-    updateStats();
-  }
-
-
-  private void setSourceAdapter(int index) {
-    FLog.v(TAG, "onImageSourceSelect: %d", index);
-
-    mCurrentSourceAdapterIndex = index;
-    switch (index) {
-      case NETWORK_INDEX:
-        mUrlsLocal = false;
-        break;
-      case LOCAL_INDEX:
-        mUrlsLocal = true;
-        break;
-      default:
-        resetAdapter();
-        mImageUrls.clear();
-        return;
+    @VisibleForTesting
+    public void setAllowAnimations(boolean allowAnimations) {
+        mAllowAnimations = allowAnimations;
+        supportInvalidateOptionsMenu();
+        updateAdapter(null);
+        loadUrls();
     }
 
-    loadUrls();
-    setLoaderAdapter(mCurrentLoaderAdapterIndex);
-  }
-
-  private void loadUrls() {
-    if (mUrlsLocal) {
-      loadLocalUrls();
-    } else {
-      loadNetworkUrls();
+    @VisibleForTesting
+    public void setUseDrawee(boolean useDrawee) {
+        mUseDrawee = useDrawee;
+        supportInvalidateOptionsMenu();
+        setLoaderAdapter(mCurrentLoaderAdapterIndex);
+        setSourceAdapter(mCurrentSourceAdapterIndex);
     }
-  }
 
-  private void scheduleNextStatsClockTick() {
-    mHandler.postDelayed(mStatsClockTickRunnable, STATS_CLOCK_INTERVAL_MS);
-  }
-
-  private void cancelNextStatsClockTick() {
-    mHandler.removeCallbacks(mStatsClockTickRunnable);
-  }
-
-  public static int calcDesiredSize(Context context, int parentWidth, int parentHeight) {
-    int orientation = context.getResources().getConfiguration().orientation;
-    int desiredSize = (orientation == Configuration.ORIENTATION_LANDSCAPE) ?
-        parentHeight / 2 : parentHeight / 3;
-    return Math.min(desiredSize, parentWidth);
-  }
-
-  private ImageSize chooseImageSize() {
-    ViewGroup.LayoutParams layoutParams = mRecyclerView.getLayoutParams();
-    if (layoutParams == null) {
-      return ImageSize.LARGE_THUMBNAIL;
-    }
-    int size = calcDesiredSize(this, layoutParams.width, layoutParams.height);
-    if (size <= 90) {
-      return ImageSize.SMALL_SQUARE;
-    } else if (size <= 160) {
-      return ImageSize.SMALL_THUMBNAIL;
-    } else if (size <= 320) {
-      return ImageSize.MEDIUM_THUMBNAIL;
-    } else if (size <= 640) {
-      return ImageSize.LARGE_THUMBNAIL;
-    } else if (size <= 1024) {
-      return ImageSize.HUGE_THUMBNAIL;
-    } else {
-      return ImageSize.ORIGINAL_IMAGE;
-    }
-  }
-
-  private void loadNetworkUrls() {
-    String url = "https://api.imgur.com/3/gallery/hot/viral/0.json";
-    ImageSize staticSize = chooseImageSize();
-    ImageUrlsRequestBuilder builder = new ImageUrlsRequestBuilder(url)
-        .addImageFormat(ImageFormat.JPEG, staticSize)
-        .addImageFormat(ImageFormat.PNG, staticSize);
-    if (mAllowAnimations) {
-      builder.addImageFormat(
-          ImageFormat.GIF,
-          ImageSize.ORIGINAL_IMAGE);
-    }
-    ImageUrlsFetcher.getImageUrls(
-        builder.build(),
-        new ImageUrlsFetcher.Callback() {
-          @Override
-          public void onFinish(List<String> result) {
-            // If the user changes to local images before the call comes back, then this should
-            // be ignored
-            if (!mUrlsLocal) {
-              mImageUrls = result;
-              updateAdapter(mImageUrls);
-            }
-          }
-        });
-  }
-
-  private void loadLocalUrls() {
-    Uri externalContentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    String[] projection = {MediaStore.Images.Media._ID};
-    Cursor cursor = null;
-    try {
-      cursor = getContentResolver().query(externalContentUri, projection, null, null, null);
-
-      mImageUrls.clear();
-
-      int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-
-      String imageId;
-      Uri imageUri;
-      while (cursor.moveToNext()) {
-        imageId = cursor.getString(columnIndex);
-        imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, imageId);
-        mImageUrls.add(imageUri.toString());
-      }
-    } finally {
-      if (cursor != null) {
-        cursor.close();
-      }
-    }
-  }
-
-  private void updateAdapter(List<String> urls) {
-    if (mCurrentAdapter != null) {
-      mCurrentAdapter.clear();
-      if (urls != null) {
-        for (String url : urls) {
-          mCurrentAdapter.addUrl(url);
+    private void resetAdapter() {
+        if (mCurrentAdapter != null) {
+            mCurrentAdapter.shutDown();
+            mCurrentAdapter = null;
+            System.gc();
         }
-      }
-      mCurrentAdapter.notifyDataSetChanged();
     }
-  }
 
-  private void updateStats() {
-    final Runtime runtime = Runtime.getRuntime();
-    final long heapMemory = runtime.totalMemory() - runtime.freeMemory();
-    final StringBuilder sb = new StringBuilder(DEFAULT_MESSAGE_SIZE);
-    // When changing format of output below, make sure to sync "run_comparison.py" as well
-    sb.append("Heap: ");
-    appendSize(sb, heapMemory);
-    sb.append(" Java ");
-    appendSize(sb, Debug.getNativeHeapSize());
-    sb.append(" native\n");
-    appendTime(sb, "Avg wait time: ", mPerfListener.getAverageWaitTime(), "\n");
-    appendNumber(sb, "Requests: ", mPerfListener.getOutstandingRequests(), " outsdng ");
-    appendNumber(sb, "", mPerfListener.getCancelledRequests(), " cncld\n");
-    final String message = sb.toString();
-    mStatsDisplay.setText(message);
-    FLog.i(TAG, message);
-  }
+    private void setLoaderAdapter(int index) {
+        FLog.v(TAG, "onImageLoaderSelect: %d", index);
+        resetAdapter();
+        mCurrentLoaderAdapterIndex = index;
+        mPerfListener = new PerfListener();
+        switch (index) {
+            case FRESCO_INDEX:
+            case FRESCO_OKHTTP_INDEX:
+                mCurrentAdapter = new FrescoAdapter(
+                        this,
+                        mPerfListener,
+                        index == FRESCO_INDEX ?
+                                ImagePipelineConfigFactory.getImagePipelineConfig(this) :
+                                ImagePipelineConfigFactory.getOkHttpImagePipelineConfig(this));
+                break;
+            case GLIDE_INDEX:
+                mCurrentAdapter = new GlideAdapter(this, mPerfListener);
+                break;
+            case PICASSO_INDEX:
+                mCurrentAdapter = new PicassoAdapter(this, mPerfListener);
+                break;
+            case UIL_INDEX:
+                mCurrentAdapter = new UilAdapter(this, mPerfListener);
+                break;
+            case VOLLEY_INDEX:
+                mCurrentAdapter = mUseDrawee ?
+                        new VolleyDraweeAdapter(this, mPerfListener) :
+                        new VolleyAdapter(this, mPerfListener);
+                break;
+            case AQUERY_INDEX:
+                mCurrentAdapter = new AQueryAdapter(this, mPerfListener);
+                break;
+            default:
+                mCurrentAdapter = null;
+                return;
+        }
+        mRecyclerView.setAdapter(mCurrentAdapter);
 
-  private static void appendSize(StringBuilder sb, long bytes) {
-    String value = String.format(Locale.getDefault(), "%.1f MB", (float) bytes / BYTES_IN_MEGABYTE);
-    sb.append(value);
-  }
+        updateAdapter(mImageUrls);
 
-  private static void appendTime(StringBuilder sb, String prefix, long timeMs, String suffix) {
-    appendValue(sb, prefix, timeMs + " ms", suffix);
-  }
-
-  private static void appendNumber(StringBuilder sb, String prefix, long number, String suffix) {
-    appendValue(sb, prefix, number + "", suffix);
-  }
-
-  private static void appendValue(StringBuilder sb, String prefix, String value, String suffix) {
-    sb.append(prefix).append(value).append(suffix);
-  }
-
-  /**
-   * Determines display's height.
-   */
-  public int getDisplayHeight() {
-    Display display = getWindowManager().getDefaultDisplay();
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
-      return display.getHeight();
-    } else {
-      final Point size = new Point();
-      display.getSize(size);
-      return size.y;
+        updateStats();
     }
-  }
+
+    private void setSourceAdapter(int index) {
+        FLog.v(TAG, "onImageSourceSelect: %d", index);
+
+        mCurrentSourceAdapterIndex = index;
+        switch (index) {
+            case NETWORK_INDEX:
+                mUrlsLocal = false;
+                break;
+            case LOCAL_INDEX:
+                mUrlsLocal = true;
+                break;
+            default:
+                resetAdapter();
+                mImageUrls.clear();
+                return;
+        }
+
+        loadUrls();
+        setLoaderAdapter(mCurrentLoaderAdapterIndex);
+    }
+
+    private void loadUrls() {
+        if (mUrlsLocal) {
+            loadLocalUrls();
+        }
+        else {
+            loadNetworkUrls();
+        }
+    }
+
+    private void scheduleNextStatsClockTick() {
+        mHandler.postDelayed(mStatsClockTickRunnable, STATS_CLOCK_INTERVAL_MS);
+    }
+
+    private void cancelNextStatsClockTick() {
+        mHandler.removeCallbacks(mStatsClockTickRunnable);
+    }
+
+    private ImageSize chooseImageSize() {
+        ViewGroup.LayoutParams layoutParams = mRecyclerView.getLayoutParams();
+        if (layoutParams == null) {
+            return ImageSize.LARGE_THUMBNAIL;
+        }
+        int size = calcDesiredSize(this, layoutParams.width, layoutParams.height);
+        if (size <= 90) {
+            return ImageSize.SMALL_SQUARE;
+        }
+        else if (size <= 160) {
+            return ImageSize.SMALL_THUMBNAIL;
+        }
+        else if (size <= 320) {
+            return ImageSize.MEDIUM_THUMBNAIL;
+        }
+        else if (size <= 640) {
+            return ImageSize.LARGE_THUMBNAIL;
+        }
+        else if (size <= 1024) {
+            return ImageSize.HUGE_THUMBNAIL;
+        }
+        else {
+            return ImageSize.ORIGINAL_IMAGE;
+        }
+    }
+
+    private void loadNetworkUrls() {
+        String url = "https://api.imgur.com/3/gallery/hot/viral/0.json";
+        ImageSize staticSize = chooseImageSize();
+        ImageUrlsRequestBuilder builder = new ImageUrlsRequestBuilder(url)
+                .addImageFormat(ImageFormat.JPEG, staticSize)
+                .addImageFormat(ImageFormat.PNG, staticSize);
+        if (mAllowAnimations) {
+            builder.addImageFormat(
+                    ImageFormat.GIF,
+                    ImageSize.ORIGINAL_IMAGE);
+        }
+        ImageUrlsFetcher.getImageUrls(
+                builder.build(),
+                new ImageUrlsFetcher.Callback() {
+                    @Override
+                    public void onFinish(List<String> result) {
+                        // If the user changes to local images before the call comes back, then this should
+                        // be ignored
+                        if (!mUrlsLocal) {
+                            mImageUrls = result;
+                            updateAdapter(mImageUrls);
+                        }
+                    }
+                });
+    }
+
+    private void loadLocalUrls() {
+        Uri externalContentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        String[] projection = {MediaStore.Images.Media._ID};
+        Cursor cursor = null;
+        try {
+            cursor = getContentResolver().query(externalContentUri, projection, null, null, null);
+
+            mImageUrls.clear();
+
+            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+
+            String imageId;
+            Uri imageUri;
+            while (cursor.moveToNext()) {
+                imageId = cursor.getString(columnIndex);
+                imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, imageId);
+                mImageUrls.add(imageUri.toString());
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    private void updateAdapter(List<String> urls) {
+        if (mCurrentAdapter != null) {
+            mCurrentAdapter.clear();
+            if (urls != null) {
+                for (String url : urls) {
+                    mCurrentAdapter.addUrl(url);
+                }
+            }
+            mCurrentAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void updateStats() {
+        final Runtime runtime = Runtime.getRuntime();
+        final long heapMemory = runtime.totalMemory() - runtime.freeMemory();
+        final StringBuilder sb = new StringBuilder(DEFAULT_MESSAGE_SIZE);
+        // When changing format of output below, make sure to sync "run_comparison.py" as well
+        sb.append("Heap: ");
+        appendSize(sb, heapMemory);
+        sb.append(" Java ");
+        appendSize(sb, Debug.getNativeHeapSize());
+        sb.append(" native\n");
+        appendTime(sb, "Avg wait time: ", mPerfListener.getAverageWaitTime(), "\n");
+        appendNumber(sb, "Requests: ", mPerfListener.getOutstandingRequests(), " outsdng ");
+        appendNumber(sb, "", mPerfListener.getCancelledRequests(), " cncld\n");
+        final String message = sb.toString();
+        mStatsDisplay.setText(message);
+        FLog.i(TAG, message);
+    }
+
+    /**
+     * Determines display's height.
+     */
+    public int getDisplayHeight() {
+        Display display = getWindowManager().getDefaultDisplay();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
+            return display.getHeight();
+        }
+        else {
+            final Point size = new Point();
+            display.getSize(size);
+            return size.y;
+        }
+    }
 }

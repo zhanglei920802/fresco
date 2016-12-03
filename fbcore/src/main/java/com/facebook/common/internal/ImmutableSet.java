@@ -19,18 +19,18 @@ import java.util.Set;
  */
 public class ImmutableSet<E> extends HashSet<E> {
 
-  // Prevent direct instantiation.
-  private ImmutableSet(Set<E> set) {
-    super(set);
-  }
+    // Prevent direct instantiation.
+    private ImmutableSet(Set<E> set) {
+        super(set);
+    }
 
-  public static <E> ImmutableSet<E> copyOf(Set<E> set) {
-    return new ImmutableSet<>(set);
-  }
+    public static <E> ImmutableSet<E> copyOf(Set<E> set) {
+        return new ImmutableSet<>(set);
+    }
 
-  public static <E> ImmutableSet<E> of(E... elements) {
-    HashSet<E> set = new HashSet<>();
-    Collections.addAll(set, elements);
-    return new ImmutableSet<>(set);
-  }
+    public static <E> ImmutableSet<E> of(E... elements) {
+        HashSet<E> set = new HashSet<>();
+        Collections.addAll(set, elements);
+        return new ImmutableSet<>(set);
+    }
 }

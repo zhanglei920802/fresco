@@ -9,9 +9,6 @@
 
 package com.facebook.imagepipeline.producers;
 
-import java.io.File;
-import java.util.Map;
-
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
@@ -26,168 +23,181 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.testing.FakeClock;
 import com.facebook.imagepipeline.testing.TestExecutorService;
 
-import org.junit.*;
-import org.junit.runner.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.*;
-import org.mockito.invocation.*;
-import org.mockito.stubbing.*;
-import org.powermock.core.classloader.annotations.*;
-import org.powermock.modules.junit4.rule.*;
-import org.robolectric.*;
-import org.robolectric.annotation.*;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.rule.PowerMockRule;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 
-import static org.junit.Assert.*;
+import java.io.File;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 /**
  * Basic tests for {@link LocalVideoThumbnailProducer}
  */
 @RunWith(RobolectricTestRunner.class)
-@PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*" })
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*"})
 @PrepareForTest(android.media.ThumbnailUtils.class)
-@Config(manifest= Config.NONE)
+@Config(manifest = Config.NONE)
 @Ignore
 public class LocalVideoThumbnailProducerTest {
-  private static final String PRODUCER_NAME = LocalVideoThumbnailProducer.PRODUCER_NAME;
-  private static final String TEST_FILENAME = "dummy.jpg";
-  @Mock public PooledByteBufferFactory mPooledByteBufferFactory;
-  @Mock public Consumer<CloseableReference<CloseableImage>> mConsumer;
-  @Mock public ImageRequest mImageRequest;
-  @Mock public ProducerListener mProducerListener;
-  @Mock public Exception mException;
-  @Mock public Bitmap mBitmap;
+    private static final String PRODUCER_NAME = LocalVideoThumbnailProducer.PRODUCER_NAME;
+    private static final String TEST_FILENAME = "dummy.jpg";
+    private final String mRequestId = "mRequestId";
+    @Mock
+    public PooledByteBufferFactory mPooledByteBufferFactory;
+    @Mock
+    public Consumer<CloseableReference<CloseableImage>> mConsumer;
+    @Mock
+    public ImageRequest mImageRequest;
+    @Mock
+    public ProducerListener mProducerListener;
+    @Mock
+    public Exception mException;
+    @Mock
+    public Bitmap mBitmap;
+    @Rule
+    public PowerMockRule rule = new PowerMockRule();
+    private TestExecutorService mExecutor;
+    private SettableProducerContext mProducerContext;
+    private File mFile;
+    private LocalVideoThumbnailProducer mLocalVideoThumbnailProducer;
+    private CloseableReference<CloseableStaticBitmap> mCloseableReference;
 
-  @Rule
-  public PowerMockRule rule = new PowerMockRule();
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        mExecutor = new TestExecutorService(new FakeClock());
+        mLocalVideoThumbnailProducer = new LocalVideoThumbnailProducer(mExecutor);
+        mFile = new File(RuntimeEnvironment.application.getExternalFilesDir(null), TEST_FILENAME);
 
-  private TestExecutorService mExecutor;
-  private SettableProducerContext mProducerContext;
-  private final String mRequestId = "mRequestId";
-  private File mFile;
-  private LocalVideoThumbnailProducer mLocalVideoThumbnailProducer;
-  private CloseableReference<CloseableStaticBitmap> mCloseableReference;
+        mockStatic(ThumbnailUtils.class);
+        mProducerContext = new SettableProducerContext(
+                mImageRequest,
+                mRequestId,
+                mProducerListener,
+                mock(Object.class),
+                ImageRequest.RequestLevel.FULL_FETCH,
+                false,
+                false,
+                Priority.MEDIUM);
+        when(mImageRequest.getSourceFile()).thenReturn(mFile);
+    }
 
-  @Before
-  public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
-    mExecutor = new TestExecutorService(new FakeClock());
-    mLocalVideoThumbnailProducer = new LocalVideoThumbnailProducer(mExecutor);
-    mFile = new File(RuntimeEnvironment.application.getExternalFilesDir(null), TEST_FILENAME);
+    @Test
+    public void testLocalVideoThumbnailCancelled() {
+        mLocalVideoThumbnailProducer.produceResults(mConsumer, mProducerContext);
+        mProducerContext.cancel();
+        verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
+        verify(mProducerListener).onProducerFinishWithCancellation(mRequestId, PRODUCER_NAME, null);
+        verify(mConsumer).onCancellation();
+    }
 
-    mockStatic(ThumbnailUtils.class);
-    mProducerContext = new SettableProducerContext(
-        mImageRequest,
-        mRequestId,
-        mProducerListener,
-        mock(Object.class),
-        ImageRequest.RequestLevel.FULL_FETCH,
-        false,
-        false,
-        Priority.MEDIUM);
-    when(mImageRequest.getSourceFile()).thenReturn(mFile);
-  }
+    @Test
+    public void testLocalVideoMiniThumbnailSuccess() throws Exception {
+        when(mImageRequest.getPreferredWidth()).thenReturn(100);
+        when(mImageRequest.getPreferredHeight()).thenReturn(100);
+        when(
+                android.media.ThumbnailUtils.createVideoThumbnail(
+                        mFile.getPath(), MediaStore.Images.Thumbnails.MINI_KIND))
+                .thenReturn(mBitmap);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        mCloseableReference = ((CloseableReference) invocation.getArguments()[0]).clone();
+                        return null;
+                    }
+                }).when(mConsumer).onNewResult(any(CloseableReference.class), eq(true));
+        mLocalVideoThumbnailProducer.produceResults(mConsumer, mProducerContext);
+        mExecutor.runUntilIdle();
+        assertEquals(1, mCloseableReference.getUnderlyingReferenceTestOnly().getRefCountTestOnly());
+        assertEquals(
+                mBitmap,
+                mCloseableReference.getUnderlyingReferenceTestOnly().get().getUnderlyingBitmap());
+        verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
+        verify(mProducerListener).onProducerFinishWithSuccess(mRequestId, PRODUCER_NAME, null);
+    }
 
-  @Test
-  public void testLocalVideoThumbnailCancelled() {
-    mLocalVideoThumbnailProducer.produceResults(mConsumer, mProducerContext);
-    mProducerContext.cancel();
-    verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
-    verify(mProducerListener).onProducerFinishWithCancellation(mRequestId, PRODUCER_NAME, null);
-    verify(mConsumer).onCancellation();
-  }
+    @Test
+    public void testLocalVideoMicroThumbnailSuccess() throws Exception {
+        when(mProducerListener.requiresExtraMap(mRequestId)).thenReturn(true);
+        when(
+                android.media.ThumbnailUtils.createVideoThumbnail(
+                        mFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND))
+                .thenReturn(mBitmap);
+        doAnswer(
+                new Answer() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        mCloseableReference = ((CloseableReference) invocation.getArguments()[0]).clone();
+                        return null;
+                    }
+                }).when(mConsumer).onNewResult(any(CloseableReference.class), eq(true));
+        mLocalVideoThumbnailProducer.produceResults(mConsumer, mProducerContext);
+        mExecutor.runUntilIdle();
+        assertEquals(1, mCloseableReference.getUnderlyingReferenceTestOnly().getRefCountTestOnly());
+        assertEquals(
+                mBitmap,
+                mCloseableReference.getUnderlyingReferenceTestOnly().get().getUnderlyingBitmap());
+        verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
+        Map<String, String> thumbnailFoundMap =
+                ImmutableMap.of(LocalVideoThumbnailProducer.CREATED_THUMBNAIL, "true");
+        verify(mProducerListener).onProducerFinishWithSuccess(
+                mRequestId, PRODUCER_NAME, thumbnailFoundMap);
+    }
 
-  @Test
-  public void testLocalVideoMiniThumbnailSuccess() throws Exception {
-    when(mImageRequest.getPreferredWidth()).thenReturn(100);
-    when(mImageRequest.getPreferredHeight()).thenReturn(100);
-    when(
-        android.media.ThumbnailUtils.createVideoThumbnail(
-            mFile.getPath(), MediaStore.Images.Thumbnails.MINI_KIND))
-        .thenReturn(mBitmap);
-    doAnswer(
-        new Answer() {
-          @Override
-          public Object answer(InvocationOnMock invocation) throws Throwable {
-            mCloseableReference = ((CloseableReference) invocation.getArguments()[0]).clone();
-            return null;
-          }
-        }).when(mConsumer).onNewResult(any(CloseableReference.class), eq(true));
-    mLocalVideoThumbnailProducer.produceResults(mConsumer, mProducerContext);
-    mExecutor.runUntilIdle();
-    assertEquals(1, mCloseableReference.getUnderlyingReferenceTestOnly().getRefCountTestOnly());
-    assertEquals(
-        mBitmap,
-        mCloseableReference.getUnderlyingReferenceTestOnly().get().getUnderlyingBitmap());
-    verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
-    verify(mProducerListener).onProducerFinishWithSuccess(mRequestId, PRODUCER_NAME, null);
-  }
+    @Test
+    public void testLocalVideoMicroThumbnailReturnsNull() throws Exception {
+        when(mProducerListener.requiresExtraMap(mRequestId)).thenReturn(true);
+        when(
+                android.media.ThumbnailUtils.createVideoThumbnail(
+                        mFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND))
+                .thenReturn(null);
+        mLocalVideoThumbnailProducer.produceResults(mConsumer, mProducerContext);
+        mExecutor.runUntilIdle();
+        verify(mConsumer).onNewResult(null, true);
+        verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
+        Map<String, String> thumbnailNotFoundMap =
+                ImmutableMap.of(LocalVideoThumbnailProducer.CREATED_THUMBNAIL, "false");
+        verify(mProducerListener).onProducerFinishWithSuccess(
+                mRequestId, PRODUCER_NAME, thumbnailNotFoundMap);
+    }
 
-  @Test
-  public void testLocalVideoMicroThumbnailSuccess() throws Exception {
-    when(mProducerListener.requiresExtraMap(mRequestId)).thenReturn(true);
-    when(
-        android.media.ThumbnailUtils.createVideoThumbnail(
-            mFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND))
-        .thenReturn(mBitmap);
-    doAnswer(
-        new Answer() {
-          @Override
-          public Object answer(InvocationOnMock invocation) throws Throwable {
-            mCloseableReference = ((CloseableReference) invocation.getArguments()[0]).clone();
-            return null;
-          }
-        }).when(mConsumer).onNewResult(any(CloseableReference.class), eq(true));
-    mLocalVideoThumbnailProducer.produceResults(mConsumer, mProducerContext);
-    mExecutor.runUntilIdle();
-    assertEquals(1, mCloseableReference.getUnderlyingReferenceTestOnly().getRefCountTestOnly());
-    assertEquals(
-        mBitmap,
-        mCloseableReference.getUnderlyingReferenceTestOnly().get().getUnderlyingBitmap());
-    verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
-    Map<String, String> thumbnailFoundMap =
-        ImmutableMap.of(LocalVideoThumbnailProducer.CREATED_THUMBNAIL, "true");
-    verify(mProducerListener).onProducerFinishWithSuccess(
-        mRequestId, PRODUCER_NAME, thumbnailFoundMap);
-  }
+    @Test(expected = RuntimeException.class)
+    public void testFetchLocalFileFailsByThrowing() throws Exception {
+        when(
+                android.media.ThumbnailUtils.createVideoThumbnail(
+                        mFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND))
+                .thenThrow(mException);
+        verify(mConsumer).onFailure(mException);
+        verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
+        verify(mProducerListener).onProducerFinishWithFailure(
+                mRequestId, PRODUCER_NAME, mException, null);
+    }
 
-  @Test
-  public void testLocalVideoMicroThumbnailReturnsNull() throws Exception {
-    when(mProducerListener.requiresExtraMap(mRequestId)).thenReturn(true);
-    when(
-        android.media.ThumbnailUtils.createVideoThumbnail(
-            mFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND))
-        .thenReturn(null);
-    mLocalVideoThumbnailProducer.produceResults(mConsumer, mProducerContext);
-    mExecutor.runUntilIdle();
-    verify(mConsumer).onNewResult(null, true);
-    verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
-    Map<String, String> thumbnailNotFoundMap =
-        ImmutableMap.of(LocalVideoThumbnailProducer.CREATED_THUMBNAIL, "false");
-    verify(mProducerListener).onProducerFinishWithSuccess(
-        mRequestId, PRODUCER_NAME, thumbnailNotFoundMap);
-  }
-
-  @Test(expected = RuntimeException.class)
-  public void testFetchLocalFileFailsByThrowing() throws Exception {
-    when(
-        android.media.ThumbnailUtils.createVideoThumbnail(
-            mFile.getPath(), MediaStore.Images.Thumbnails.MICRO_KIND))
-        .thenThrow(mException);
-    verify(mConsumer).onFailure(mException);
-    verify(mProducerListener).onProducerStart(mRequestId, PRODUCER_NAME);
-    verify(mProducerListener).onProducerFinishWithFailure(
-        mRequestId, PRODUCER_NAME, mException, null);
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    mFile.delete();
-  }
+    @After
+    public void tearDown() throws Exception {
+        mFile.delete();
+    }
 }

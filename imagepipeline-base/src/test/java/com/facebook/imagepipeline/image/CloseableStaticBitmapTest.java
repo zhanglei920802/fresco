@@ -26,34 +26,34 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 public class CloseableStaticBitmapTest {
 
-  private Bitmap mBitmap;
-  private CloseableStaticBitmap mCloseableStaticBitmap;
+    private Bitmap mBitmap;
+    private CloseableStaticBitmap mCloseableStaticBitmap;
 
-  @Before
-  public void setUp() {
-    mBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-    ResourceReleaser<Bitmap> releaser = SimpleBitmapReleaser.getInstance();
-    mCloseableStaticBitmap = new CloseableStaticBitmap(
-        mBitmap, releaser, ImmutableQualityInfo.FULL_QUALITY, 0);
-  }
+    @Before
+    public void setUp() {
+        mBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        ResourceReleaser<Bitmap> releaser = SimpleBitmapReleaser.getInstance();
+        mCloseableStaticBitmap = new CloseableStaticBitmap(
+                mBitmap, releaser, ImmutableQualityInfo.FULL_QUALITY, 0);
+    }
 
-  @Test
-  public void testClose() {
-    mCloseableStaticBitmap.close();
-    assertTrue(mCloseableStaticBitmap.isClosed());
-    assertTrue(mBitmap.isRecycled());
-  }
+    @Test
+    public void testClose() {
+        mCloseableStaticBitmap.close();
+        assertTrue(mCloseableStaticBitmap.isClosed());
+        assertTrue(mBitmap.isRecycled());
+    }
 
-  @Test
-  public void testConvert() {
-    CloseableReference<Bitmap> ref = mCloseableStaticBitmap.convertToBitmapReference();
-    assertSame(ref.get(), mBitmap);
-    assertTrue(mCloseableStaticBitmap.isClosed());
-  }
+    @Test
+    public void testConvert() {
+        CloseableReference<Bitmap> ref = mCloseableStaticBitmap.convertToBitmapReference();
+        assertSame(ref.get(), mBitmap);
+        assertTrue(mCloseableStaticBitmap.isClosed());
+    }
 
-  @Test(expected = NullPointerException.class)
-  public void testCannotConvertIfClosed() {
-    mCloseableStaticBitmap.close();
-    mCloseableStaticBitmap.convertToBitmapReference();
-  }
+    @Test(expected = NullPointerException.class)
+    public void testCannotConvertIfClosed() {
+        mCloseableStaticBitmap.close();
+        mCloseableStaticBitmap.convertToBitmapReference();
+    }
 }

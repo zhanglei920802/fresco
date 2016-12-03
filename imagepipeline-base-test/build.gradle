@@ -26,14 +26,14 @@ task sourcesJar(type: Jar) {
     classifier = 'sources'
 }
 
-task jarTest (type: Jar) {
+task jarTest(type: Jar) {
     from android.sourceSets.test.java.srcDirs
     include '**/*.java'
     classifier = 'test'
 }
 
 configurations {
-    testOutput.extendsFrom (testCompile)
+    testOutput.extendsFrom(testCompile)
 }
 
 artifacts.add('archives', sourcesJar)

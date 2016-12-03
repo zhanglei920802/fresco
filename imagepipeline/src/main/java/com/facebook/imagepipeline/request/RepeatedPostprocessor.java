@@ -15,10 +15,11 @@ package com.facebook.imagepipeline.request;
  */
 public interface RepeatedPostprocessor extends Postprocessor {
 
-  /**
-   * Callback used to pass the postprocessor a reference to the object that will run the
-   * postprocessor's {@code PostProcessor#process} method when the client requires.
-   * @param runner
-   */
-  void setCallback(RepeatedPostprocessorRunner runner);
+    /**
+     * Callback used to pass the postprocessor a reference to the object that will run the
+     * postprocessor's {@code PostProcessor#process} method when the client requires.
+     *
+     * @param runner
+     */
+    void setCallback(RepeatedPostprocessorRunner runner);
 }

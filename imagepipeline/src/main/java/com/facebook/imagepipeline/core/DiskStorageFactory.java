@@ -16,5 +16,5 @@ import com.facebook.cache.disk.DiskStorage;
  * Used by ImagePipelineConfig/Factory
  */
 public interface DiskStorageFactory {
-  DiskStorage get(DiskCacheConfig diskCacheConfig);
+    DiskStorage get(DiskCacheConfig diskCacheConfig);
 }
